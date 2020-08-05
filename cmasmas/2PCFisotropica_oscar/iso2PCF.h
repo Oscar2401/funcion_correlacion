@@ -1,4 +1,3 @@
-
 #include "distancias.h"
 #include <stdlib.h> //funciona el new y delete y printf
 
@@ -6,7 +5,7 @@
 struct Punto{
     float x;
     float y;
-    //float z;
+    float z;
 };
 
 // clase
@@ -72,15 +71,9 @@ class iso2PCF{
             {
                 for (j = i+1; j < num_puntos; j++)
                 {
-                    // Metodo aprox
-                    //aux = distancia(data[i].x - data[j].x, data[i].y - data[j].y);
-                    //dd = distancia(aux, data[i].z - data[j].z);
-                    //aux = distancia(rand[i].x - rand[j].x, rand[i].y - rand[j].y);
-                    //rr = distancia(aux, rand[i].z - rand[j].z);
-
                     // Distancia euclidea
-                    dd = dist(data[i].x-data[j].x, data[i].y - data[j].y);
-                    rr = dist(rand[i].x-rand[j].x, rand[i].y - rand[j].y);
+                    dd = dist(data[i].x-data[j].x, data[i].y - data[j].y, data[i].z - data[j].z);
+                    rr = dist(rand[i].x-rand[j].x, rand[i].y - rand[j].y, rand[i].z - rand[j].z);
                     if (dd < d_max)
                     {
                         pos = (int)(dd*s);
@@ -108,7 +101,7 @@ class iso2PCF{
                     //dr = distancia(aux, data[i].z - rand[j].z);
 
                     // Distancia euclidea
-                    dr = dist(data[i].x - rand[j].x, data[i].y - rand[j].y);
+                    dr = dist(data[i].x - rand[j].x, data[i].y - rand[j].y, data[i].z - rand[j].z);
                     if (dr < d_max)
                     {
                         pos = (int)(dr*s);
