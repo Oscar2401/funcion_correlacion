@@ -129,9 +129,10 @@ finish = time.perf_counter()
 print(f'Finializó en {round(finish-start,2)} segundos = {round((finish-start)/60,2)} minutos = {round((finish-start)/3600,2)} horas' )
 
 # Simetrizamos los Histogramas:
-for i in range(bins - 2):
-    for j in range(i+1, bins-1):
-        for k in range(j+1, bins):
+
+for i in range(bins):
+    for j in range(i, bins):
+        for k in range(j, bins):
             s = NDDD[i][j][k] + NDDD[i][k][j] + NDDD[j][i][k] + NDDD[j][k][i] + NDDD[k][i][j] + NDDD[k][j][i]
             NDDD[i][j][k] = s
             NDDD[i][k][j] = s
@@ -147,20 +148,29 @@ for i in range(bins - 2):
             NRRR[k][i][j] = s
             NRRR[k][j][i] = s
             
-for i in range(bins - 1):
-    for j in range(i+1, bins):
-        for k in range(bins):
-            s = NDDR[i][j][k] + NDDR[j][i][k]
+for i in range(bins):
+    for j in range(i, bins):
+        for k in range(j,bins):
+            s = NDDR[i][j][k] + NDDR[j][i][k]+ NDDR[i][k][j]+ NDDR[j][k][i]+ NDDR[k][i][j] + NDDR[k][j][i]
             NDDR[i][j][k] = s
+            NDDR[i][k][j] = s
             NDDR[j][i][k] = s
-            s = NDRR[i][j][k] + NDRR[j][i][k]
+            NDDR[j][k][i] = s
+            NDDR[k][i][j] = s
+            NDDR[k][j][i] = s
+        
+            s = NDRR[i][j][k] + NDRR[j][i][k]+ NDRR[i][k][j]+ NDRR[j][k][i]+ NDRR[k][i][j]+ NDRR[k][j][i]
             NDRR[i][j][k] = s
+            NDRR[i][k][j] = s
             NDRR[j][i][k] = s
+            NDRR[j][k][i] = s
+            NDRR[k][i][j] = s
+            NDRR[k][j][i] = s
 
 #Guaradamos los histogramas:
 
-np.savetxt('/home/echeveste/Mis_trabajos/correlation_f/mis_datos/Histos_FB/DDD_{0}_osc.dat'.format(str(name)), NDDD.reshape((30,30*30)))
-np.savetxt('/home/echeveste/Mis_trabajos/correlation_f/mis_datos/Histos_FB/RRR_{0}_osc.dat'.format(str(name)), NRRR.reshape((30,30*30)))
-np.savetxt('/home/echeveste/Mis_trabajos/correlation_f/mis_datos/Histos_FB/DDR_{0}_osc.dat'.format(str(name)), NDDR.reshape((30,30*30)))
-np.savetxt('/home/echeveste/Mis_trabajos/correlation_f/mis_datos/Histos_FB/DRR_{0}_osc.dat'.format(str(name)), NDRR.reshape((30,30*30)))
+np.savetxt('/home/echeveste/mis_trabajos/correlation_f_2/datos/histogramas/BF_oscar_py/DDD_iso_{0}_osc.dat'.format(str(name)), NDDD.reshape((bins,bins*bins)))
+np.savetxt('/home/echeveste/mis_trabajos/correlation_f_2/datos/histogramas/BF_oscar_py/RRR_iso_{0}_osc.dat'.format(str(name)), NRRR.reshape((bins,bins*bins)))
+np.savetxt('/home/echeveste/mis_trabajos/correlation_f_2/datos/histogramas/BF_oscar_py/DDR_iso_{0}_osc.dat'.format(str(name)), NDDR.reshape((bins,bins*bins))
+np.savetxt('/home/echeveste/mis_trabajos/correlation_f_2/datos/histogramas/BF_oscar_py/DRR_iso_{0}_osc.dat'.format(str(name)), NDRR.reshape((bins,bins*bins)))
 
