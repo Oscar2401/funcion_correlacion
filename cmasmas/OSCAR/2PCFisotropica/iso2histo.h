@@ -54,18 +54,24 @@ class iso2hist{
 			return d_max;
 		}
 		// Métodos para hacer histogramas.
-		void make_histoXX(float *DD, float *RR){
+		void make_histoXX(unsigned int *DD, unsigned int *RR){
 			int pos; // Posición de apuntador.
-			float dis, aux, ds;
-			ds = (float)(bin)/d_max;
-			for(int i=0; i<n_pts; i++){
-				for(int j=i+1; j<n_pts; j++){
-					dis = sqrt((data[i].x-data[j].x)*(data[i].x-data[j].x) + (data[i].y-data[j].y)*(data[i].y-data[j].y) + (data[i].z-data[j].z)*(data[i].z-data[j].z));
-					if(dis < d_max){
+			double dis, ds = (double)(bin)/(double)(d_max), dx, dy, dz;
+			std::cout << "Estoy haciendo histogramas DD y RR..." << std::endl;
+			for(int i = 0; i < n_pts-1; i++){
+				for(int j = i+1; j < n_pts; j++){
+					dx = data[i].x-data[j].x;
+					dy = data[i].y-data[j].y;
+					dz = data[i].z-data[j].z;
+					dis = sqrt(dx*dx + dy*dy + dz*dz);
+					if(dis < (double)(d_max)){
 						pos = (int)(dis*ds);
 						DD[pos] += 2;
 					}
-					dis = sqrt((rand[i].x-rand[j].x)*(rand[i].x-rand[j].x)+(rand[i].y - rand[j].y)*(rand[i].y - rand[j].y)+(rand[i].z - rand[j].z)*(rand[i].z - rand[j].z));
+					dx = rand[i].x-rand[j].x;
+					dy = rand[i].y-rand[j].y;
+					dz = rand[i].z-rand[j].z;
+					dis = sqrt(dx*dx + dy*dy + dz*dz);
 					if(dis < d_max){
 						pos = (int)(dis*ds);
 						RR[pos] +=2;
@@ -73,14 +79,17 @@ class iso2hist{
 				}
 			}
 		}
-		void make_histoXY(float *DR){
+		void make_histoXY(unsigned int *DR){
 			int pos;
-			float dis, aux, ds;
-			ds = (float)(bin)/d_max;
-			for (int i=0; i<n_pts; i++){
-				for(int j=0; j<n_pts; j++){
-					dis = sqrt((data[i].x - rand[j].x)*(data[i].x - rand[j].x) + (data[i].y - rand[j].y)*(data[i].y - rand[j].y) + (data[i].z - rand[j].z)*(data[i].z - rand[j].z));
-					if(dis<d_max){
+			double dis, ds = (double)(bin)/(double)(d_max), dx, dy, dz;
+			std::cout << "Estoy haciendo histograma DR..." << std::endl;
+			for (int i = 0; i < n_pts; i++){
+				for(int j = 0; j < n_pts; j++){
+					dx = data[i].x-rand[j].x;
+					dy = data[i].y-rand[j].y;
+					dz = data[i].z-rand[j].z;
+					dis = sqrt(dx*dx + dy*dy + dz*dz);
+					if(dis < (double)(d_max)){
 						pos = (int)(dis*ds);
 						DR[pos] += 1;
 					}
