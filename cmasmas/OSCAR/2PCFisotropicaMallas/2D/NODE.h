@@ -33,12 +33,13 @@ class NODE{
 		Point2D *dataR;
 
 	private: 
-		void make_nodos();
+		void make_nodos(Node **, Point2D *);
+		void add(Point2D *&, int&, float, float);
 	
 	// Métodos de Clase:
 	public:
 		//Constructor de clase:
-		NODE(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point2D *_dataD, Point2D *_dataR){
+		NODE(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point2D *_dataD, Point2D *_dataR, Node **_nodeD, Node  **_nodeR){
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
@@ -46,32 +47,14 @@ class NODE{
 			d_max = _d_max;
 			dataD = _dataD;
 			dataR = _dataR;
+			nodeD = _nodeD;
+			nodeR = _nodeR;
 			std::cout << "\nHaciendo nodos..." << std::endl;
-			make_nodos();
+			make_nodos(nodeD,dataD);
+			make_nodos(nodeR,dataR);
 
 		}
-		void setBins(int _bn){
-			bn = _bn;
-		}
-		void setNpts(int _n_pts){
-			n_pts = _n_pts;
-		}
-		void setSizeBox(float _size_box){
-			size_box = _size_box;
-		}
-		void setSizeNode(float _size_node){
-			size_node = _size_node;
-		}
-		void setDmax(float _d_max){
-			d_max = _d_max;
-		}
-		void setDataD(Point2D *_dataD){
-			dataD = _dataD;
-		}
-		void setDataR(Point2D *_dataR){
-			dataR = _dataR;
-		}
-
+		
 		// Implementamos Método de mallas:
 		void make_histoXX(unsigned int *, unsigned int*);
 		void make_histoXY(unsigned int*);
@@ -80,78 +63,44 @@ class NODE{
 
 //=================================================================== 
 
-void NODE::make_nodos(){
+void NODE::make_nodos(Node ** nod, Point2D *dat){
 	/*
 	Función para crear los nodos con los datos y puntos random
 	*/
-	int i, j, rowD, colD, rowR, colR, lengthD, lengthR, partitions = (int)(ceil(size_box/size_node));
-	float pmed = size_node/2;
-	
-	nodeD = new Node*[partitions];
-	nodeR = new Node*[partitions];
-	for ( i = 0; i < partitions; i++){
-		*(nodeD+i) = new Node[partitions];
-		*(nodeR+i) = new Node[partitions];
-	}
+	int i, row, col, partitions = (int)(ceil(size_box/size_node));
+	float p_med = size_node/2;
 	
 	// Inicializamos los nodos vacíos:
-	for (int row = 0; row < partitions; row++){
-		for (int col = 0; col < partitions; col++){
-			nodeD[row][col].nodepos.y = ((float)(row)*(size_node))+pmed;
-			nodeD[row][col].nodepos.x = ((float)(col)*(size_node))+pmed;
-			nodeD[row][col].len = 0;
-			nodeD[row][col].elements = new Point2D[0];
-			
-			nodeR[row][col].nodepos.y = ((float)(row)*(size_node))+pmed;
-			nodeR[row][col].nodepos.x = ((float)(col)*(size_node))+pmed;
-			nodeR[row][col].len = 0;
-			nodeR[row][col].elements = new Point2D[0];
+	for ( row = 0; row < partitions; row++){
+		for ( col = 0; col < partitions; col++){
+			nod[row][col].nodepos.y = ((float)(row)+p_med)*(size_node);
+			nod[row][col].nodepos.x = ((float)(col)+p_med)*(size_node);
+			nod[row][col].len = 0;
+			nod[row][col].elements = new Point2D[0];
 		}
 	}
-
 	// Llenamos los nodos con los puntos de data:
 	for ( i = 0; i < n_pts; i++){
-		
-		// Dirección de punto en nodos
-		colD = (int)(dataD[i].x/size_node);
-        	rowD = (int)(dataD[i].y/size_node);
-		
-		colR = (int)(dataR[i].x/size_node);
-        	rowR = (int)(dataR[i].y/size_node);
-		
-		nodeD[rowD][colD].len++; // incrementamos la cantidad de puntos en el nodo.
-		lengthD = nodeD[rowD][colD].len;
-		
-		nodeR[rowR][colR].len++; // incrementamos la cantidad de puntos en el nodo.
-		lengthR = nodeR[rowR][colR].len;
-
-		Point2D *array_auxD = new Point2D[lengthD];
-		Point2D *array_auxR = new Point2D[lengthR];
-
-		for ( j = 0; j < lengthD-1; j++){
-			array_auxD[j].x = nodeD[rowD][colD].elements[j].x;
-			array_auxD[j].y = nodeD[rowD][colD].elements[j].y;	
-		}
-		for ( j = 0; j < lengthR-1; j++){	
-			array_auxR[j].x = nodeR[rowR][colR].elements[j].x;
-			array_auxR[j].y = nodeR[rowR][colR].elements[j].y;	
-		}
-
-		delete[] nodeD[rowD][colD].elements;
-		delete[] nodeR[rowR][colR].elements;
-		nodeD[rowD][colD].elements = array_auxD;
-		nodeR[rowR][colR].elements = array_auxR;
-		
-		// Guardamos punto en nodo
-		nodeD[rowD][colD].elements[lengthD-1].x = dataD[i].x;
-		nodeD[rowD][colD].elements[lengthD-1].y = dataD[i].y;
-		
-		nodeR[rowR][colR].elements[lengthR-1].x = dataR[i].x;
-		nodeR[rowR][colR].elements[lengthR-1].y = dataR[i].y;
-			
+		col = (int)(dat[i].x/size_node);
+        	row = (int)(dat[i].y/size_node);
+		add( nod[row][col].elements, nod[row][col].len, dat[i].x, dat[i].y);
 	}
 }
 
+//=================================================================== 
+
+void NODE::add(Point2D *&array, int &lon, float _x, float _y){
+	lon++;
+	Point2D *array_aux = new Point2D[lon];
+	for (int i = 0; i < lon-1; i++){
+		array_aux[i].x = array[i].x;
+		array_aux[i].y = array[i].y;
+	}
+	delete[] array;
+	array = array_aux;
+	array[lon-1].x = _x;
+	array[lon-1].y = _y; 
+}
 
 //=================================================================== 
 
@@ -172,7 +121,7 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 					dx =  nodeD[row][col].elements[i].x-nodeD[row][col].elements[j].x;
 					dy =  nodeD[row][col].elements[i].y-nodeD[row][col].elements[j].y;
 					dis = sqrt(dx*dx + dy*dy);
-					if (dis < d_max){
+					if (dis <= d_max){
 						pos = (int)(dis*ds);
 						DD[pos] += 2;
 					}
@@ -185,7 +134,7 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 					dx =  nodeR[row][col].elements[i].x-nodeR[row][col].elements[j].x;
 					dy =  nodeR[row][col].elements[i].y-nodeR[row][col].elements[j].y;
 					dis = sqrt(dx*dx + dy*dy);
-					if (dis < d_max){
+					if (dis <= d_max){
 						pos = (int)(dis*ds);
 						RR[pos] += 2;
 					}
@@ -198,50 +147,93 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 			
 			x1R = nodeR[row][col].nodepos.x;
 			y1R = nodeR[row][col].nodepos.y;
-			for ( u = row; u < partitions; u++){
-				for ( v = col; v < partitions; v++){
-					if (u !=row || v !=col){ 
-						
-						// Histograma DD
-						x2D = nodeD[u][v].nodepos.x;
-						y2D = nodeD[u][v].nodepos.y;
-						dx_nod = x1D-x2D;
-						dy_nod = y1D-y2D;
-						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
-						if (dis_nod < d_max){
-							for ( i = 0; i < nodeD[row][col].len; i++){
-								for ( j = 0; j < nodeD[u][v].len; j++){	
-									dx =  nodeD[row][col].elements[i].x-nodeD[u][v].elements[j].x;
-									dy =  nodeD[row][col].elements[i].y-nodeD[u][v].elements[j].y;
-									dis = sqrt(dx*dx + dy*dy);
-									if (dis < d_max){
-										pos = (int)(dis*ds);
-										DD[pos] += 2;
-									}
-								}
+			
+			// Diatancias entre nodos del mismo renglon
+			for (int m = 1; col + m < partitions ; m ++){
+				u = row;
+				v = col+m;
+				
+				x2D = nodeD[u][v].nodepos.x;
+				y2D = nodeD[u][v].nodepos.y;
+				dx_nod = x1D-x2D;
+				dy_nod = y1D-y2D;
+				dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
+				if (dis_nod <= d_max){
+					for ( i = 0; i < nodeD[row][col].len; i++){
+						for ( j = 0; j < nodeD[u][v].len; j++){	
+							dx =  nodeD[row][col].elements[i].x-nodeD[u][v].elements[j].x;
+							dy =  nodeD[row][col].elements[i].y-nodeD[u][v].elements[j].y;
+							dis = sqrt(dx*dx + dy*dy);
+							if (dis <= d_max){
+								pos = (int)(dis*ds);
+								DD[pos] += 2;
 							}
 						}
-						
-						// Histograma RR
-						x2R = nodeR[u][v].nodepos.x;
-						y2R = nodeR[u][v].nodepos.y;
-						dx_nod = x1R-x2R;
-						dy_nod = y1R-y2R;
-						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
-						if (dis_nod<d_max){
-							for ( i = 0; i < nodeR[row][col].len; i++){
-								for ( j = 0; j < nodeR[u][v].len; j++){	
-									dx =  nodeR[row][col].elements[i].x-nodeR[u][v].elements[j].x;
-									dy =  nodeR[row][col].elements[i].y-nodeR[u][v].elements[j].y;
-									dis = sqrt(dx*dx + dy*dy);
-									if (dis < d_max){
-										pos = (int)(dis*ds);
-										RR[pos] += 2;
-									}
+					}
+				}
+				
+				x2R = nodeR[u][v].nodepos.x;
+				y2R = nodeR[u][v].nodepos.y;
+				dx_nod = x1R-x2R;
+				dy_nod = y1R-y2R;
+				dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
+				if (dis_nod <= d_max){
+					for ( i = 0; i < nodeR[row][col].len; i++){
+						for ( j = 0; j < nodeR[u][v].len; j++){	
+							dx =  nodeR[row][col].elements[i].x-nodeR[u][v].elements[j].x;
+							dy =  nodeR[row][col].elements[i].y-nodeR[u][v].elements[j].y;
+							dis = sqrt(dx*dx + dy*dy);
+							if (dis <= d_max){
+								pos = (int)(dis*ds);
+								RR[pos] += 2;
+							}
+						}
+					}
+				}
+			}
+			
+			// Diatancias entre nodos de renglon diferente
+			for ( u = row + 1; u < partitions; u++){
+				for ( v = 0; v < partitions; v++){
+					// Histograma DD
+					x2D = nodeD[u][v].nodepos.x;
+					y2D = nodeD[u][v].nodepos.y;
+					dx_nod = x1D-x2D;
+					dy_nod = y1D-y2D;
+					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
+					if (dis_nod <= d_max){
+						for ( i = 0; i < nodeD[row][col].len; i++){
+							for ( j = 0; j < nodeD[u][v].len; j++){	
+								dx =  nodeD[row][col].elements[i].x-nodeD[u][v].elements[j].x;
+								dy =  nodeD[row][col].elements[i].y-nodeD[u][v].elements[j].y;
+								dis = sqrt(dx*dx + dy*dy);
+								if (dis <= d_max){
+									pos = (int)(dis*ds);
+									DD[pos] += 2;
 								}
 							}
 						}
 					}
+					
+					// Histograma RR
+					x2R = nodeR[u][v].nodepos.x;
+					y2R = nodeR[u][v].nodepos.y;
+					dx_nod = x1R-x2R;
+					dy_nod = y1R-y2R;
+					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
+					if (dis_nod <= d_max){
+						for ( i = 0; i < nodeR[row][col].len; i++){
+							for ( j = 0; j < nodeR[u][v].len; j++){	
+								dx =  nodeR[row][col].elements[i].x-nodeR[u][v].elements[j].x;
+								dy =  nodeR[row][col].elements[i].y-nodeR[u][v].elements[j].y;
+								dis = sqrt(dx*dx + dy*dy);
+								if (dis <= d_max){
+									pos = (int)(dis*ds);
+									RR[pos] += 2;
+								}
+							}
+						}
+					}	
 				}	
 			}
 		}
@@ -271,7 +263,7 @@ void NODE::make_histoXY(unsigned int *DR){
 					dx_nod = x1-x2;
 					dy_nod = y1-y2;
 					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod)-corr;
-					if (dis_nod < d_max){
+					if (dis_nod <= d_max){
 						for ( i = 0; i < nodeD[row][col].len; i++){
 							for ( j = 0; j < nodeR[u][v].len; j++){	
 								dx =  nodeD[row][col].elements[i].x-nodeR[u][v].elements[j].x;

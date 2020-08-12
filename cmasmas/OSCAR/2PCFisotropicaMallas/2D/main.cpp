@@ -11,17 +11,19 @@ void save_histogram(string, int, unsigned int *);
 
 Point2D *dataD, *dataR;
 unsigned int  *DD, *RR, *DR;
+Node **nodeD;
+Node **nodeR;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	int n_pts = 32768, bn = 30;
-	float d_max = 180, size_box = 250, size_node = 20;
+	float d_max = 180, size_box = 250, size_node = 10;
 	dataD = new Point2D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point2D[n_pts];
 	
 	// Nombre de los archivos 
-	string nameDD = "DDaiso_mesh_", nameRR = "RRiso_mesh_", nameDR = "DRiso_mesh_";
+	string nameDD = "DDaiso_mesh_2D_", nameRR = "RRiso_mesh_2D_", nameDR = "DRiso_mesh_2D_";
 	nameDD.append(argv[3]);
 	nameRR.append(argv[3]);
 	nameDR.append(argv[3]);
@@ -29,11 +31,12 @@ int main(int argc, char **argv){
 	nameRR += ".dat";
 	nameDR += ".dat";
 	
-	// Creamos los histogramas
+	// inicializamos los histogramas
 	DD = new unsigned int[bn];
 	RR = new unsigned int[bn];
 	DR = new unsigned int[bn];
-	for (int i = 0; i < bn; i++){
+	int i;
+	for (i = 0; i < bn; i++){
 		*(DD+i) = 0.0; // vector[i]
 		*(RR+i) = 0.0;
 		*(DR+i) = 0.0;
@@ -43,8 +46,17 @@ int main(int argc, char **argv){
 	open_files(argv[1],n_pts,dataD);
 	open_files(argv[2],n_pts,dataR); // guardo los datos en los Struct
 	
+	// inicializamos las mallas
+	int partitions = (int)(ceil(size_box/size_node));
+	nodeD = new Node*[partitions];
+	nodeR = new Node*[partitions];
+	for ( i = 0; i < partitions; i++){
+		*(nodeD + i) = new Node[partitions];
+		*(nodeR + i) = new Node[partitions];
+	}
+	
 	// Iniciamos clase
-	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR);
+	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR, nodeD, nodeR);
 	
 	auto start = std::chrono::system_clock::now();
 	
@@ -60,17 +72,16 @@ int main(int argc, char **argv){
 	// Mostramos los histogramas 
 	cout << "\nHistograma DD:" << endl;
 	
-	int k;
-	for (k = 0; k<bn; k++){
-		printf("%d \t",DD[k]);
+	for (i = 0; i<bn; i++){
+		printf("%d \t",DD[i]);
 	}
 	cout << "\nHistograma RR:" << endl;
-	for (k = 0; k<bn; k++){
-		printf("%d \t",RR[k]);
+	for (i = 0; i<bn; i++){
+		printf("%d \t",RR[i]);
 	}
 	cout << "\nHistograma DR:" << endl;
-	for (k = 0; k<bn; k++){
-		printf("%d \t",DR[k]);
+	for (i = 0; i<bn; i++){
+		printf("%d \t",DR[i]);
 	}
 	
 	
