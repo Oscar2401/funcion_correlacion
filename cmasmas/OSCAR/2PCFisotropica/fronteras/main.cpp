@@ -18,8 +18,9 @@ int main(int argc, char **argv){
 	
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
-	int np = 32768, bn = 30;
-	float dmax = 180.0;
+	//int np = 32768, bn = 30;
+	int np = 10000, bn = 30;
+	float dmax = 30.0, size_box = 250;
 	dataD = new Point3D[np]; // Asignamos meoria a esta variable
 	dataR = new Point3D[np];
 	
@@ -45,7 +46,7 @@ int main(int argc, char **argv){
 	// Abrimos y trabajamos los datos en los histogramas
 	open_files(argv[1], np, dataD);
 	open_files(argv[2], np, dataR); // guardo los datos en los Struct
-	iso2hist my_hist(bn, np, dmax, dataD, dataR);
+	iso2hist my_hist(bn, np, dmax, size_box, dataD, dataR);
 	
 	auto start = std::chrono::system_clock::now();
 	my_hist.make_histoXX(DD,RR); //hace histogramas XX

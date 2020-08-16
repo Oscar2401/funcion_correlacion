@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#include <ctime>
+#include <chrono>
+#include <omp.h>
 #include "NODE.h"
 
 using namespace std;
@@ -17,7 +18,7 @@ Node ***nodeR;
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
-	int n_pts = 32768, bn = 30;
+	int n_pts = 10000, bn = 30;
 	float d_max = 180, size_box = 250, size_node = 20;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
@@ -76,13 +77,16 @@ int main(int argc, char **argv){
 	// Iniciamos clase
 	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR, nodeD, nodeR);
 	
-	float to = clock();
+	auto start = std::chrono::system_clock::now();
 	
 	my_hist.make_histoXX(DD, RR); //hace histogramas XX
 	my_hist.make_histoXY(DR); //hace historamas XY
 	my_hist.~NODE(); //destruimos objeto
 	
-	float tf = clock() - to;
+	auto end = std::chrono::system_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::seconds>((end - start)); //mostramos los segundos que corre el programa
+	printf("Time = %lld s\n", static_cast<long long int>(elapsed.count()));
+	
 	cout << "Termine de hacer todos los histogramas" << endl;
 	
 	// Mostramos los histogramas 
@@ -120,7 +124,7 @@ int main(int argc, char **argv){
 	//delete[] DR;
 	//delete[] RR;
 	
-	printf("\nTiempo implementado = %.4f seg.\n", ((float)tf)/CLOCKS_PER_SEC);
+	printf("Time = %lld s\n", static_cast<long long int>(elapsed.count()));
 	cout << "Programa finalizado..." << endl;
 	cin.get();
 	return 0;

@@ -56,24 +56,24 @@ class iso2hist{
 		// Métodos para hacer histogramas.
 		void make_histoXX(unsigned int *DD, unsigned int *RR){
 			int pos; // Posición de apuntador.
-			double dis, ds = (double)(bin)/(double)(d_max), dx, dy, dz;
+			float dis, ds = (float)(bin)/d_max, dd_max = d_max*d_max, dx, dy, dz;
 			std::cout << "Estoy haciendo histogramas DD y RR..." << std::endl;
 			for(int i = 0; i < n_pts-1; i++){
 				for(int j = i+1; j < n_pts; j++){
 					dx = data[i].x-data[j].x;
 					dy = data[i].y-data[j].y;
 					dz = data[i].z-data[j].z;
-					dis = sqrt(dx*dx + dy*dy + dz*dz);
-					if(dis < (double)(d_max)){
-						pos = (int)(dis*ds);
+					dis = dx*dx + dy*dy + dz*dz;
+					if(dis <= dd_max){
+						pos = (int)(sqrt(dis)*ds);
 						DD[pos] += 2;
 					}
 					dx = rand[i].x-rand[j].x;
 					dy = rand[i].y-rand[j].y;
 					dz = rand[i].z-rand[j].z;
-					dis = sqrt(dx*dx + dy*dy + dz*dz);
-					if(dis < d_max){
-						pos = (int)(dis*ds);
+					dis = dx*dx + dy*dy + dz*dz;
+					if(dis <= dd_max){
+						pos = (int)(sqrt(dis)*ds);
 						RR[pos] +=2;
 					}
 				}
@@ -81,16 +81,16 @@ class iso2hist{
 		}
 		void make_histoXY(unsigned int *DR){
 			int pos;
-			double dis, ds = (double)(bin)/(double)(d_max), dx, dy, dz;
+			float dis, ds = (float)(bin)/d_max, dd_max = d_max*d_max, dx, dy, dz;
 			std::cout << "Estoy haciendo histograma DR..." << std::endl;
 			for (int i = 0; i < n_pts; i++){
 				for(int j = 0; j < n_pts; j++){
 					dx = data[i].x-rand[j].x;
 					dy = data[i].y-rand[j].y;
 					dz = data[i].z-rand[j].z;
-					dis = sqrt(dx*dx + dy*dy + dz*dz);
-					if(dis < (double)(d_max)){
-						pos = (int)(dis*ds);
+					dis = dx*dx + dy*dy + dz*dz;
+					if(dis <= dd_max){
+						pos = (int)(sqrt(dis)*ds);
 						DR[pos] += 1;
 					}
 				}
