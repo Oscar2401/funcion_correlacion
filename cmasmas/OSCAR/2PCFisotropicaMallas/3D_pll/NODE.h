@@ -128,43 +128,46 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 	*/
 	int partitions = (int)(ceil(size_box/size_node));
 	float corr = size_node*sqrt(3);
-	float dis, dis_nod, dd_max = d_max*d_max;
-	float ds = ((float)(bn))/d_max;
+	float dis, dis_nod;
+	float ds = ((float)(bn))/d_max, dd_max = d_max*d_max;
 	std::cout << "-> Estoy haciendo histogramas DD y RR..." << std::endl;
 	
-	#pragma omp parallel for schedule(dynamic)  num_threads(2) collapse(3) private(dis,dis_nod) shared(partitions,corr,ds,d_max,dd_max)
-	for ( int row = 0; row < partitions; row++){
-		for ( int col = 0; col < partitions; col++){
-			for ( int mom = 0; mom < partitions; mom++){
+	#pragma omp parallel num_threads(4) private(dis,dis_nod) shared(partitions,corr,ds,d_max,dd_max)
+	{
+	
+	#pragma omp for collapse(3) schedule(dynamic) private(dis,dis_nod) 
+	for (int row = 0; row < partitions; row++){
+		for (int col = 0; col < partitions; col++){
+			for (int mom = 0; mom < partitions; mom++){
 				// Distancias entre puntos del mismo nodo:
-				
-				// variables privadas de los hilos
-				int u, v, w, i, j, pos;  
+				int i, j, u, v, w, pos;
+				float x1D, y1D, z1D, x1R, y1R, z1R;
 				float dx, dy, dz, dx_nod, dy_nod, dz_nod;
-				float x1D, x2D, y1D, y2D, z1D, z2D, x1R, x2R, y1R, y2R, z1R, z2R;
 				
 				// Histograma DD
-				for (i = 0; i < nodeD[row][col][mom].len - 1; i++){
-					for (j = i+1; j < nodeD[row][col][mom].len; j++){
+				for ( i= 0; i < nodeD[row][col][mom].len - 1; i++){
+					for ( j = i+1; j < nodeD[row][col][mom].len; j++){
 						dx =  nodeD[row][col][mom].elements[i].x-nodeD[row][col][mom].elements[j].x;
 						dy =  nodeD[row][col][mom].elements[i].y-nodeD[row][col][mom].elements[j].y;
 						dz =  nodeD[row][col][mom].elements[i].z-nodeD[row][col][mom].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis <= dd_max){
 							pos = (int)(sqrt(dis)*ds);
+							#pragma omp atomic
 							DD[pos] += 2;
 						}
 					}
 				}
 				// Histograma RR
-				for ( i = 0; i < nodeR[row][col][mom].len - 1; i++){
+				for ( i= 0; i < nodeR[row][col][mom].len - 1; i++){
 					for ( j = i+1; j < nodeR[row][col][mom].len; j++){	
-						dx =  nodeR[row][col][mom].elements[i].x-nodeR[row][col][mom].elements[j].x;
-						dy =  nodeR[row][col][mom].elements[i].y-nodeR[row][col][mom].elements[j].y;
-						dz =  nodeR[row][col][mom].elements[i].z-nodeR[row][col][mom].elements[j].z;
+						dx = nodeR[row][col][mom].elements[i].x-nodeR[row][col][mom].elements[j].x;
+						dy = nodeR[row][col][mom].elements[i].y-nodeR[row][col][mom].elements[j].y;
+						dz = nodeR[row][col][mom].elements[i].z-nodeR[row][col][mom].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis <= dd_max){
 							pos = (int)(sqrt(dis)*ds);
+							#pragma omp atomic
 							RR[pos] += 2;
 						}
 					}
@@ -183,12 +186,9 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 				for ( w = mom + 1;  w < partitions ; w ++){
 					u = row;
 					v = col;
-					x2D = nodeD[u][v][w].nodepos.x;
-					y2D = nodeD[u][v][w].nodepos.y;
-					z2D = nodeD[u][v][w].nodepos.z;
-					dx_nod = x1D-x2D;
-					dy_nod = y1D-y2D;
-					dz_nod = z1D-z2D;
+					dx_nod = x1D-nodeD[u][v][w].nodepos.x;
+					dy_nod = y1D-nodeD[u][v][w].nodepos.y;
+					dz_nod = z1D-nodeD[u][v][w].nodepos.z;
 					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 					if (dis_nod <= d_max){
 						for ( i = 0; i < nodeD[row][col][mom].len; i++){
@@ -199,17 +199,15 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 								dis = dx*dx + dy*dy + dz*dz;
 								if (dis <= dd_max){
 									pos = (int)(sqrt(dis)*ds);
+									#pragma omp atomic
 									DD[pos] += 2;
 								}
 							}
 						}
 					}
-					x2R = nodeR[u][v][w].nodepos.x;
-					y2R = nodeR[u][v][w].nodepos.y;
-					z2R = nodeR[u][v][w].nodepos.z;
-					dx_nod = x1R-x2R;
-					dy_nod = y1R-y2R;
-					dz_nod = z1R-z2R;
+					dx_nod = x1R-nodeR[u][v][w].nodepos.x;
+					dy_nod = y1R-nodeR[u][v][w].nodepos.y;
+					dz_nod = z1R-nodeR[u][v][w].nodepos.z;
 					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 					if (dis_nod <= d_max){
 						for ( i = 0; i < nodeR[row][col][mom].len; i++){
@@ -217,24 +215,22 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 								dx =  nodeR[row][col][mom].elements[i].x-nodeR[u][v][w].elements[j].x;
 								dy =  nodeR[row][col][mom].elements[i].y-nodeR[u][v][w].elements[j].y;
 								dz =  nodeR[row][col][mom].elements[i].z-nodeR[u][v][w].elements[j].z;
-								dis = sqrt(dx*dx + dy*dy + dz*dz);
+								dis = dx*dx + dy*dy + dz*dz;
 								if (dis <= dd_max){
-									pos = (int)(dis*ds);
+									pos = (int)(sqrt(dis)*ds);
+									#pragma omp atomic
 									RR[pos] += 2;
 								}
 							}
 						}
 					}
 				}
-				for ( v = col + 1; v < partitions ; v ++){
-					for ( w = 0; w < partitions ; w ++){
+				for (v = col + 1; v < partitions ; v ++){
+					for (w = 0; w < partitions ; w ++){
 						u = row;
-						x2D = nodeD[u][v][w].nodepos.x;
-						y2D = nodeD[u][v][w].nodepos.y;
-						z2D = nodeD[u][v][w].nodepos.z;
-						dx_nod = x1D-x2D;
-						dy_nod = y1D-y2D;
-						dz_nod = z1D-z2D;
+						dx_nod = x1D-nodeD[u][v][w].nodepos.x;;
+						dy_nod = y1D-nodeD[u][v][w].nodepos.y;
+						dz_nod = z1D-nodeD[u][v][w].nodepos.z;
 						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 						if (dis_nod <= d_max){
 							for ( i = 0; i < nodeD[row][col][mom].len; i++){
@@ -245,17 +241,15 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 									dis = dx*dx + dy*dy + dz*dz;
 									if (dis <= dd_max){
 										pos = (int)(sqrt(dis)*ds);
+										#pragma omp atomic
 										DD[pos] += 2;
 									}
 								}
 							}
 						}
-						x2R = nodeR[u][v][w].nodepos.x;
-						y2R = nodeR[u][v][w].nodepos.y;
-						z2R = nodeR[u][v][w].nodepos.z;
-						dx_nod = x1R-x2R;
-						dy_nod = y1R-y2R;
-						dz_nod = z1R-z2R;
+						dx_nod = x1R-nodeR[u][v][w].nodepos.x;
+						dy_nod = y1R-nodeR[u][v][w].nodepos.y;
+						dz_nod = z1R-nodeR[u][v][w].nodepos.z;
 						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 						if (dis_nod <= d_max){
 							for ( i = 0; i < nodeR[row][col][mom].len; i++){
@@ -266,6 +260,7 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 									dis = dx*dx + dy*dy + dz*dz;
 									if (dis <= dd_max){
 										pos = (int)(sqrt(dis)*ds);
+										#pragma omp atomic
 										RR[pos] += 2;
 									}
 								}
@@ -277,12 +272,9 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 					for ( v = 0; v < partitions; v++){
 						for ( w = 0; w < partitions; w++){
 							// Histograma DD
-							x2D = nodeD[u][v][w].nodepos.x;
-							y2D = nodeD[u][v][w].nodepos.y;
-							z2D = nodeD[u][v][w].nodepos.z;
-							dx_nod = x1D-x2D;
-							dy_nod = y1D-y2D;
-							dz_nod = z1D-z2D;
+							dx_nod = x1D-nodeD[u][v][w].nodepos.x;
+							dy_nod = y1D-nodeD[u][v][w].nodepos.y;
+							dz_nod = z1D-nodeD[u][v][w].nodepos.z;
 							dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 							if (dis_nod <= d_max){
 								for ( i = 0; i < nodeD[row][col][mom].len; i++){
@@ -293,19 +285,16 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 										dis = dx*dx + dy*dy + dz*dz;
 										if (dis <= dd_max){
 											pos = (int)(sqrt(dis)*ds);
+											#pragma omp atomic
 											DD[pos] += 2;
 										}
 									}
 								}
-							}
-								
+							}	
 							// Histograma RR
-							x2R = nodeR[u][v][w].nodepos.x;
-							y2R = nodeR[u][v][w].nodepos.y;
-							z2R = nodeR[u][v][w].nodepos.z;
-							dx_nod = x1R-x2R;
-							dy_nod = y1R-y2R;
-							dz_nod = z1R-z2R;
+							dx_nod = x1R-nodeR[u][v][w].nodepos.x;
+							dy_nod = y1R-nodeR[u][v][w].nodepos.y;
+							dz_nod = z1R-nodeR[u][v][w].nodepos.z;
 							dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
 							if (dis_nod <= d_max){
 								for ( i = 0; i < nodeR[row][col][mom].len; i++){
@@ -316,6 +305,7 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 										dis = dx*dx + dy*dy + dz*dz;
 										if (dis <= dd_max){
 											pos = (int)(sqrt(dis)*ds);
+											#pragma omp atomic
 											RR[pos] += 2;
 										}
 									}
@@ -326,6 +316,7 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 				}
 			}
 		}
+	}
 	}
 }
 //=================================================================== 
@@ -344,13 +335,16 @@ void NODE::make_histoXY(unsigned int *DR){
 	float ds = ((float)(bn))/d_max, dd_max = d_max*d_max;;
 	std::cout << "-> Estoy haciendo histograma DR..." << std::endl;
 	
-	#pragma omp parallel for schedule(dynamic)  num_threads(2) collapse(3) private(dis,dis_nod) shared(partitions,corr,ds,d_max,dd_max)
+	#pragma omp parallel num_threads(4) private(dis,dis_nod) shared(partitions,corr,ds,d_max,dd_max)
+	{
+	#pragma omp for collapse(3) schedule(dynamic) private(dis,dis_nod) 
 	for (int row = 0; row < partitions; row++){
 		for (int col = 0; col < partitions; col++){
 			for (int mom = 0; mom < partitions; mom++){
 				
 				int i, j, u, v, w, pos;
 				float dx, dy, dz, dx_nod, dy_nod, dz_nod;
+				
 				// Distancias entre puntos de diferentes nodos de diferentes datos
 				for ( u = 0; u < partitions; u++){
 					for ( v = 0; v < partitions; v++){
@@ -367,8 +361,9 @@ void NODE::make_histoXY(unsigned int *DR){
 										dy =  nodeD[row][col][mom].elements[i].y-nodeR[u][v][w].elements[j].y;
 										dz =  nodeD[row][col][mom].elements[i].z-nodeR[u][v][w].elements[j].z;
 										dis = dx*dx + dy*dy + dz*dz;
-										if (dis <= dd_max){
+										if (dis < dd_max){
 											pos = (int)(sqrt(dis)*ds);
+											#pragma omp atomic
 											DR[pos] += 1;
 										}
 									}
@@ -380,7 +375,9 @@ void NODE::make_histoXY(unsigned int *DR){
 			}
 		}
 	}
+	}
 }
+
 //=================================================================== 
 
 NODE::~NODE(){
