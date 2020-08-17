@@ -47,6 +47,7 @@ int main(int argc, char **argv){
 	open_files(argv[1], np, dataD);
 	open_files(argv[2], np, dataR); // guardo los datos en los Struct
 	iso2hist my_hist(bn, np, dmax, size_box, dataD, dataR);
+
 	
 	auto start = std::chrono::system_clock::now();
 	my_hist.make_histoXX(DD,RR); //hace histogramas XX
