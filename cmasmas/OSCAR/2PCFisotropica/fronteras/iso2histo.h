@@ -51,6 +51,7 @@ class iso2hist{
 						DD[pos] += 2;
 					}
 					
+					//Condiciones para fronteras
 					con_x = (data[i].x < d_max || data[j].x < d_max)&&(data[i].x > front || data[j].x > front);
 					con_y = (data[i].y < d_max || data[j].y < d_max)&&(data[i].y > front || data[j].y > front);
 					con_z = (data[i].z < d_max || data[j].z < d_max)&&(data[i].z > front || data[j].z > front);
@@ -59,7 +60,7 @@ class iso2hist{
 					if( con_x ){
 					dis_f = dis + ll - 2*abs(dx)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
@@ -67,7 +68,7 @@ class iso2hist{
 					if( con_y ){
 					dis_f = dis + ll - 2*abs(dy)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
@@ -75,39 +76,39 @@ class iso2hist{
 					if( con_z ){
 					dis_f = dis + ll - 2*abs(dz)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
 					
 					if( con_x && con_y ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
-					if(dis <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+					if(dis_f <= dd_max){
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
 					
 					if( con_x && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
-					if(dis <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+					if(dis_f <= dd_max){
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
 					
 					if( con_y && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
-					if(dis <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+					if(dis_f <= dd_max){
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
 					
 					if( con_x && con_y && con_z ){
 					dis_f = dis + 3*ll - 2*(abs(dx)+ abs(dy) + abs(dz))*size_box;
-					if(dis <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+					if(dis_f <= dd_max){
+						pos = (int)(sqrt(dis_f)*ds);
 						DD[pos] += 4;
 					}
 					}
@@ -131,7 +132,7 @@ class iso2hist{
 					if( con_x ){
 					dis_f = dis + ll - 2*abs(dx)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -139,7 +140,7 @@ class iso2hist{
 					if( con_y ){
 					dis_f = dis + ll - 2*abs(dy)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -147,7 +148,7 @@ class iso2hist{
 					if( con_z ){
 					dis_f = dis + ll - 2*abs(dz)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -155,7 +156,7 @@ class iso2hist{
 					if( con_x && con_y ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -163,7 +164,7 @@ class iso2hist{
 					if( con_x && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -171,7 +172,7 @@ class iso2hist{
 					if( con_y && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -179,7 +180,7 @@ class iso2hist{
 					if( con_x && con_y && con_z ){
 					dis_f = dis + 3*ll - 2*(abs(dx)+abs(dy)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						RR[pos] += 4;
 					}
 					}
@@ -221,7 +222,7 @@ class iso2hist{
 					if( con_y ){
 					dis_f = dis + ll - 2*abs(dy)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}
@@ -229,7 +230,7 @@ class iso2hist{
 					if( con_z ){
 					dis_f = dis + ll - 2*abs(dz)*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}
@@ -237,7 +238,7 @@ class iso2hist{
 					if( con_x && con_y ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}
@@ -245,7 +246,7 @@ class iso2hist{
 					if( con_x && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}
@@ -253,7 +254,7 @@ class iso2hist{
 					if( con_y && con_z ){
 					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}
@@ -261,7 +262,7 @@ class iso2hist{
 					if( con_x && con_y && con_z ){
 					dis_f = dis + 3*ll - 2*(abs(dx)+abs(dy)+abs(dz))*size_box;
 					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis)*ds);
+						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
 					}
 					}

@@ -81,9 +81,9 @@ void NODE::make_nodos(Node *** nod, Point3D *dat){
 	for ( row = 0; row < partitions; row++){
 		for ( col = 0; col < partitions; col++){
 			for ( mom = 0; mom < partitions; mom++){
-				nod[row][col][mom].nodepos.z = ((float)(mom)+p_med)*(size_node);
-				nod[row][col][mom].nodepos.y = ((float)(row)+p_med)*(size_node);
-				nod[row][col][mom].nodepos.x = ((float)(col)+p_med)*(size_node);
+				nod[row][col][mom].nodepos.z = ((float)(mom)*(size_node))+p_med;
+				nod[row][col][mom].nodepos.y = ((float)(row)*(size_node))+p_med;
+				nod[row][col][mom].nodepos.x = ((float)(col)*(size_node))+p_med;
 				nod[row][col][mom].len = 0;
 				nod[row][col][mom].elements = new Point3D[0];
 			}

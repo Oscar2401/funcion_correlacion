@@ -19,7 +19,7 @@ int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	int np = 10000, bn = 30;
-	float dmax = 180.0;
+	float dmax = 30.0;
 	dataD = new Point3D[np]; // Asignamos meoria a esta variable
 	dataR = new Point3D[np];
 	
