@@ -80,7 +80,7 @@ int main(int argc, char **argv){
 	
 	// Guardamos los histogramas
 	save_histogram(nameDD, bn, DD);
-	cout << "Guarde histograma DD..." << endl;
+	cout << "\nGuarde histograma DD..." << endl;
 	save_histogram(nameRR, bn, RR);
 	cout << "Guarde histograma RR..." << endl;
 	save_histogram(nameDR, bn, DR);

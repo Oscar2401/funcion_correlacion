@@ -18,7 +18,7 @@ int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	int n_pts = 10000, bn = 30;
-	float d_max = 180, size_box = 250, size_node = 20;
+	float d_max = 30, size_box = 250, size_node = 20;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	

@@ -36,153 +36,166 @@ class iso2hist{
 			float front = size_box - d_max, dis_f;
 			float ll = size_box*size_box;
 			bool con_x, con_y, con_z;
+			float x1D, x2D, y1D, y2D, z1D, z2D, x1R, x2R, y1R, y2R, z1R, z2R; 
 			std::cout << "Estoy haciendo histogramas DD y RR..." << std::endl;
-			int c = 0;
 			for(int i = 0; i < n_pts-1; i++){
 				for(int j = i+1; j < n_pts; j++){
 					//DATA
 					//====================================
-					dx = data[i].x-data[j].x;
-					dy = data[i].y-data[j].y;
-					dz = data[i].z-data[j].z;
+					x1D = data[i].x;
+					x2D = data[j].x;
+					y1D = data[i].y;
+					y2D = data[j].y;
+					z1D = data[i].z;
+					z2D = data[j].z;
+					
+					dx = abs(x1D-x2D);
+					dy = abs(y1D-y2D);
+					dz = abs(z1D-z2D);
+					
 					dis = dx*dx + dy*dy + dz*dz;
 					if(dis <= dd_max){
 						pos = (int)(sqrt(dis)*ds);
 						DD[pos] += 2;
 					}
-					
 					//Condiciones para fronteras
-					con_x = (data[i].x < d_max || data[j].x < d_max)&&(data[i].x > front || data[j].x > front);
-					con_y = (data[i].y < d_max || data[j].y < d_max)&&(data[i].y > front || data[j].y > front);
-					con_z = (data[i].z < d_max || data[j].z < d_max)&&(data[i].z > front || data[j].z > front);
-					
+					con_x = (x1D < d_max && x2D > front)||(x2D < d_max && x1D > front);
+					con_y = (y1D < d_max && y2D > front)||(y2D < d_max && y1D > front);
+					con_z = (z1D < d_max && z2D > front)||(z2D < d_max && z1D > front);
 					// Distancias en frontera 
 					if( con_x ){
-					dis_f = dis + ll - 2*abs(dx)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dx*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_y ){
-					dis_f = dis + ll - 2*abs(dy)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dy*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_z ){
-					dis_f = dis + ll - 2*abs(dz)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dz*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_y ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dx+dy)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dx+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_y && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dy+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_y && con_z ){
-					dis_f = dis + 3*ll - 2*(abs(dx)+ abs(dy) + abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						DD[pos] += 4;
-					}
+						dis_f = dis + 3*ll - 2*(dx+dy+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							DD[pos] += 4;
+						}
 					}
 					// RANDOM
 					//====================================
-					dx = rand[i].x-rand[j].x;
-					dy = rand[i].y-rand[j].y;
-					dz = rand[i].z-rand[j].z;
+					x1R = rand[i].x;
+					x2R = rand[j].x;
+					y1R = rand[i].y;
+					y2R = rand[j].y;
+					z1R = rand[i].z;
+					z2R = rand[j].z;
+					
+					dx = abs(x1R-x2R);
+					dy = abs(y1R-y2R);
+					dz = abs(z1R-z2R);
+					
 					dis = dx*dx + dy*dy + dz*dz;
 					if(dis <= dd_max){
 						pos = (int)(sqrt(dis)*ds);
 						RR[pos] +=2;
 					}
 					
-					
-					con_x = (rand[i].x < d_max || rand[j].x < d_max)&&(rand[i].x > front || rand[j].x > front);
-					con_y = (rand[i].y < d_max || rand[j].y < d_max)&&(rand[i].y > front || rand[j].y > front);
-					con_z = (rand[i].z < d_max || rand[j].z < d_max)&&(rand[i].z > front || rand[j].z > front);
+					con_x = (x1R < d_max && x2R > front)||(x2R < d_max && x1R > front);
+					con_y = (y1R < d_max && y2R > front)||(y2R < d_max && y1R > front);
+					con_z = (z1R < d_max && z2R > front)||(z2R < d_max && z1R > front);
 					
 					// Distancias en frontera 
 					if( con_x ){
-					dis_f = dis + ll - 2*abs(dx)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dx*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_y ){
-					dis_f = dis + ll - 2*abs(dy)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dy*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_z ){
-					dis_f = dis + ll - 2*abs(dz)*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + ll - 2*dz*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_y ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dx+dy)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dx+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_y && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + 2*ll - 2*(dy+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 					
 					if( con_x && con_y && con_z ){
-					dis_f = dis + 3*ll - 2*(abs(dx)+abs(dy)+abs(dz))*size_box;
-					if(dis_f <= dd_max){
-						pos = (int)(sqrt(dis_f)*ds);
-						RR[pos] += 4;
-					}
+						dis_f = dis + 3*ll - 2*(dx+dy+dz)*size_box;
+						if(dis_f <= dd_max){
+							pos = (int)(sqrt(dis_f)*ds);
+							RR[pos] += 4;
+						}
 					}
 				}
 			}
@@ -194,25 +207,34 @@ class iso2hist{
 			float front = size_box - d_max, dis_f;
 			float ll = size_box*size_box;
 			bool con_x, con_y, con_z;
+			float x1D, y1D, z1D, x2R, y2R, z2R;
 			std::cout << "Estoy haciendo histograma DR..." << std::endl;
 			for (int i = 0; i < n_pts; i++){
 				for(int j = 0; j < n_pts; j++){
-					dx = data[i].x-rand[j].x;
-					dy = data[i].y-rand[j].y;
-					dz = data[i].z-rand[j].z;
+					
+					x1D = data[i].x;
+					y1D = data[i].y;
+					z1D = data[i].z;
+					x2R = rand[j].x;
+					y2R = rand[j].y;
+					z2R = rand[j].z;
+					
+					dx = abs(x1D-x2R);
+					dy = abs(y1D-y2R);
+					dz = abs(z1D-z2R);
 					dis = dx*dx + dy*dy + dz*dz;
 					if(dis <= dd_max){
 						pos = (int)(sqrt(dis)*ds);
 						DR[pos] += 1;
 					}
 					
-					con_x = (rand[i].x < d_max || rand[j].x < d_max)&&(rand[i].x > front || rand[j].x > front);
-					con_y = (rand[i].y < d_max || rand[j].y < d_max)&&(rand[i].y > front || rand[j].y > front);
-					con_z = (rand[i].z < d_max || rand[j].z < d_max)&&(rand[i].z > front || rand[j].z > front);
+					con_x = (x1D<d_max && x2R>front)||(x2R<d_max && x1D>front);
+					con_y = (y1D<d_max && y2R>front)||(y2R<d_max && y1D>front);
+					con_z = (z1D<d_max && z2R>front)||(z2R<d_max && z1D>front);
 					
 					// Distancias en frontera 
 					if( con_x ){
-					dis_f = dis + ll - 2*abs(dx)*size_box;
+					dis_f = dis + ll - 2*dx*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis)*ds);
 						DR[pos] += 2;
@@ -220,7 +242,7 @@ class iso2hist{
 					}
 					
 					if( con_y ){
-					dis_f = dis + ll - 2*abs(dy)*size_box;
+					dis_f = dis + ll - 2*dy*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
@@ -228,7 +250,7 @@ class iso2hist{
 					}
 					
 					if( con_z ){
-					dis_f = dis + ll - 2*abs(dz)*size_box;
+					dis_f = dis + ll - 2*dz*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
@@ -236,7 +258,7 @@ class iso2hist{
 					}
 					
 					if( con_x && con_y ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dy))*size_box;
+					dis_f = dis + 2*ll - 2*(dx+dy)*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
@@ -244,7 +266,7 @@ class iso2hist{
 					}
 					
 					if( con_x && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dx)+abs(dz))*size_box;
+					dis_f = dis + 2*ll - 2*(dx+dz)*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
@@ -252,7 +274,7 @@ class iso2hist{
 					}
 					
 					if( con_y && con_z ){
-					dis_f = dis + 2*ll - 2*(abs(dy)+abs(dz))*size_box;
+					dis_f = dis + 2*ll - 2*(dy+dz)*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;
@@ -260,7 +282,7 @@ class iso2hist{
 					}
 					
 					if( con_x && con_y && con_z ){
-					dis_f = dis + 3*ll - 2*(abs(dx)+abs(dy)+abs(dz))*size_box;
+					dis_f = dis + 3*ll - 2*(dx+dy+dz)*size_box;
 					if(dis_f <= dd_max){
 						pos = (int)(sqrt(dis_f)*ds);
 						DR[pos] += 2;

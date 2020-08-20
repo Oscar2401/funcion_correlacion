@@ -53,8 +53,8 @@ int main(int argc, char **argv){
 	my_hist.~iso2hist(); //destruimos objeto
 	
 	auto end = std::chrono::system_clock::now();
-	auto elapsed = std::chrono::duration_cast<std::chrono::seconds>((end - start)); //mostramos los segundos que corre el programa
-	printf("Time = %lld s\n", static_cast<long long int>(elapsed.count()));
+	auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>((end - start)); //mostramos los segundos que corre el programa
+	printf("Time = %lld ms\n", static_cast<long long int>(elapsed.count()));
 	
 	// Eliminamos datos 
 	delete[] dataD;
