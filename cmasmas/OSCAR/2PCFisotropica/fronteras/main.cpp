@@ -19,8 +19,8 @@ int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	//int np = 32768, bn = 30;
-	int np = 10000, bn = 30;
-	float dmax = 30.0, size_box = 250;
+	int np = 32768, bn = 18;
+	float dmax = 180.0, size_box = 250;
 	dataD = new Point3D[np]; // Asignamos meoria a esta variable
 	dataR = new Point3D[np];
 	
@@ -59,8 +59,8 @@ int main(int argc, char **argv){
 	printf("Time = %lld s\n", static_cast<long long int>(elapsed.count()));
 	
 	// Eliminamos datos 
-	delete[] dataD;
-    	delete[] dataR;
+	//delete[] dataD;
+    	//delete[] dataR;
 	
 	cout << "Termine de hacer todos los histogramas" << endl;
 	// Mostramos los histogramas 

@@ -67,7 +67,7 @@ class NODE{
 		}
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(unsigned int *, unsigned int*);
+		void make_histoXX(unsigned int *);
 		void make_histoXY(unsigned int *);
 		void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		void histo_front_XY(unsigned int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
@@ -131,7 +131,7 @@ void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 
 //=================================================================== 
 
-void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
+void NODE::make_histoXX(unsigned int *DD){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -141,11 +141,11 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 	
 	*/
 	int i, j, u, v, w, row, col, mom, pos, partitions = (int)(ceil(size_box/size_node));
-	float x1D, y1D, z1D, x1R, y1R, z1R, x2D, y2D, z2D, x2R, y2R, z2R;
+	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
 	float dis, dis_nod;
 	bool con_x, con_y, con_z;
-	std::cout << "-> Estoy haciendo histogramas DD y RR..." << std::endl;
+	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
 	for (row = 0; row < partitions; row++){
 		for (col = 0; col < partitions; col++){
@@ -165,46 +165,26 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 						}
 					}
 				}
-				// Histograma RR
-				for ( i= 0; i < nodeR[row][col][mom].len - 1; i++){
-					for ( j = i+1; j < nodeR[row][col][mom].len; j++){	
-						dx = nodeR[row][col][mom].elements[i].x-nodeR[row][col][mom].elements[j].x;
-						dy = nodeR[row][col][mom].elements[i].y-nodeR[row][col][mom].elements[j].y;
-						dz = nodeR[row][col][mom].elements[i].z-nodeR[row][col][mom].elements[j].z;
-						dis = dx*dx + dy*dy + dz*dz;
-						if (dis <= dd_max){
-							pos = (int)(sqrt(dis)*ds);
-							RR[pos] += 2;
-						}
-					}
-				}
-				
-
 				// Distancias entre puntos del diferente nodo:
 				//==================================================
+				
 				x1D = nodeD[row][col][mom].nodepos.x;
 				y1D = nodeD[row][col][mom].nodepos.y;
 				z1D = nodeD[row][col][mom].nodepos.z;
-			
-				x1R = nodeR[row][col][mom].nodepos.x;
-				y1R = nodeR[row][col][mom].nodepos.y;
-				z1R = nodeR[row][col][mom].nodepos.z;
 				
 				//=======================================
-				for ( w = mom + 1;  w < partitions ; w ++){
-					
-					u = row;
-					v = col;
-					
+				u = row;
+				v = col;
+				for ( w = mom + 1;  w < partitions ; w ++){	
 					// Histograma DD
 					x2D = nodeD[u][v][w].nodepos.x;
 					y2D = nodeD[u][v][w].nodepos.y;
 					z2D = nodeD[u][v][w].nodepos.z;
-					dx_nod = abs(x1D-x2D);
-					dy_nod = abs(y1D-y2D);
-					dz_nod = abs(z1D-z2D);
-					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-					if (dis_nod <= d_max){
+					dx_nod = x1D-x2D;
+					dy_nod = y1D-y2D;
+					dz_nod = z1D-z2D;
+					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod);
+					if (dis_nod-corr <= d_max){
 						for ( i = 0; i < nodeD[row][col][mom].len; i++){
 							for ( j = 0; j < nodeD[u][v][w].len; j++){
 							dx =  nodeD[row][col][mom].elements[i].x-nodeD[u][v][w].elements[j].x;
@@ -218,63 +198,31 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 							}
 						}
 					}
-					
 					// Distacia de los puntos frontera DD
-					con_x = (x1D-size_node/2<d_max && x2D+size_node/2>front)||(x2D-size_node/2<d_max && x1D+size_node/2>front);
-					con_y = (y1D-size_node/2<d_max && y2D+size_node/2>front)||(y2D-size_node/2<d_max && y1D+size_node/2>front);
-					con_z = (z1D-size_node/2<d_max && z2D+size_node/2>front)||(z2D-size_node/2<d_max && z1D+size_node/2>front);
+					//=======================================
 					
-					if(con_x || (con_y || con_z) ){ // vemos si el nodo esta en la frontera
-					histo_front_XX(DD,nodeD,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-					}
-					
-					// Histograma RR
-					x2R = nodeR[u][v][w].nodepos.x;
-					y2R = nodeR[u][v][w].nodepos.y;
-					z2R = nodeR[u][v][w].nodepos.z;
-					dx_nod = abs(x1R-x2R);
-					dy_nod = abs(y1R-y2R);
-					dz_nod = abs(z1R-z2R);
-					dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-					if (dis_nod <= d_max){
-						for ( i = 0; i < nodeR[row][col][mom].len; i++){
-							for ( j = 0; j < nodeR[u][v][w].len; j++){	
-							dx =  nodeR[row][col][mom].elements[i].x-nodeR[u][v][w].elements[j].x;
-							dy =  nodeR[row][col][mom].elements[i].y-nodeR[u][v][w].elements[j].y;
-							dz =  nodeR[row][col][mom].elements[i].z-nodeR[u][v][w].elements[j].z;
-							dis = dx*dx + dy*dy + dz*dz;
-							if (dis <= dd_max){
-								pos = (int)(sqrt(dis)*ds);
-								RR[pos] += 2;
-							}
-							}
-						}
-					}
-					
-					// Distacia de los puntos frontera RR
-					con_x = (x1R-size_node/2<d_max && x2R+size_node/2>front)||(x2R-size_node/2<d_max && x1R+size_node/2>front);
-					con_y = (y1R-size_node/2<d_max && y2R+size_node/2>front)||(y2R-size_node/2<d_max && y1R+size_node/2>front);
-					con_z = (z1R-size_node/2<d_max && z2R+size_node/2>front)||(z2R-size_node/2<d_max && z1R+size_node/2>front);
-					
-					if(con_x || (con_y || con_z)){
-					histo_front_XX(RR,nodeR,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
+					//Condiciones de nodos en frontera:
+				con_x = (x1D-(size_node/2)<d_max && x2D+(size_node/2)>front)||(x2D-(size_node/2)<d_max && x1D+(size_node/2)>front);
+				con_y = (y1D-(size_node/2)<d_max && y2D+(size_node/2)>front)||(y2D-(size_node/2)<d_max && y1D+(size_node/2)>front);
+				con_z = (z1D-(size_node/2)<d_max && z2D+(size_node/2)>front)||(z2D-(size_node/2)<d_max && z1D+(size_node/2)>front);
+				
+					if(con_x || (con_y || con_z) ){
+					histo_front_XX(DD,nodeD,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 					}
 				}
-				
 				//=======================================
+				u = row;
 				for (v = col + 1; v < partitions ; v ++){
-					for (w = 0; w < partitions ; w ++){
-						u = row;
-						
+					for (w = 0; w < partitions ; w ++){		
 						// Histograma DD
 						x2D = nodeD[u][v][w].nodepos.x;
 						y2D = nodeD[u][v][w].nodepos.y;
 						z2D = nodeD[u][v][w].nodepos.z;
-						dx_nod = abs(x1D-x2D);
-						dy_nod = abs(y1D-y2D);
-						dz_nod = abs(z1D-z2D);
-						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-						if (dis_nod <= d_max){
+						dx_nod = x1D-x2D;
+						dy_nod = y1D-y2D;
+						dz_nod = z1D-z2D;
+						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod);
+						if (dis_nod-corr <= d_max){
 							for ( i = 0; i < nodeD[row][col][mom].len; i++){
 								for ( j = 0; j < nodeD[u][v][w].len; j++){	
 								dx =  nodeD[row][col][mom].elements[i].x-nodeD[u][v][w].elements[j].x;
@@ -288,51 +236,19 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 								}
 							}
 						}
-						
-						
 						// Distacia de los puntos frontera
-					con_x = (x1D-size_node/2<d_max && x2D+size_node/2>front)||(x2D-size_node/2<d_max && x1D+size_node/2>front);
-					con_y = (y1D-size_node/2<d_max && y2D+size_node/2>front)||(y2D-size_node/2<d_max && y1D+size_node/2>front);
-					con_z = (z1D-size_node/2<d_max && z2D+size_node/2>front)||(z2D-size_node/2<d_max && z1D+size_node/2>front);
+						//=======================================
 					
-						if(con_x || (con_y || con_z)){ 
-						histo_front_XX(DD,nodeD,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-						}
-						
-						// Histograma RR
-						x2R = nodeR[u][v][w].nodepos.x;
-						y2R = nodeR[u][v][w].nodepos.y;
-						z2R = nodeR[u][v][w].nodepos.z;
-						dx_nod = abs(x1R-x2R);
-						dy_nod = abs(y1R-y2R);
-						dz_nod = abs(z1R-z2R);
-						dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-						if (dis_nod <= d_max){
-							for ( i = 0; i < nodeR[row][col][mom].len; i++){
-								for ( j = 0; j < nodeR[u][v][w].len; j++){	
-								dx =  nodeR[row][col][mom].elements[i].x-nodeR[u][v][w].elements[j].x;
-								dy =  nodeR[row][col][mom].elements[i].y-nodeR[u][v][w].elements[j].y;
-								dz =  nodeR[row][col][mom].elements[i].z-nodeR[u][v][w].elements[j].z;
-								dis = dx*dx + dy*dy + dz*dz;
-								if (dis <= dd_max){
-									pos = (int)(sqrt(dis)*ds);
-									RR[pos] += 2;
-								}
-								}
-							}
-						}
-						
-						// Distacia de los puntos frontera RR
-					con_x = (x1R-size_node/2<d_max && x2R+size_node/2>front)||(x2R-size_node/2<d_max && x1R+size_node/2>front);
-					con_y = (y1R-size_node/2<d_max && y2R+size_node/2>front)||(y2R-size_node/2<d_max && y1R+size_node/2>front);
-					con_z = (z1R-size_node/2<d_max && z2R+size_node/2>front)||(z2R-size_node/2<d_max && z1R+size_node/2>front);
+						//Condiciones de nodos en frontera:
+				con_x = (x1D-(size_node/2)<d_max && x2D+(size_node/2)>front)||(x2D-(size_node/2)<d_max && x1D+(size_node/2)>front);
+				con_y = (y1D-(size_node/2)<d_max && y2D+(size_node/2)>front)||(y2D-(size_node/2)<d_max && y1D+(size_node/2)>front);
+				con_z = (z1D-(size_node/2)<d_max && z2D+(size_node/2)>front)||(z2D-(size_node/2)<d_max && z1D+(size_node/2)>front);
 					
-						if(con_x || (con_y || con_z)){
-						histo_front_XX(RR,nodeR,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-						}
+					if(con_x || (con_y || con_z)){ 
+					histo_front_XX(DD,nodeD,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+					}
 					}
 				}
-				
 				//=======================================
 				for ( u = row + 1; u < partitions; u++){
 					for ( v = 0; v < partitions; v++){
@@ -341,11 +257,11 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 							x2D = nodeD[u][v][w].nodepos.x;
 							y2D = nodeD[u][v][w].nodepos.y;
 							z2D = nodeD[u][v][w].nodepos.z;
-							dx_nod = abs(x1D-x2D);
-							dy_nod = abs(y1D-y2D);
-							dz_nod = abs(z1D-z2D);
-							dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-							if (dis_nod <= d_max){
+							dx_nod = x1D-x2D;
+							dy_nod = y1D-y2D;
+							dz_nod = z1D-z2D;
+							dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod);
+							if (dis_nod-corr <= d_max){
 								for ( i = 0; i < nodeD[row][col][mom].len; i++){
 									for ( j = 0; j < nodeD[u][v][w].len; j++){	
 									dx =  nodeD[row][col][mom].elements[i].x-nodeD[u][v][w].elements[j].x;
@@ -359,45 +275,18 @@ void NODE::make_histoXX(unsigned int *DD, unsigned int *RR){
 									}
 								}
 							}
-							
-					con_x = (x1D-size_node/2<d_max && x2D+size_node/2>front)||(x2D-size_node/2<d_max && x1D+size_node/2>front);
-					con_y = (y1D-size_node/2<d_max && y2D+size_node/2>front)||(y2D-size_node/2<d_max && y1D+size_node/2>front);
-					con_z = (z1D-size_node/2<d_max && z2D+size_node/2>front)||(z2D-size_node/2<d_max && z1D+size_node/2>front);
+							// Distacia de los puntos frontera
+							//=======================================
 					
-					if(con_x || (con_y || con_z)){
-						histo_front_XX(DD,nodeD,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-					}
-							
-							// Histograma RR
-							x2R = nodeR[u][v][w].nodepos.x;
-							y2R = nodeR[u][v][w].nodepos.y;
-							z2R = nodeR[u][v][w].nodepos.z;
-							dx_nod = abs(x1R-x2R);
-							dy_nod = abs(y1R-y2R);
-							dz_nod = abs(z1R-z2R);
-							dis_nod = sqrt(dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod)-corr;
-							if (dis_nod <= d_max){
-								for ( i = 0; i < nodeR[row][col][mom].len; i++){
-									for ( j = 0; j < nodeR[u][v][w].len; j++){	
-									dx =  nodeR[row][col][mom].elements[i].x-nodeR[u][v][w].elements[j].x;
-									dy =  nodeR[row][col][mom].elements[i].y-nodeR[u][v][w].elements[j].y;
-									dz =  nodeR[row][col][mom].elements[i].z-nodeR[u][v][w].elements[j].z;
-									dis = dx*dx + dy*dy + dz*dz;
-									if (dis <= dd_max){
-										pos = (int)(sqrt(dis)*ds);
-										RR[pos] += 2;
-									}
-									}
-								}
-							}
-							
-					con_x = (x1R-size_node/2<d_max && x2R+size_node/2>front)||(x2R-size_node/2<d_max && x1R+size_node/2>front);
-					con_y = (y1R-size_node/2<d_max && y2R+size_node/2>front)||(y2R-size_node/2<d_max && y1R+size_node/2>front);
-					con_z = (z1R-size_node/2<d_max && z2R+size_node/2>front)||(z2R-size_node/2<d_max && z1R+size_node/2>front);
+							//Condiciones de nodos en frontera:
+				con_x = (x1D-(size_node/2)<d_max && x2D+(size_node/2)>front)||(x2D-(size_node/2)<d_max && x1D+(size_node/2)>front);
+				con_y = (y1D-(size_node/2)<d_max && y2D+(size_node/2)>front)||(y2D-(size_node/2)<d_max && y1D+(size_node/2)>front);
+				con_z = (z1D-(size_node/2)<d_max && z2D+(size_node/2)>front)||(z2D-(size_node/2)<d_max && z1D+(size_node/2)>front);
 					
-					if(con_x || (con_y || con_z)){
-						histo_front_XX(RR,nodeR,dis_nod+corr,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-					}
+				if(con_x || (con_y || con_z)){
+				histo_front_XX(DD,nodeD,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+				}
+							
 						}	
 					}
 				}
@@ -420,7 +309,7 @@ void NODE::make_histoXY(unsigned int *DR){
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float dis, dis_nod;
 	bool con_x, con_y, con_z;
-	std::cout << "-> Estoy haciendo histograma DR..." << std::endl;
+	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
 	for (row = 0; row < partitions; row++){
 		for (col = 0; col < partitions; col++){
 			for (mom = 0; mom < partitions; mom++){
@@ -456,14 +345,17 @@ void NODE::make_histoXY(unsigned int *DR){
 							}
 							}	
 							}
-							
-					con_x = (x1D-size_node/2<d_max && x2R+size_node/2>front)||(x2R-size_node/2<d_max && x1D+size_node/2>front);
-					con_y = (y1D-size_node/2<d_max && y2R+size_node/2>front)||(y2R-size_node/2<d_max && y1D+size_node/2>front);
-					con_z = (z1D-size_node/2<d_max && z2R+size_node/2>front)||(z2R-size_node/2<d_max && z1D+size_node/2>front);
-							
-					if(con_x || (con_y || con_z)){
-						histo_front_XY(DR,nodeD,nodeR,dis_nod,dx_nod,dy_nod,dz_nod,con_x,con_y,con_z,row,col,mom,u,v,w);
-					}
+							// Distacia de los puntos frontera
+							//=======================================
+					
+							//Condiciones de nodos en frontera:
+				con_x = (x1D-(size_node/2)<d_max && x2R+(size_node/2)>front)||(x2R-(size_node/2)<d_max && x1D+(size_node/2)>front);
+				con_y = (y1D-(size_node/2)<d_max && y2R+(size_node/2)>front)||(y2R-(size_node/2)<d_max && y1D+(size_node/2)>front);
+				con_z = (z1D-(size_node/2)<d_max && z2R+(size_node/2)>front)||(z2R-(size_node/2)<d_max && z1D+(size_node/2)>front);
+						
+				if(con_x || (con_y || con_z)){
+				histo_front_XY(DR,nodeD,nodeR,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+				}
 							
 						}
 					}	
@@ -490,7 +382,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -508,7 +400,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -526,7 +418,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -544,7 +436,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -562,7 +454,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -580,7 +472,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -598,7 +490,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XX[_pos] += 4;
+						XX[_pos] += 2;
 					}
 				}
 			}
@@ -623,7 +515,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -641,7 +533,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -659,7 +551,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -677,7 +569,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -695,7 +587,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -713,7 +605,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}
@@ -731,7 +623,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						_pos = (int)(sqrt(_dis)*ds);
-						XY[_pos] += 2;
+						XY[_pos] += 1;
 					}
 				}
 			}

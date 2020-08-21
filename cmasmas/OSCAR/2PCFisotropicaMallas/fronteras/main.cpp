@@ -17,8 +17,8 @@ Node ***nodeR;
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
-	int n_pts = 10000, bn = 30;
-	float d_max = 30, size_box = 250, size_node = 20;
+	int n_pts = 32768, bn = 10;
+	float d_max = 100, size_box = 250, size_node = 14;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -76,13 +76,17 @@ int main(int argc, char **argv){
 	// Iniciamos clase
 	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR, nodeD, nodeR);
 	
-	float to = clock();
+	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DD, RR); //hace histogramas XX
-	my_hist.make_histoXY(DR); //hace historamas XY
+	my_hist.make_histoXX(DD); //hace histogramas XX
+	
+	clock_t c_end = clock();
+	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
+	//my_hist.make_histoXX(RR);
+	//my_hist.make_histoXY(DR); //hace historamas XY
 	my_hist.~NODE(); //destruimos objeto
 	
-	float tf = clock() - to;
+	
 	cout << "Termine de hacer todos los histogramas" << endl;
 	
 	// Mostramos los histogramas 
@@ -120,7 +124,8 @@ int main(int argc, char **argv){
 	//delete[] DR;
 	//delete[] RR;
 	
-	printf("\nTiempo implementado = %.4f seg.\n", ((float)tf)/CLOCKS_PER_SEC);
+	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
+	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
 	cout << "Programa finalizado..." << endl;
 	cin.get();
 	return 0;
