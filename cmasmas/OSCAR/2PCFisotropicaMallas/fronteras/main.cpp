@@ -26,10 +26,11 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "Construcción de Histogramas DD, RR y DR para calcular" << endl;
-	cout << "la función de correlación de 2 puntos anisotrópica" << endl;
-	cout << "implementando el método de mallas" << endl;
+	cout << "la función de correlación de 2 puntos isotrópica" << endl;
+	cout << "implementando el método de mallas con condiciones" << endl;
+	cout << "periódicas de frontera" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "Parametros usados: " << endl;
+	cout << "Parametros usados: \n" << endl;
 	cout << "Cantidad de puntos: " << n_pts << endl;
 	cout << "Bins de histogramas: " << bn << endl;
 	cout << "Distancia máxima: " << d_max << endl;
@@ -78,16 +79,16 @@ int main(int argc, char **argv){
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DD); //hace histogramas XX
+	my_hist.make_histoXX(DD, my_hist.meshData()); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	//my_hist.make_histoXX(RR);
-	//my_hist.make_histoXY(DR); //hace historamas XY
+	//my_hist.make_histoXX(RR, my_hist.meshRand());
+	//my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); //hace historamas XY
 	my_hist.~NODE(); //destruimos objeto
 	
 	
-	cout << "Termine de hacer todos los histogramas" << endl;
+	cout << "Termine de hacer todos los histogramas\n" << endl;
 	
 	// Mostramos los histogramas 
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
