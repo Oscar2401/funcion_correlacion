@@ -148,17 +148,27 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 	RR: arreglo donde se creará el histograma RR.
 	
 	*/
-	int i, j, u, v, w, row, col, mom, partitions = (int)(ceil(size_box/size_node));
-	float x1D, y1D, z1D, x2D, y2D, z2D;
-	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
+	int i, j, u, v, w, partitions = (int)(ceil(size_box/size_node));
+	
 	float dis, dis_nod;
 	float pt_m = size_node/2;
-	bool con_x, con_y, con_z;
+	
 	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
-	for (row = 0; row < partitions; row++){
-		for (col = 0; col < partitions; col++){
-			for (mom = 0; mom < partitions; mom++){
+	#pragma omp parallel num_threads(4) private(i,j,u,v,w,dis,dis_nod)
+    	{
+    	unsigned int *SS;
+    	SS = new unsigned int[bn];
+    	for (int k = 0; k < bn; k++){
+		*(SS+k) = 0;
+	}
+    	#pragma omp for  collapse(3)  schedule(dynamic) private(i,j,u,v,w,dis,dis_nod)
+	for (int row = 0; row < partitions; row++){
+		for (int col = 0; col < partitions; col++){
+			for (int mom = 0; mom < partitions; mom++){
+				float x1D, y1D, z1D, x2D, y2D, z2D;
+				float dx, dy, dz, dx_nod, dy_nod, dz_nod;
+				bool con_x, con_y, con_z;
 				// Distancias entre puntos del mismo nodo:
 				//==================================================
 				// Histograma DD
@@ -169,7 +179,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 						dz = nodeD[row][col][mom].elements[i].z-nodeD[row][col][mom].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis <= dd_max){
-							*(XX + (int)(sqrt(dis)*ds)) += 2;
+							*(SS + (int)(sqrt(dis)*ds)) += 2;
 						}
 					}
 				}
@@ -200,7 +210,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 							dz =  nodeD[row][col][mom].elements[i].z-nodeD[u][v][w].elements[j].z;
 							dis = dx*dx + dy*dy + dz*dz;
 							if (dis <= dd_max){
-								*(XX + (int)(sqrt(dis)*ds)) += 2;
+								*(SS + (int)(sqrt(dis)*ds)) += 2;
 							}
 							}
 						}
@@ -214,7 +224,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 					con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
 				
 					if(con_x || (con_y || con_z) ){
-					histo_front_XX(XX,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+					histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 					}
 				}
 				//=======================================
@@ -237,7 +247,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 								dz =  nodeD[row][col][mom].elements[i].z-nodeD[u][v][w].elements[j].z;
 								dis = dx*dx + dy*dy + dz*dz;
 								if (dis <= dd_max){
-									*(XX + (int)(sqrt(dis)*ds)) += 2;
+									*(SS + (int)(sqrt(dis)*ds)) += 2;
 								}
 								}
 							}
@@ -251,7 +261,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 						con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
 					
 					if(con_x || (con_y || con_z)){ 
-					histo_front_XX(XX,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+					histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 					}
 					}
 				}
@@ -275,7 +285,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 									dz =  nodeD[row][col][mom].elements[i].z-nodeD[u][v][w].elements[j].z;
 									dis = dx*dx + dy*dy + dz*dz;
 									if (dis <= dd_max){
-										*(XX + (int)(sqrt(dis)*ds)) += 2;
+										*(SS + (int)(sqrt(dis)*ds)) += 2;
 									}
 									}
 								}
@@ -284,12 +294,12 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 							//=======================================
 					
 							//Condiciones de nodos en frontera:
-				con_x = (x1D-pt_m<d_max && x2D+pt_m>front)||(x2D-pt_m<d_max && x1D+pt_m>front);
-				con_y = (y1D-pt_m<d_max && y2D+pt_m>front)||(y2D-pt_m<d_max && y1D+pt_m>front);
-				con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
+							con_x = (x1D-pt_m<d_max && x2D+pt_m>front)||(x2D-pt_m<d_max && x1D+pt_m>front);
+							con_y = (y1D-pt_m<d_max && y2D+pt_m>front)||(y2D-pt_m<d_max && y1D+pt_m>front);
+							con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
 					
 				if(con_x || (con_y || con_z)){
-				histo_front_XX(XX,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+				histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 				}
 							
 						}	
@@ -297,6 +307,13 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 				}
 			}
 		}
+	}
+	#pragma omp critical
+        {
+            for( int a=0; a<bn; a++ ) {
+                 *(XX+a)+=*(SS+a);
+            }
+        }
 	}
 }
 //=================================================================== 
@@ -316,6 +333,15 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 	float pt_m = size_node/2;
 	bool con_x, con_y, con_z;
 	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) private(i,j,u,v,w,dis,dis_nod)
+    	{
+    	unsigned int *SS;
+    	SS = new unsigned int[bn];
+    	for (int k = 0; k < bn; k++){
+		*(SS+k) = 0;
+	}
+	#pragma omp for  collapse(3)  schedule(dynamic) private(i,j,u,v,w,dis,dis_nod)
 	for (row = 0; row < partitions; row++){
 		for (col = 0; col < partitions; col++){
 			for (mom = 0; mom < partitions; mom++){
@@ -345,7 +371,7 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 								dz =  nodeX[row][col][mom].elements[i].z-nodeY[u][v][w].elements[j].z;
 								dis = dx*dx + dy*dy + dz*dz;
 								if (dis < dd_max){
-									*(XY+ (int)(sqrt(dis)*ds)) += 1;
+									*(SS+ (int)(sqrt(dis)*ds)) += 1;
 								}
 							}
 							}	
@@ -359,7 +385,7 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 					con_z = (z1D-pt_m<d_max && z2R+pt_m>front)||(z2R-pt_m<d_max && z1D+pt_m>front);
 						
 				if(con_x || (con_y || con_z)){
-				histo_front_XY(XY,nodeX,nodeY,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+				histo_front_XY(SS,nodeX,nodeY,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 				}
 							
 						}
@@ -367,6 +393,13 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 				}
 			}
 		}
+	}
+	#pragma omp critical
+        {
+            for( int a=0; a<bn; a++ ) {
+                 *(XY+a)+=*(SS+a);
+            }
+        }
 	}
 }
 

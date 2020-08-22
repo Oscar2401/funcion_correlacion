@@ -52,9 +52,9 @@ int main(int argc, char **argv){
 	DR = new unsigned int[bn];
 	int i;
 	for (i = 0; i < bn; i++){
-		*(DD+i) = 0.0; // vector[i]
-		*(RR+i) = 0.0;
-		*(DR+i) = 0.0;
+		*(DD+i) = 0; // vector[i]
+		*(RR+i) = 0;
+		*(DR+i) = 0;
 	}
 
 	// Abrimos y trabajamos los datos en los histogramas
