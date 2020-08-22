@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
-
+#include <omp.h>
 
 struct Point3D{
 	float x;
