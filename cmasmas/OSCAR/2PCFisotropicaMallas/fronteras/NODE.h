@@ -155,7 +155,7 @@ void NODE::make_histoXX(unsigned int *XX, Node ***nodeX){
 	
 	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
-	#pragma omp parallel num_threads(4) private(i,j,u,v,w,dis,dis_nod)
+	#pragma omp parallel num_threads(2) private(i,j,u,v,w,dis,dis_nod)
     	{
     	unsigned int *SS;
     	SS = new unsigned int[bn];
