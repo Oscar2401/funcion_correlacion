@@ -8,10 +8,10 @@
 using namespace std;
 
 void open_files(string, int, Point3D *);
-void save_histogram(string, int, unsigned int *);
+void save_histogram(string, int, long int *);
 
 Point3D *dataD, *dataR;
-unsigned int  *DD, *RR, *DR;
+long int  *DD, *RR, *DR;
 Node ***nodeD;
 Node ***nodeR;
 
@@ -49,9 +49,9 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new unsigned int[bn];
-	RR = new unsigned int[bn];
-	DR = new unsigned int[bn];
+	DD = new long int[bn];
+	RR = new long int[bn];
+	DR = new long int[bn];
 	int i;
 	for (i = 0; i < bn; i++){
 		*(DD+i) = 0; // vector[i]
@@ -98,19 +98,19 @@ int main(int argc, char **argv){
 	cout << "HITOGRAMA DD:" << endl;
 	
 	for (i = 0; i<bn; i++){
-		printf("%d \t",DD[i]);
+		printf("%ld \t",DD[i]);
 	}
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA RR:" << endl;
 	for (i = 0; i<bn; i++){
-		printf("%d \t",RR[i]);
+		printf("%ld \t",RR[i]);
 	}
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DR:" << endl;
 	for (i = 0; i<bn; i++){
-		printf("%d \t",DR[i]);
+		printf("%ld \t",DR[i]);
 	}
 	
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -161,7 +161,7 @@ void open_files(string name_file, int pts, Point3D *datos){
 //====================================================================
 
 
-void save_histogram(string name, int bns, unsigned int *histo){
+void save_histogram(string name, int bns, long int *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);
