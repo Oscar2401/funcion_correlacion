@@ -18,7 +18,6 @@ Node ***nodeR;
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
-	//int n_pts = 32768, bn = 10;
 	int n_pts = 32768, bn = 10;
 	float d_max = 100, size_box = 250, size_node = 14;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
@@ -49,14 +48,21 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new unsigned int[bn];
-	RR = new unsigned int[bn];
-	DR = new unsigned int[bn];
-	int i;
+	DD = new unsigned int*[bn];
+	RR = new unsigned int*[bn];
+	DR = new unsigned int*[bn];
+	int i,j;
 	for (i = 0; i < bn; i++){
-		*(DD+i) = 0; // vector[i]
-		*(RR+i) = 0;
-		*(DR+i) = 0;
+		*(DD+i) = new float[bn]; // vector[i]
+		*(RR+i) = new float[bn];
+		*(DR+i) = new float[bn];
+	}
+	for (i = 0; i < bn; i++){
+		for ( j = 0; j < bn; j++){
+			*(*(DD + i) + j) = 0.0;
+			*(*(DR + i) + j) = 0.0;   
+			*(*(RR + i) + j) = 0.0;
+		} 
 	}
 
 	// Abrimos y trabajamos los datos en los histogramas
@@ -81,7 +87,7 @@ int main(int argc, char **argv){
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DD, RR, my_hist.meshData()); //hace histogramas XX
+	my_hist.make_histoXX(DD, my_hist.meshData()); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;

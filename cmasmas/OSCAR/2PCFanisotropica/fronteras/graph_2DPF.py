@@ -7,10 +7,10 @@ DR_mesh = np.loadtxt('DRiso_mesh_3D_full.dat')
 
 #Función de correlación Landy-Szalay
 def estim_LS(NDD, NRR, NDR):
-    return (NDD - NRR)/NRR
+    return (NDD - 2*NDR + NRR)/NRR
 
 eps_LS = estim_LS(DD_mesh, RR_mesh, DR_mesh)
-r = np.linspace(0,110,30)
+r = np.linspace(0,180,30)
 
 fig = plt.figure(figsize=(14,8))
 plt.scatter(r,eps_LS, s=50, c='g',label='LS')

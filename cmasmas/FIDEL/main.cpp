@@ -7,22 +7,21 @@
 
 using namespace std;
 
-void open_files(string, int, Point3D *);
+void open_files(string, int, float **);
 void save_histogram(string, int, unsigned int *);
 
-Point3D *dataD, *dataR;
+float **dataD, **dataR;
 unsigned int  *DD, *RR, *DR;
-Node ***nodeD;
-Node ***nodeR;
+float ***nodeD;
+float ***nodeR;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
-	//int n_pts = 32768, bn = 10;
 	int n_pts = 32768, bn = 10;
 	float d_max = 100, size_box = 250, size_node = 14;
-	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
-	dataR = new Point3D[n_pts];
+	dataD = new float[n_pts]; // Asignamos meoria a esta variable
+	dataR = new float[n_pts];
 	
 	//Mensaje a usuario
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -65,14 +64,14 @@ int main(int argc, char **argv){
 	
 	// inicializamos las mallas
 	int partitions = (int)(ceil(size_box/size_node));
-	nodeD = new Node**[partitions];
-	nodeR = new Node**[partitions];
+	nodeD = new float**[partitions];
+	nodeR = new float**[partitions];
 	for ( i = 0; i < partitions; i++){
-		*(nodeD + i) = new Node*[partitions];
-		*(nodeR + i) = new Node*[partitions];
+		*(nodeD + i) = new float*[partitions];
+		*(nodeR + i) = new float*[partitions];
 		for (int j = 0; j < partitions; j++){
-			*(*(nodeD + i)+j) = new Node[partitions];
-			*(*(nodeR + i)+j) = new Node[partitions];
+			*(*(nodeD + i)+j) = new float[partitions];
+			*(*(nodeR + i)+j) = new float[partitions];
 		}
 	}	
 	
@@ -81,7 +80,7 @@ int main(int argc, char **argv){
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DD, RR, my_hist.meshData()); //hace histogramas XX
+	my_hist.make_histoXX(DD, my_hist.meshData()); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
@@ -138,7 +137,7 @@ int main(int argc, char **argv){
 //============ Sección de Funciones ================================== 
 //====================================================================
 
-void open_files(string name_file, int pts, Point3D *datos){
+void open_files(string name_file, int pts, float **datos){
 	/* Función para abrir nuestros archivos de datos */
 	ifstream file;
 	file.open(name_file.c_str(), ios::in | ios::binary); //le indico al programa que se trata de un archivo binario con ios::binary
@@ -152,7 +151,7 @@ void open_files(string name_file, int pts, Point3D *datos){
 	//while (!file.eof())
 	for ( int c = 0; c < pts; c++)
 	{
-		file >> datos[c].x >> datos[c].y >> datos[c].z >> remove; 
+		file >> *(*(datos+c)+0) >> *(*(datos+c)+1) >> *(*(datos+c)+2) >> remove; 
 		//c++;
 	}
 	file.close();
