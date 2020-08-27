@@ -2,7 +2,7 @@
 #include <fstream> //manejo de archivos
 #include <string.h>
 #include "iso2histo.h"
-#include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -49,14 +49,15 @@ int main(int argc, char **argv){
 	iso2hist my_hist(bn, np, dmax, size_box, dataD, dataR);
 
 	
-	auto start = std::chrono::system_clock::now();
-	my_hist.make_histoXX(DD,RR); //hace histogramas XX
-	my_hist.make_histoXY(DR); //hace historamas XY
-	my_hist.~iso2hist(); //destruimos objeto
+	clock_t c_start = clock();
 	
-	auto end = std::chrono::system_clock::now();
-	auto elapsed = std::chrono::duration_cast<std::chrono::seconds>((end - start)); //mostramos los segundos que corre el programa
-	printf("Time = %lld s\n", static_cast<long long int>(elapsed.count()));
+	my_hist.make_histoXX(DD,RR); //hace histogramas XX
+	
+	clock_t c_end = clock();
+	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
+	//my_hist.make_histoXY(DR); //hace historamas XY
+	my_hist.~iso2hist(); //destruimos objeto
+
 	
 	// Eliminamos datos 
 	//delete[] dataD;
@@ -89,8 +90,9 @@ int main(int argc, char **argv){
 	//delete[] DD;
 	//delete[] DR;
 	//delete[] RR;
-	cout << "Programa Terminado..." << endl;
-	cin.get();
+	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
+	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
+	cout << "Programa finalizado..." << endl;
 	return 0;
 	
 }
