@@ -165,6 +165,7 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
+	float x, y, z;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
 	bool con_x, con_y, con_z;
 	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
@@ -178,10 +179,13 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 				//==================================================
 				// Histograma DD
 				for ( i= 0; i < nodeX[row][col][mom].len - 1; i++){
+					x = nodeX[row][col][mom].elements[i].x;
+					y = nodeX[row][col][mom].elements[i].y;
+					z = nodeX[row][col][mom].elements[i].z;
 					for ( j = i+1; j < nodeX[row][col][mom].len; j++){
-						dx = nodeX[row][col][mom].elements[i].x-nodeX[row][col][mom].elements[j].x;
-						dy = nodeX[row][col][mom].elements[i].y-nodeX[row][col][mom].elements[j].y;
-						dz = nodeX[row][col][mom].elements[i].z-nodeX[row][col][mom].elements[j].z;
+						dx = x-nodeX[row][col][mom].elements[j].x;
+						dy = y-nodeX[row][col][mom].elements[j].y;
+						dz = z-nodeX[row][col][mom].elements[j].z;
 						dis = dx*dx+dy*dy+dz*dz;
 						if (dis <= dd_max){
 							*(SS + (int)(sqrt(dis)*ds)) += 2;
@@ -209,10 +213,13 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
 					if (dis_nod <= ddmax_nod){
 						for ( i = 0; i < nodeX[row][col][mom].len; i++){
+							x = nodeX[row][col][mom].elements[i].x;
+							y = nodeX[row][col][mom].elements[i].y;
+							z = nodeX[row][col][mom].elements[i].z;
 							for ( j = 0; j < nodeX[u][v][w].len; j++){
-							dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
-							dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
-							dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
+							dx =  x-nodeX[u][v][w].elements[j].x;
+							dy =  y-nodeX[u][v][w].elements[j].y;
+							dz =  z-nodeX[u][v][w].elements[j].z;
 							dis = dx*dx+dy*dy+dz*dz;
 							if (dis <= dd_max){
 								*(SS + (int)(sqrt(dis)*ds)) += 2;
@@ -245,10 +252,13 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 						dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
 						if (dis_nod <= ddmax_nod){
 							for ( i = 0; i < nodeX[row][col][mom].len; i++){
+								x = nodeX[row][col][mom].elements[i].x;
+								y = nodeX[row][col][mom].elements[i].y;
+								z = nodeX[row][col][mom].elements[i].z;
 								for ( j = 0; j < nodeX[u][v][w].len; j++){	
-								dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
-								dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
-								dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
+								dx =  x-nodeX[u][v][w].elements[j].x;
+								dy =  y-nodeX[u][v][w].elements[j].y;
+								dz =  z-nodeX[u][v][w].elements[j].z;
 								dis = dx*dx+dy*dy+dz*dz;
 								if (dis <= dd_max){
 									*(SS + (int)(sqrt(dis)*ds)) += 2;
@@ -283,10 +293,13 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 							dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
 							if (dis_nod <= ddmax_nod){
 								for ( i = 0; i < nodeX[row][col][mom].len; i++){
+									x = nodeX[row][col][mom].elements[i].x;
+									y = nodeX[row][col][mom].elements[i].y;
+									z = nodeX[row][col][mom].elements[i].z;
 									for ( j = 0; j < nodeX[u][v][w].len; j++){	
-									dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
-									dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
-									dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
+									dx =  x-nodeX[u][v][w].elements[j].x;
+									dy =  y-nodeX[u][v][w].elements[j].y;
+									dz =  z-nodeX[u][v][w].elements[j].z;
 									dis = dx*dx + dy*dy + dz*dz;
 									if (dis <= dd_max){
 										*(SS + (int)(sqrt(dis)*ds)) += 2;
@@ -418,10 +431,10 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 }
 
 //=================================================================== 
- 
 void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
 	int i, j;
-	float dis_f, _dis, _d_x, _d_y, _d_z;
+	float dis_f,_dis,_d_x,_d_y,_d_z;
+	float _x,_y,_z;
 	//======================================================================
 	// Si los puentos estás en las paredes laterales de X
 	if( con_in_x ){
@@ -429,10 +442,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + ll - 2*dn_x*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = fabs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x)-size_box;
-					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
+					_d_y = _y-dat[_u][_v][_w].elements[j].y;
+					_d_z = _z-dat[_u][_v][_w].elements[j].z;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -447,10 +463,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + ll - 2*dn_y*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y = fabs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y)-size_box;
-					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = _x-dat[_u][_v][_w].elements[j].x;
+					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
+					_d_z = _z-dat[_u][_v][_w].elements[j].z;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -465,10 +484,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + ll - 2*dn_z*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z = fabs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z)-size_box;
+					_d_x = _x-dat[_u][_v][_w].elements[j].x;
+					_d_y = _y-dat[_u][_v][_w].elements[j].y;
+					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -483,10 +505,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + 2*ll - 2*(dn_x+dn_y)*size_box;
 		if (dis_f < ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = fabs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x)-size_box;
-					_d_y = fabs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y)-size_box;
-					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
+					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
+					_d_z = _z-dat[_u][_v][_w].elements[j].z;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -501,10 +526,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = fabs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x)-size_box;
-					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z = fabs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z)-size_box;
+					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
+					_d_y = _y-dat[_u][_v][_w].elements[j].y;
+					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -519,10 +547,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y = fabs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y)-size_box;
-					_d_z = fabs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z)-size_box;
+					_d_x = _x-dat[_u][_v][_w].elements[j].x;
+					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
+					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
 					_dis = (_d_x*_d_x) + (_d_y*_d_y) + (_d_z*_d_z); 
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -537,10 +568,13 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+				_x = dat[_row][_col][_mom].elements[i].x;
+				_y = dat[_row][_col][_mom].elements[i].y;
+				_z = dat[_row][_col][_mom].elements[i].z;
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x = fabs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x)-size_box;
-					_d_y = fabs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y)-size_box;
-					_d_z = fabs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z)-size_box;
+					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
+					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
+					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -550,7 +584,6 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		}
 	}
 }
-
 //=================================================================== 
 
 void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
