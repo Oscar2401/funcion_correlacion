@@ -39,6 +39,7 @@ class NODE{
 		float corr;
 		float front;
 		float ds;
+		float ddmax_nod;
 		
 	private: 
 		void make_nodos(Node ***, Point3D *);
@@ -62,6 +63,7 @@ class NODE{
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
+			ddmax_nod = (d_max+corr)*(d_max+corr);
 			make_nodos(nodeD,dataD); 
 			make_nodos(nodeR,dataR);
 			std::cout << "Terminé de contruir nodos..." << std::endl;
@@ -150,7 +152,6 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	*/
 	//Variables compartidas en hilos: 
 	int partitions = (int)((size_box/size_node)+1);
-	float ddmax_nod = (d_max+corr)*(d_max+corr);
 	float pt_m = size_node/2;
 	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
@@ -340,7 +341,6 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 	
 	*/
 	int i, j, u, v, w, partitions = (int)((size_box/size_node)+1);
-	float ddmax_nod = (d_max+corr)*(d_max+corr);
 	float dis, dis_nod;
 	float pt_m = size_node/2;
 	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
@@ -419,9 +419,9 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 
 //=================================================================== 
  
-void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
+void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
 	int i, j;
-	float dis_f, _dis, _d_x, _d_y, _d_z, ddmax_nod = (d_max+corr)*(d_max+corr);
+	float dis_f, _dis, _d_x, _d_y, _d_z;
 	//======================================================================
 	// Si los puentos estás en las paredes laterales de X
 	if( con_in_x ){
@@ -435,7 +435,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
 					if (_dis < dd_max){
-						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -453,7 +453,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -471,7 +471,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -489,7 +489,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -507,7 +507,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -525,7 +525,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -543,7 +543,7 @@ void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x,
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -559,7 +559,7 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 	por codiciones periodicas de frontera
 	*/
 	int _pos, i, j;
-	float dis_f, _dis, _d_x, _d_y, _d_z, ddmax_nod = (d_max+corr)*(d_max+corr);
+	float dis_f, _dis, _d_x, _d_y, _d_z;
 	
 	//======================================================================
 	// Si los puentos estás en las paredes laterales de X
