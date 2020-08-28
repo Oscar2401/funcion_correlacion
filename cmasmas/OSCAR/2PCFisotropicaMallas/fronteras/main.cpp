@@ -4,14 +4,15 @@
 #include <ctime>
 #include "NODE.h"
 #include <omp.h>
+#include <cmath>
 
 using namespace std;
 
 void open_files(string, int, Point3D *);
-void save_histogram(string, int, long int *);
+void save_histogram(string, int, unsigned int *);
 
 Point3D *dataD, *dataR;
-long int  *DD, *RR, *DR;
+unsigned int  *DD, *RR, *DR;
 Node ***nodeD;
 Node ***nodeR;
 
@@ -20,7 +21,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 32768, bn = 10;
-	float d_max = 100, size_box = 250, size_node = 14;
+	float d_max = 100.0, size_box = 250.0, size_node = 14.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -49,9 +50,9 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new long int[bn];
-	RR = new long int[bn];
-	DR = new long int[bn];
+	DD = new unsigned int[bn];
+	RR = new unsigned int[bn];
+	DR = new unsigned int[bn];
 	int i;
 	for (i = 0; i < bn; i++){
 		*(DD+i) = 0; // vector[i]
@@ -98,19 +99,19 @@ int main(int argc, char **argv){
 	cout << "HITOGRAMA DD:" << endl;
 	
 	for (i = 0; i<bn; i++){
-		printf("%ld \t",DD[i]);
+		printf("%d \t",DD[i]);
 	}
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA RR:" << endl;
 	for (i = 0; i<bn; i++){
-		printf("%ld \t",RR[i]);
+		printf("%d \t",RR[i]);
 	}
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DR:" << endl;
 	for (i = 0; i<bn; i++){
-		printf("%ld \t",DR[i]);
+		printf("%d \t",DR[i]);
 	}
 	
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -161,7 +162,7 @@ void open_files(string name_file, int pts, Point3D *datos){
 //====================================================================
 
 
-void save_histogram(string name, int bns, long int *histo){
+void save_histogram(string name, int bns, unsigned int *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);

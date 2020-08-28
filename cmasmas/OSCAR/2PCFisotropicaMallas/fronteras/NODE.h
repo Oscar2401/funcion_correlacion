@@ -75,10 +75,10 @@ class NODE{
 		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(long int *,  long int *, Node ***);
-		void make_histoXY(long int *, Node ***, Node ***);
-		void histo_front_XX(long int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
-		void histo_front_XY(long int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
+		void make_histoXX(unsigned int *, unsigned int *, Node ***);
+		void make_histoXY(unsigned int *, Node ***, Node ***);
+		void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
+		void histo_front_XY(unsigned int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		~NODE();
 };
 
@@ -96,7 +96,7 @@ void NODE::make_nodos(Node *** nod, Point3D *dat){
 	dat: datos a dividir en nodos.
 	
 	*/
-	int i, row, col, mom, partitions = (int)(ceil(size_box/size_node));
+	int i, row, col, mom, partitions = (int)((size_box/size_node)+1);
 	float p_med = size_node/2;
 	
 	// Inicializamos los nodos vacíos:
@@ -139,7 +139,7 @@ void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 
 //=================================================================== 
 
-void NODE::make_histoXX(long int *XX, long int *YY, Node ***nodeX){
+void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -149,15 +149,15 @@ void NODE::make_histoXX(long int *XX, long int *YY, Node ***nodeX){
 	
 	*/
 	//Variables compartidas en hilos: 
-	int partitions = (int)(std::ceil(size_box/size_node));
+	int partitions = (int)((size_box/size_node)+1);
 	float ddmax_nod = (d_max+corr)*(d_max+corr);
 	float pt_m = size_node/2;
 	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
 	#pragma omp parallel num_threads(4) 
     	{
-    	long int *SS;
-    	SS = new long int[bn];
+    	unsigned int *SS;
+    	SS = new unsigned int[bn];
     	for (int k = 0; k < bn; k++){
 		*(SS+k) = 0;
 	}
@@ -331,7 +331,7 @@ void NODE::make_histoXX(long int *XX, long int *YY, Node ***nodeX){
 }
 //=================================================================== 
 
-void NODE::make_histoXY(long int *XY, Node ***nodeX, Node ***nodeY){
+void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 	/*
 	Función para crear el histograma DR. 
 	
@@ -339,7 +339,7 @@ void NODE::make_histoXY(long int *XY, Node ***nodeX, Node ***nodeY){
 	DR: arreglo donde se creará el histograma DR.
 	
 	*/
-	int i, j, u, v, w, partitions = (int)(std::ceil(size_box/size_node));
+	int i, j, u, v, w, partitions = (int)((size_box/size_node)+1);
 	float ddmax_nod = (d_max+corr)*(d_max+corr);
 	float dis, dis_nod;
 	float pt_m = size_node/2;
@@ -347,8 +347,8 @@ void NODE::make_histoXY(long int *XY, Node ***nodeX, Node ***nodeY){
 	
 	#pragma omp parallel num_threads(4) private(i,j,u,v,w,dis,dis_nod)
     	{
-    	long int *SS;
-    	SS = new long int[bn];
+    	unsigned int *SS;
+    	SS = new unsigned int[bn];
     	for (int k = 0; k < bn; k++){
 		*(SS+k) = 0;
 	}
@@ -419,7 +419,7 @@ void NODE::make_histoXY(long int *XY, Node ***nodeX, Node ***nodeY){
 
 //=================================================================== 
  
-void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
+void NODE::histo_front_XX(unsigned int *XX, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
 	int i, j;
 	float dis_f, _dis, _d_x, _d_y, _d_z, ddmax_nod = (d_max+corr)*(d_max+corr);
 	//======================================================================
@@ -435,7 +435,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -471,7 +471,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -507,7 +507,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -525,7 +525,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -543,7 +543,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
-						*(XX+(int)(sqrt(_dis)*ds)) += 2;
+						//*(XX+(int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
 			}
@@ -553,7 +553,7 @@ void NODE::histo_front_XX(long int *XX, Node ***dat, float disn, float dn_x, flo
 
 //=================================================================== 
 
-void NODE::histo_front_XY(long int *XY, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
+void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
 	/*
 	Función para contar las distancias a las fronteras 
 	por codiciones periodicas de frontera
