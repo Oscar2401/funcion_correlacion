@@ -4,6 +4,7 @@
 #include <ctime>
 #include "NODE.h"
 #include <omp.h>
+#include <cmath>
 
 using namespace std;
 
@@ -18,8 +19,9 @@ Node ***nodeR;
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
+	//int n_pts = 32768, bn = 10;
 	int n_pts = 32768, bn = 10;
-	float d_max = 100, size_box = 250, size_node = 14;
+	float d_max = 100.0, size_box = 250.0, size_node = 14.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -39,7 +41,7 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	// Nombre de los archivos 
-	string nameDD = "DDaiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
+	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
 	nameDD.append(argv[3]);
 	nameRR.append(argv[3]);
 	nameDR.append(argv[3]);
@@ -80,7 +82,7 @@ int main(int argc, char **argv){
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DD, my_hist.meshData()); //hace histogramas XX
+	my_hist.make_histoXX(DD, RR, my_hist.meshData()); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
