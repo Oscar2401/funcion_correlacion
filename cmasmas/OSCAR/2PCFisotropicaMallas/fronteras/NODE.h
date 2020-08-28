@@ -182,8 +182,8 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 						dx = nodeX[row][col][mom].elements[i].x-nodeX[row][col][mom].elements[j].x;
 						dy = nodeX[row][col][mom].elements[i].y-nodeX[row][col][mom].elements[j].y;
 						dz = nodeX[row][col][mom].elements[i].z-nodeX[row][col][mom].elements[j].z;
-						dis = dx*dx + dy*dy + dz*dz;
-						if (dis < dd_max){
+						dis = dx*dx+dy*dy+dz*dz;
+						if (dis <= dd_max){
 							*(SS + (int)(sqrt(dis)*ds)) += 2;
 						}
 					}
@@ -207,14 +207,14 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 					dy_nod = y1D-y2D;
 					dz_nod = z1D-z2D;
 					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
-					if (dis_nod < ddmax_nod){
+					if (dis_nod <= ddmax_nod){
 						for ( i = 0; i < nodeX[row][col][mom].len; i++){
 							for ( j = 0; j < nodeX[u][v][w].len; j++){
 							dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
 							dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
 							dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
-							dis = dx*dx + dy*dy + dz*dz;
-							if (dis < dd_max){
+							dis = dx*dx+dy*dy+dz*dz;
+							if (dis <= dd_max){
 								*(SS + (int)(sqrt(dis)*ds)) += 2;
 							}
 							}
@@ -224,11 +224,11 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 					//=======================================
 					
 					//Condiciones de nodos en frontera:
-					con_x = (x1D-pt_m<d_max && x2D+pt_m>front)||(x2D-pt_m<d_max && x1D+pt_m>front);
-					con_y = (y1D-pt_m<d_max && y2D+pt_m>front)||(y2D-pt_m<d_max && y1D+pt_m>front);
-					con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
+					con_x = ((x1D-pt_m<=d_max)&&(x2D+pt_m>=front))||((x2D-pt_m<=d_max)&&(x1D+pt_m>=front));
+					con_y = ((y1D-pt_m<=d_max)&&(y2D+pt_m>=front))||((y2D-pt_m<=d_max)&&(y1D+pt_m>=front));
+					con_z = ((z1D-pt_m<=d_max)&&(z2D+pt_m>=front))||((z2D-pt_m<=d_max)&&(z1D+pt_m>=front));
 				
-					if(con_x || (con_y || con_z) ){
+					if(con_x || con_y || con_z){
 					histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 					}
 				}
@@ -243,14 +243,14 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 						dy_nod = y1D-y2D;
 						dz_nod = z1D-z2D;
 						dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
-						if (dis_nod < ddmax_nod){
+						if (dis_nod <= ddmax_nod){
 							for ( i = 0; i < nodeX[row][col][mom].len; i++){
 								for ( j = 0; j < nodeX[u][v][w].len; j++){	
 								dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
 								dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
 								dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
-								dis = dx*dx + dy*dy + dz*dz;
-								if (dis < dd_max){
+								dis = dx*dx+dy*dy+dz*dz;
+								if (dis <= dd_max){
 									*(SS + (int)(sqrt(dis)*ds)) += 2;
 								}
 								}
@@ -260,11 +260,11 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 						//=======================================
 					
 						//Condiciones de nodos en frontera:
-						con_x = (x1D-pt_m<d_max && x2D+pt_m>front)||(x2D-pt_m<d_max && x1D+pt_m>front);
-						con_y = (y1D-pt_m<d_max && y2D+pt_m>front)||(y2D-pt_m<d_max && y1D+pt_m>front);
-						con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
+						con_x = ((x1D-pt_m<=d_max)&&(x2D+pt_m>=front))||((x2D-pt_m<=d_max)&&(x1D+pt_m>=front));
+						con_y = ((y1D-pt_m<=d_max)&&(y2D+pt_m>=front))||((y2D-pt_m<=d_max)&&(y1D+pt_m>=front));
+						con_z = ((z1D-pt_m<=d_max)&&(z2D+pt_m>=front))||((z2D-pt_m<=d_max)&&(z1D+pt_m>=front));
 					
-					if(con_x || (con_y || con_z)){ 
+					if(con_x || con_y || con_z){ 
 					histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 					}
 					}
@@ -281,14 +281,14 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 							dy_nod = y1D-y2D;
 							dz_nod = z1D-z2D;
 							dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
-							if (dis_nod < ddmax_nod){
+							if (dis_nod <= ddmax_nod){
 								for ( i = 0; i < nodeX[row][col][mom].len; i++){
 									for ( j = 0; j < nodeX[u][v][w].len; j++){	
 									dx =  nodeX[row][col][mom].elements[i].x-nodeX[u][v][w].elements[j].x;
 									dy =  nodeX[row][col][mom].elements[i].y-nodeX[u][v][w].elements[j].y;
 									dz =  nodeX[row][col][mom].elements[i].z-nodeX[u][v][w].elements[j].z;
 									dis = dx*dx + dy*dy + dz*dz;
-									if (dis < dd_max){
+									if (dis <= dd_max){
 										*(SS + (int)(sqrt(dis)*ds)) += 2;
 									}
 									}
@@ -298,11 +298,11 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 							//=======================================
 					
 							//Condiciones de nodos en frontera:
-							con_x = (x1D-pt_m<d_max && x2D+pt_m>front)||(x2D-pt_m<d_max && x1D+pt_m>front);
-							con_y = (y1D-pt_m<d_max && y2D+pt_m>front)||(y2D-pt_m<d_max && y1D+pt_m>front);
-							con_z = (z1D-pt_m<d_max && z2D+pt_m>front)||(z2D-pt_m<d_max && z1D+pt_m>front);
+							con_x = ((x1D-pt_m<=d_max)&&(x2D+pt_m>=front))||((x2D-pt_m<=d_max)&&(x1D+pt_m>=front));
+							con_y = ((y1D-pt_m<=d_max)&&(y2D+pt_m>=front))||((y2D-pt_m<=d_max)&&(y1D+pt_m>=front));
+							con_z = ((z1D-pt_m<=d_max)&&(z2D+pt_m>=front))||((z2D-pt_m<=d_max)&&(z1D+pt_m>=front));
 					
-				if(con_x || (con_y || con_z)){
+				if(con_x || con_y || con_z){
 				histo_front_XX(SS,nodeX,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 				}
 							
@@ -394,9 +394,9 @@ void NODE::make_histoXY(unsigned int *XY, Node ***nodeX, Node ***nodeY){
 							//=======================================
 					
 							//Condiciones de nodos en frontera:
-					con_x = (x1D-pt_m<d_max && x2R+pt_m>front)||(x2R-pt_m<d_max && x1D+pt_m>front);
-					con_y = (y1D-pt_m<d_max && y2R+pt_m>front)||(y2R-pt_m<d_max && y1D+pt_m>front);
-					con_z = (z1D-pt_m<d_max && z2R+pt_m>front)||(z2R-pt_m<d_max && z1D+pt_m>front);
+					con_x = ((x1D-pt_m)<d_max && (x2R+pt_m)>front)||((x2R-pt_m)<d_max && x1D+pt_m>front);
+					con_y = ((y1D-pt_m)<d_max && (y2R+pt_m)>front)||((y2R-pt_m)<d_max && y1D+pt_m>front);
+					con_z = ((z1D-pt_m)<d_max && (z2R+pt_m)>front)||((z2R-pt_m)<d_max && z1D+pt_m>front);
 						
 				if(con_x || (con_y || con_z)){
 				histo_front_XY(SS,nodeX,nodeY,dis_nod,abs(dx_nod),abs(dy_nod),abs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
@@ -427,14 +427,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_x ){
 		// forma de calcular la distancia a las proyecciones usando la distancia entre puntos dentro de la caja
 		dis_f = disn + ll - 2*dn_x*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
+					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
+					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
@@ -445,14 +445,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	// Si los puentos estás en las paredes laterales de Y		
 	if( con_in_y ){
 		dis_f = disn + ll - 2*dn_y*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
+					_d_y = size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
+					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
@@ -463,14 +463,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	// Si los puentos estás en las paredes laterales de Z
 	if( con_in_z ){
 		dis_f = disn + ll - 2*dn_z*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y =  dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
+					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
+					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
+					_d_z = size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
@@ -484,9 +484,9 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		if (dis_f < ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
+					_d_x = size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
+					_d_y = size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
+					_d_z = dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z;
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
 					if (_dis < dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
@@ -499,14 +499,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Z				
 	if( con_in_x && con_in_z ){
 		dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
+					_d_x = size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
+					_d_y = dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y;
+					_d_z = size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
@@ -517,14 +517,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	// Si los puentos estás en las esquinas que cruzan las paredes laterales de Y y Z			
 	if( con_in_y && con_in_z ){
 		dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
+					_d_x = dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x;
+					_d_y = size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
+					_d_z = size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
@@ -535,14 +535,14 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X, Y y Z		
 	if( con_in_x && con_in_y && con_in_z ){
 		dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
-		if (dis_f < ddmax_nod){
+		if (dis_f <= ddmax_nod){
 			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
 				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
+					_d_x = size_box-abs(dat[_row][_col][_mom].elements[i].x-dat[_u][_v][_w].elements[j].x);
+					_d_y = size_box-abs(dat[_row][_col][_mom].elements[i].y-dat[_u][_v][_w].elements[j].y);
+					_d_z = size_box-abs(dat[_row][_col][_mom].elements[i].z-dat[_u][_v][_w].elements[j].z);
 					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis < dd_max){
+					if (_dis <= dd_max){
 						*(PP + (int)(sqrt(_dis)*ds)) += 2;
 					}
 				}
