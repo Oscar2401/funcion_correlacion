@@ -89,7 +89,7 @@ class NODE{
 //=================================================================== 
 //=================================================================== 
 
-void NODE::make_nodos(Node *** nod, Point3D *dat){
+void NODE::make_nodos(Node ***nod, Point3D *dat){
 	/*
 	Función para crear los nodos con los datos y puntos random
 	
@@ -102,21 +102,21 @@ void NODE::make_nodos(Node *** nod, Point3D *dat){
 	float p_med = size_node/2;
 	
 	// Inicializamos los nodos vacíos:
-	for ( row = 0; row < partitions; row++){
-		for ( col = 0; col < partitions; col++){
-			for ( mom = 0; mom < partitions; mom++){
+	for (row=0; row<partitions; row++){
+		for (col=0; col<partitions; col++){
+			for (mom=0; mom<partitions; mom++){
 				nod[row][col][mom].nodepos.z = ((float)(mom)*(size_node))+p_med;
-				nod[row][col][mom].nodepos.y = ((float)(row)*(size_node))+p_med;
-				nod[row][col][mom].nodepos.x = ((float)(col)*(size_node))+p_med;
+				nod[row][col][mom].nodepos.y = ((float)(col)*(size_node))+p_med;
+				nod[row][col][mom].nodepos.x = ((float)(row)*(size_node))+p_med;
 				nod[row][col][mom].len = 0;
 				nod[row][col][mom].elements = new Point3D[0];
 			}
 		}
 	}
 	// Llenamos los nodos con los puntos de dat:
-	for ( i = 0; i < n_pts; i++){
-		col = (int)(dat[i].x/size_node);
-        	row = (int)(dat[i].y/size_node);
+	for (i=0; i<n_pts; i++){
+		row = (int)(dat[i].x/size_node);
+        	col = (int)(dat[i].y/size_node);
         	mom = (int)(dat[i].z/size_node);
 		add( nod[row][col][mom].elements, nod[row][col][mom].len, dat[i].x, dat[i].y, dat[i].z);
 	}
@@ -127,7 +127,7 @@ void NODE::make_nodos(Node *** nod, Point3D *dat){
 void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 	lon++;
 	Point3D *array_aux = new Point3D[lon];
-	for (int i = 0; i < lon-1; i++){
+	for (int i=0; i<lon-1; i++){
 		array_aux[i].x = array[i].x;
 		array_aux[i].y = array[i].y;
 		array_aux[i].z = array[i].z;
@@ -162,18 +162,20 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	
 	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
 	
-	for (row = 0; row < partitions; row++){
-		for (col = 0; col < partitions; col++){
-			for (mom = 0; mom < partitions; mom++){
+	for (row = 0; row < partitions; ++row){
+		x1D = nodeX[row][0][0].nodepos.x;
+		for (col = 0; col < partitions; ++col){
+			y1D = nodeX[row][col][0].nodepos.y;
+			for (mom = 0; mom < partitions; ++mom){
+				z1D = nodeX[row][col][mom].nodepos.z;
 				
 				// Distancias entre puntos del mismo nodo:
 				//==================================================
-				// Histograma DD
-				for ( i= 0; i < nodeX[row][col][mom].len - 1; i++){
+				for ( i= 0; i <nodeX[row][col][mom].len - 1; ++i){
 					x = nodeX[row][col][mom].elements[i].x;
 					y = nodeX[row][col][mom].elements[i].y;
 					z = nodeX[row][col][mom].elements[i].z;
-					for ( j = i+1; j < nodeX[row][col][mom].len; j++){
+					for ( j = i+1; j < nodeX[row][col][mom].len; ++j){
 						dx = x-nodeX[row][col][mom].elements[j].x;
 						dy = y-nodeX[row][col][mom].elements[j].y;
 						dz = z-nodeX[row][col][mom].elements[j].z;
@@ -185,29 +187,18 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 				}
 				// Distancias entre puntos del diferente nodo:
 				//==================================================
-				
-				x1D = nodeX[row][col][mom].nodepos.x;
-				y1D = nodeX[row][col][mom].nodepos.y;
-				z1D = nodeX[row][col][mom].nodepos.z;
-				
-				//=======================================
 				u = row;
 				v = col;
-				for ( w = mom + 1;  w < partitions ; w ++){	
-					// Histograma DD
-					x2D = nodeX[u][v][w].nodepos.x;
-					y2D = nodeX[u][v][w].nodepos.y;
+				for (w=mom+1;  w<partitions ; ++w){	
 					z2D = nodeX[u][v][w].nodepos.z;
-					dx_nod = x1D-x2D;
-					dy_nod = y1D-y2D;
 					dz_nod = z1D-z2D;
-					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
+					dis_nod = dz_nod*dz_nod;
 					if (dis_nod <= ddmax_nod){
-						for ( i = 0; i < nodeX[row][col][mom].len; i++){
+						for ( i = 0; i < nodeX[row][col][mom].len; ++i){
 							x = nodeX[row][col][mom].elements[i].x;
 							y = nodeX[row][col][mom].elements[i].y;
 							z = nodeX[row][col][mom].elements[i].z;
-							for ( j = 0; j < nodeX[u][v][w].len; j++){
+							for ( j = 0; j < nodeX[u][v][w].len; ++j){
 							dx = x-nodeX[u][v][w].elements[j].x;
 							dy = y-nodeX[u][v][w].elements[j].y;
 							dz = z-nodeX[u][v][w].elements[j].z;
@@ -218,35 +209,28 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 							}
 						}
 					}
-					// Distacia de los puntos frontera DD
+					// Distacia de los puntos frontera XX
 					//=======================================
-					
 					//Condiciones de nodos en frontera:
-					con_x = ((x1D<=d_max_pm)&&(x2D>=front_pm))||((x2D<=d_max_pm)&&(x1D>=front_pm));
-					con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 					con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
-				
-				if(con_x || con_y || con_z){
-				histo_front_XX(XX,nodeX,dis_nod,fabs(dx_nod),fabs(dy_nod),fabs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+					if(con_z){
+					histo_front_XX(XX,nodeX,dis_nod,0.0,0.0,fabs(dz_nod),false,false,con_z,row,col,mom,u,v,w);
 					}
 				}
 				//=======================================
-				for (v = col + 1; v < partitions ; v ++){
-					for (w = 0; w < partitions ; w ++){		
-						// Histograma DD
-						x2D = nodeX[u][v][w].nodepos.x;
-						y2D = nodeX[u][v][w].nodepos.y;
+				for (v = col + 1; v < partitions ; ++v){
+					y2D = nodeX[u][v][0].nodepos.y;
+					dy_nod = y1D-y2D;
+					for (w = 0; w < partitions ; ++w){		
 						z2D = nodeX[u][v][w].nodepos.z;
-						dx_nod = x1D-x2D;
-						dy_nod = y1D-y2D;
 						dz_nod = z1D-z2D;
-						dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
+						dis_nod = dy_nod*dy_nod + dz_nod*dz_nod;
 						if (dis_nod <= ddmax_nod){
-							for ( i = 0; i < nodeX[row][col][mom].len; i++){
+							for ( i = 0; i < nodeX[row][col][mom].len; ++i){
 								x = nodeX[row][col][mom].elements[i].x;
 								y = nodeX[row][col][mom].elements[i].y;
 								z = nodeX[row][col][mom].elements[i].z;
-								for ( j = 0; j < nodeX[u][v][w].len; j++){	
+								for ( j = 0; j < nodeX[u][v][w].len; ++j){	
 								dx =  x-nodeX[u][v][w].elements[j].x;
 								dy =  y-nodeX[u][v][w].elements[j].y;
 								dz =  z-nodeX[u][v][w].elements[j].z;
@@ -259,35 +243,31 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 						}
 						// Distacia de los puntos frontera
 						//=======================================
-					
 						//Condiciones de nodos en frontera:
-						con_x = ((x1D<=d_max_pm)&&(x2D>=front_pm))||((x2D<=d_max_pm)&&(x1D>=front_pm));
 						con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 						con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
-					
-				if(con_x || con_y || con_z){ 
-				histo_front_XX(XX,nodeX,dis_nod,fabs(dx_nod),fabs(dy_nod),fabs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
-				}
+					if(con_y || con_z){ 
+					histo_front_XX(XX,nodeX,dis_nod,0.0,fabs(dy_nod),fabs(dz_nod),false,con_y,con_z,row,col,mom,u,v,w);
+					}
 					}
 				}
 				//=======================================
-				for ( u = row + 1; u < partitions; u++){
-					for ( v = 0; v < partitions; v++){
-						for ( w = 0; w < partitions; w++){
-							// Histograma DD
-							x2D = nodeX[u][v][w].nodepos.x;
-							y2D = nodeX[u][v][w].nodepos.y;
+				for ( u = row + 1; u < partitions; ++u){
+					x2D = nodeX[u][0][0].nodepos.x;
+					dx_nod = x1D-x2D;
+					for ( v = 0; v < partitions; ++v){
+						y2D = nodeX[u][v][0].nodepos.y;
+						dy_nod = y1D-y2D;
+						for ( w = 0; w < partitions; ++w){
 							z2D = nodeX[u][v][w].nodepos.z;
-							dx_nod = x1D-x2D;
-							dy_nod = y1D-y2D;
 							dz_nod = z1D-z2D;
 							dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
 							if (dis_nod <= ddmax_nod){
-								for ( i = 0; i < nodeX[row][col][mom].len; i++){
+								for ( i = 0; i < nodeX[row][col][mom].len; ++i){
 									x = nodeX[row][col][mom].elements[i].x;
 									y = nodeX[row][col][mom].elements[i].y;
 									z = nodeX[row][col][mom].elements[i].z;
-									for ( j = 0; j < nodeX[u][v][w].len; j++){	
+									for ( j = 0; j < nodeX[u][v][w].len; ++j){	
 									dx = x-nodeX[u][v][w].elements[j].x;
 									dy = y-nodeX[u][v][w].elements[j].y;
 									dz = z-nodeX[u][v][w].elements[j].z;
@@ -305,11 +285,9 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 							con_x = ((x1D<=d_max_pm)&&(x2D>=front_pm))||((x2D<=d_max_pm)&&(x1D>=front_pm));
 							con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 							con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
-					
 				if(con_x || con_y || con_z){
 				histo_front_XX(XX,nodeX,dis_nod,fabs(dx_nod),fabs(dy_nod),fabs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
-				}
-							
+				}	
 						}	
 					}
 				}
@@ -411,11 +389,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 		// forma de calcular la distancia a las proyecciones usando la distancia entre puntos dentro de la caja
 		dis_f = disn + ll - 2*dn_x*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
 					_d_y = _y-dat[_u][_v][_w].elements[j].y;
 					_d_z = _z-dat[_u][_v][_w].elements[j].z;
@@ -432,11 +410,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_y ){
 		dis_f = disn + ll - 2*dn_y*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = _x-dat[_u][_v][_w].elements[j].x;
 					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
 					_d_z = _z-dat[_u][_v][_w].elements[j].z;
@@ -453,11 +431,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_z ){
 		dis_f = disn + ll - 2*dn_z*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = _x-dat[_u][_v][_w].elements[j].x;
 					_d_y = _y-dat[_u][_v][_w].elements[j].y;
 					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
@@ -474,11 +452,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_x && con_in_y ){
 		dis_f = disn + 2*ll - 2*(dn_x+dn_y)*size_box;
 		if (dis_f < ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
 					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
 					_d_z = _z-dat[_u][_v][_w].elements[j].z;
@@ -495,11 +473,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_x && con_in_z ){
 		dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
 					_d_y = _y-dat[_u][_v][_w].elements[j].y;
 					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
@@ -516,11 +494,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_y && con_in_z ){
 		dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = _x-dat[_u][_v][_w].elements[j].x;
 					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
 					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;
@@ -537,11 +515,11 @@ void NODE::histo_front_XX(unsigned int *PP, Node ***dat, float disn, float dn_x,
 	if( con_in_x && con_in_y && con_in_z ){
 		dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
 		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
+			for ( i = 0; i < dat[_row][_col][_mom].len; ++i){
 				_x = dat[_row][_col][_mom].elements[i].x;
 				_y = dat[_row][_col][_mom].elements[i].y;
 				_z = dat[_row][_col][_mom].elements[i].z;
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
+				for ( j = 0; j < dat[_u][_v][_w].len; ++j){
 					_d_x = fabs(_x-dat[_u][_v][_w].elements[j].x)-size_box;
 					_d_y = fabs(_y-dat[_u][_v][_w].elements[j].y)-size_box;
 					_d_z = fabs(_z-dat[_u][_v][_w].elements[j].z)-size_box;

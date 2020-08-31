@@ -9,7 +9,7 @@
 using namespace std;
 
 void open_files(string, int, Point3D *);
-void save_histogram(string, int, unsigned int *);
+void save_histogram(string, int, unsigned int ***);
 
 Point3D *dataD, *dataR;
 unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
@@ -21,7 +21,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 500, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 14.0;
+	float d_max = 100.0, size_box = 250.0, size_node = 50.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -102,7 +102,7 @@ int main(int argc, char **argv){
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXX(DDD, RRR, my_hist.meshData()); //hace histogramas XX
+	my_hist.make_histoXXX(DDD, RRR, my_hist.meshData()); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
@@ -116,24 +116,14 @@ int main(int argc, char **argv){
 	// Mostramos los histogramas 
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA DD:" << endl;
-	for (i = 0; i<bn; i++) printf("%d \t",DD[i]);
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA RR:" << endl;
-	for (i = 0; i<bn; i++) printf("%d \t",RR[i]);
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA DR:" << endl;
-	for (i = 0; i<bn; i++) printf("%d \t",DR[i]);
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	save_histogram(nameDD, bn, DD);
-	cout << "\nGuarde histograma DD..." << endl;
-	save_histogram(nameRR, bn, RR);
-	cout << "\nGuarde histograma RR..." << endl;
-	save_histogram(nameDR, bn, DR);
-	cout << "\nGuarde histograma DR..." << endl;
+	save_histogram(nameDD, bn, DDD);
+	cout << "\nGuarde histograma DDD..." << endl;
+	save_histogram(nameRR, bn, RRR);
+	cout << "\nGuarde histograma RRR..." << endl;
+	save_histogram(nameDR, bn, DDR);
+	cout << "\nGuarde histograma DDR..." << endl;
+	save_histogram(nameDR, bn, DRR);
+	cout << "\nGuarde histograma DRR..." << endl;
 	
 	// Eliminamos los hitogramas 
 	//delete[] DD;
@@ -174,12 +164,12 @@ void open_files(string name_file, int pts, Point3D *datos){
 //====================================================================
 void save_histogram(string name, int bns, unsigned int ***histo){
 	int i,j;
-	int bbns = bns*bns
+	int bbns = bns*bns;
 	//puntero a todo el array
 	float (*arr_pnt)[bns][bbns] = reinterpret_cast<float(*)[bns][bbns]>(histo);
 	ofstream file2;
 	file2.open(name.c_str(),ios::out | ios::binary);
-	if (archivo.fail()){
+	if (file2.fail()){
 		cout << "Error al guardar el archivo " << endl;
 		exit(1);
 	}

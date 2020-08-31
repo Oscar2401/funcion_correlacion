@@ -21,7 +21,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 32768, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 14.0;
+	float d_max = 100.0, size_box = 250.0, size_node = 17.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	

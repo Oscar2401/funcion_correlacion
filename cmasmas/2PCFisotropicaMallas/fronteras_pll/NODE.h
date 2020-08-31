@@ -334,7 +334,6 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	}
 	// Histograma RR (ANALITICA)
 	//======================================
-	
 	float dr = (d_max/bn);
 	float alph = 4*(3.14159265359)*(n_pts*n_pts)*dr*dr*dr/(3*size_box*size_box*size_box);
 	float r1;
