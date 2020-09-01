@@ -90,7 +90,6 @@ class NODE{
 //=================================================================== 
 //==================== Funciones ==================================== 
 //=================================================================== 
-//=================================================================== 
 
 void NODE::make_nodos(Node ***nod, Point3D *dat){
 	/*
@@ -101,7 +100,7 @@ void NODE::make_nodos(Node ***nod, Point3D *dat){
 	dat: datos a dividir en nodos.
 	
 	*/
-	int i, row, col, mom, partitions = (int)((size_box/size_node)+1);
+	int i, row, col, mom, partitions = (int)(ceil(size_box/size_node));
 	float p_med = size_node/2;
 	
 	// Inicializamos los nodos vacíos:
@@ -118,10 +117,10 @@ void NODE::make_nodos(Node ***nod, Point3D *dat){
 	}
 	// Llenamos los nodos con los puntos de dat:
 	for (i=0; i<n_pts; i++){
-		row = (int)(dat[i].x/size_node);
-        	col = (int)(dat[i].y/size_node);
-        	mom = (int)(dat[i].z/size_node);
-		add( nod[row][col][mom].elements, nod[row][col][mom].len, dat[i].x, dat[i].y, dat[i].z);
+		row = (int)(floor(dat[i].x/size_node));
+        	col = (int)(floor(dat[i].y/size_node));
+        	mom = (int)(floor(dat[i].z/size_node));
+		add(nod[row][col][mom].elements, nod[row][col][mom].len, dat[i].x, dat[i].y, dat[i].z);
 	}
 }
 
@@ -146,15 +145,14 @@ void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 
 void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX){
 	/*
-	Función para crear los histogramas DD y RR.
+	Función para crear los histogramas DDD y RRR.
 	
 	Argumentos
-	DD: arreglo donde se creará el histograma DD.
-	RR: arreglo donde se creará el histograma RR.
+	DDD: arreglo donde se creará el histograma DDD.
+	RRR: arreglo donde se creará el histograma RRR.
 	
-	*/
-	//Variables compartidas en hilos: 
-	int partitions = (int)((size_box/size_node)+1);
+	*/ 
+	int partitions = (int)(ceil(size_box/size_node));
 	int i, j, row, col, mom, u, v, w, a ,b, c;
 	float dis, dis_nod;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
@@ -166,11 +164,11 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 	std::cout << "-> Estoy haciendo histograma XXX..." << std::endl;
 	
 	// x1N, y1N, z1N => Nodo pivote
-	for (row = 0; row < partitions; ++row){
+	for (row=0; row<partitions; ++row){
 	x1N = nodeX[row][0][0].nodepos.x;
-	for (col = 0; col < partitions; ++col){
+	for (col=0; col<partitions; ++col){
 	y1N = nodeX[row][col][0].nodepos.y;
-	for (mom = 0; mom < partitions; ++mom){
+	for (mom=0; mom<partitions; ++mom){
 	z1N = nodeX[row][col][mom].nodepos.z;	
 			
 	//==================================================
@@ -214,7 +212,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 			dz_nod = z2N-z3N;
 			dis_nod = dz_nod*dz_nod;
 			if (dis_nod <= ddmax_nod){
-			count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);///////////////////////////////////
+			count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 			}
 			}
 		}
@@ -475,16 +473,14 @@ void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***
 	row, col, mom => posición del Nodo. Esto define al Nodo.
 	
 	*/
-	
 	int i,j,k;
-	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	float dx,dy,dz;
 	float d12,d13,d23;
+	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	for (i= 0; i<nodeS[row][col][mom].len-2; ++i){
 		x1 = nodeS[row][col][mom].elements[i].x;
 		y1 = nodeS[row][col][mom].elements[i].y;
 		z1 = nodeS[row][col][mom].elements[i].z;
-		
 		for (j=i+1; j<nodeS[row][col][mom].len-1; ++j){
 			x2 = nodeS[row][col][mom].elements[j].x;
 			y2 = nodeS[row][col][mom].elements[j].y;
@@ -503,11 +499,11 @@ void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***
 				dz = z3-z1;
 				d13 = dx*dx+dy*dy+dz*dz;
 				if (d13 <= dd_max){
-				dx = x2-x3;
-				dy = y2-y3;
-				dz = z2-z3;
+				dx = x3-x2;
+				dy = y3-y2;
+				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
-				if (d23 <= dd_max){
+				if (d23<=dd_max){
 				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
@@ -527,9 +523,9 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 	
 	*/
 	int i,j,k;
-	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	float dx,dy,dz;
 	float d12,d13,d23;
+	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	for (i= 0; i<nodeS[row][col][mom].len-1; ++i){
 		// 1er punto en N1
 		x1 = nodeS[row][col][mom].elements[i].x;
@@ -546,7 +542,7 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 			d12 = dx*dx+dy*dy+dz*dz;
 			if (d12<=dd_max){
 			for (k=i+1; k<nodeS[row][col][mom].len; ++k){
-				// 3er punto en N2
+				// 3er punto en N1
 				x3 = nodeS[row][col][mom].elements[k].x;
 				y3 = nodeS[row][col][mom].elements[k].y;
 				z3 = nodeS[row][col][mom].elements[k].z;
@@ -554,12 +550,12 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 				dy = y3-y2;
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
-				if (d23 <= dd_max){
+				if (d23<=dd_max){
 				dx = x3-x1;
 				dy = y3-y1;
 				dz = z3-z1;
 				d13 = dx*dx+dy*dy+dz*dz;
-				if (d13 <= dd_max){
+				if (d13<=dd_max){
 				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
@@ -579,9 +575,9 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 	
 	*/
 	int i,j,k;
-	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	float dx,dy,dz;
 	float d12,d13,d23;
+	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	for (i= 0; i<nodeS[row][col][mom].len; ++i){
 		// 1er punto en N1
 		x1 = nodeS[row][col][mom].elements[i].x;
@@ -597,11 +593,11 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 			dz = z2-z1;
 			d12 = dx*dx+dy*dy+dz*dz;
 			if (d12<=dd_max){
-			for (k=j+1; k<nodeS[row][col][mom].len; ++k){
+			for (k=j+1; k<nodeS[u][v][w].len; ++k){
 				// 3er punto en N2
-				x3 = nodeS[row][col][mom].elements[k].x;
-				y3 = nodeS[row][col][mom].elements[k].y;
-				z3 = nodeS[row][col][mom].elements[k].z;
+				x3 = nodeS[u][v][w].elements[k].x;
+				y3 = nodeS[u][v][w].elements[k].y;
+				z3 = nodeS[u][v][w].elements[k].z;
 				dx = x3-x1;
 				dy = y3-y1;
 				dz = z3-z1;
@@ -611,7 +607,7 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 				dy = y3-y2;
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
-				if (d23 <= dd_max){
+				if (d23<=dd_max){
 				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
@@ -633,16 +629,16 @@ void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, i
 	
 	*/
 	int i,j,k;
-	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	float dx,dy,dz;
 	float d12,d13,d23;
+	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
 		// 1er punto en N1
 		x1 = nodeS[row][col][mom].elements[i].x;
 		y1 = nodeS[row][col][mom].elements[i].y;
 		z1 = nodeS[row][col][mom].elements[i].z;
 		for (j=0; j<nodeS[a][b][c].len; ++j){
-			// 3do punto en N3
+			// 2do punto en N3
 			x3 = nodeS[a][b][c].elements[j].x;
 			y3 = nodeS[a][b][c].elements[j].y;
 			z3 = nodeS[a][b][c].elements[j].z;
@@ -652,7 +648,7 @@ void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, i
 			d13 = dx*dx+dy*dy+dz*dz;
 			if (d13<=dd_max){
 			for (k=0; k<nodeS[u][v][w].len; ++k){
-				// 2er punto en N2
+				// 3er punto en N2
 				x2 = nodeS[u][v][w].elements[k].x;
 				y2 = nodeS[u][v][w].elements[k].y;
 				z2 = nodeS[u][v][w].elements[k].z;

@@ -21,7 +21,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 250/6;
+	float d_max = 100.0, size_box = 250.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -37,7 +37,6 @@ int main(int argc, char **argv){
 	cout << "Cantidad de puntos: " << n_pts << endl;
 	cout << "Bins de histogramas: " << bn << endl;
 	cout << "Distancia máxima: " << d_max << endl;
-	cout << "Tamaño de nodos: " << size_node << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	// Nombre de los archivos 
@@ -86,25 +85,13 @@ int main(int argc, char **argv){
 	open_files(argv[1],n_pts,dataD);
 	open_files(argv[2],n_pts,dataR); // guardo los datos en los Struct
 	
-	// inicializamos las mallas
-	int partitions = (int)((size_box/size_node)+1);
-	nodeD = new Node**[partitions];
-	nodeR = new Node**[partitions];
-	for (i=0; i<partitions; i++){
-		*(nodeD+i) = new Node*[partitions];
-		*(nodeR+i) = new Node*[partitions];
-		for (j=0; j<partitions; j++){
-			*(*(nodeD+i)+j) = new Node[partitions];
-			*(*(nodeR+i)+j) = new Node[partitions];
-		}
-	}	
 	
 	// Iniciamos clase
-	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR, nodeD, nodeR);
+	NODE my_hist(bn, n_pts, size_box, d_max, dataD, dataR);
 	
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXXX(DDD, RRR, my_hist.meshData()); //hace histogramas XX
+	my_hist.make_histoXXX(DDD, RRR); //hace histogramas XX
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
