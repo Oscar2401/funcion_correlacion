@@ -11,7 +11,7 @@ using namespace std;
 void open_files(string, int, Point3D *);
 void save_histogram(string, int, unsigned int ***);
 void delete_histos(int);
-void deleter_dat();
+void delete_dat();
 
 Point3D *dataD, *dataR;
 unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
@@ -23,7 +23,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 250/8;
+	float d_max = 100.0, size_box = 250.0, size_node = 250/10;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -114,7 +114,7 @@ int main(int argc, char **argv){
 	my_hist.~NODE(); //destruimos objeto
 	
 	//Eliminamos Datos 
-	void deleter_dat();
+	void delete_dat();
 	
 	cout << "Termine de hacer todos los histogramas\n" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -219,7 +219,7 @@ void delete_histos(int dim){
 }
 
 
-void deleter_dat(){
+void delete_dat(){
     delete[] dataD;
     delete[] dataR;
 }

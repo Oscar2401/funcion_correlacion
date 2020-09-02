@@ -63,7 +63,7 @@ class NODE{
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
-			ddmax_nod = (d_max)*(d_max);
+			ddmax_nod = (d_max+corr)*(d_max+corr);
 			make_nodos(nodeD,dataD); 
 			make_nodos(nodeR,dataR);
 			std::cout << "Terminé de construir nodos..." << std::endl;
@@ -81,7 +81,7 @@ class NODE{
 		void count_3_N111(int, int, int, unsigned int ***, Node ***);
 		void count_3_N112(int, int, int, int, int, int, unsigned int ***, Node ***);
 		void count_3_N122(int, int, int, int, int, int, unsigned int ***, Node ***);
-		void count_3_N123(int, int, int, int, int, int, int, int, int, unsigned int ***, Node ***, int);
+		void count_3_N123(int, int, int, int, int, int, int, int, int, unsigned int ***, Node ***);
 		//void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		//void histo_front_XY(unsigned int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		~NODE();
@@ -209,7 +209,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 			dz_nod2 = z1N-z3N;			// entonces la distancia N2-N3 tambien lo será. 
 			dis_nod = dz_nod2*dz_nod2;
 			if (dis_nod <= ddmax_nod){
-			count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX, 1);
+			count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 			}
 		}
 		a = u;
@@ -227,7 +227,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 				dz_nod3 = z2N-z3N;
 				dis_nod = dy_nod*dy_nod + dz_nod3*dz_nod3;
 				if (dis_nod <= ddmax_nod){
-				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX, 1);
+				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 				}
 				}
 		}
@@ -249,7 +249,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 					dz_nod3 = z2N-z3N;
 					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod3*dz_nod3;
 					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 					}
 					}
 				}
@@ -295,7 +295,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 				dz_nod3 = z2N-z3N;
 				dis_nod = dz_nod3*dz_nod3;
 				if (dis_nod <= ddmax_nod){
-				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 				}
 				}
 			}
@@ -315,7 +315,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 					dz_nod3 = z2N-z3N;
 					dis_nod = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
 					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 					}
 					}
 				}
@@ -339,7 +339,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 						dz_nod3 = z2N-z3N;
 						dis_nod = dx_nod2*dx_nod2 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
 						if (dis_nod <= ddmax_nod){
-						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 						}
 						}
 					}
@@ -390,7 +390,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 					dz_nod3 = z2N-z3N;
 					dis_nod = dz_nod3*dz_nod3;
 					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 					}
 					}
 				}
@@ -412,7 +412,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 						dz_nod3 = z2N-z3N;
 						dis_nod = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
 						if (dis_nod <= ddmax_nod){
-						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 						}
 						}
 					}
@@ -436,7 +436,7 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 							dz_nod3 = z2N-z3N;
 							dis_nod = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
 							if (dis_nod <= ddmax_nod){
-							count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX,1);
+							count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 							}
 							}
 						}
@@ -503,7 +503,7 @@ void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
 				}
 				}
 			}
@@ -555,7 +555,7 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 				dz = z3-z1;
 				d13 = dx*dx+dy*dy+dz*dz;
 				if (d13<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
 				}
 				}
 			}
@@ -607,7 +607,7 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
 				}
 				}
 			}
@@ -616,7 +616,7 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 	}
 }
 //=================================================================== 
-void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, unsigned int ***XXX, Node ***nodeS, int inc){
+void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en tres 
 	nodos con un puntos en N1, un punto en N2
@@ -661,7 +661,7 @@ void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, i
 				dz = z2-z1;
 				d12 = dx*dx+dy*dy+dz*dz;
 				if (d12 <= dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=inc;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
 				}
 				}
 			}
@@ -963,3 +963,4 @@ void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn
 NODE::~NODE(){
 	
 }
+
