@@ -10,6 +10,8 @@ using namespace std;
 
 void open_files(string, int, Point3D *);
 void save_histogram(string, int, unsigned int ***);
+void delete_histos(int);
+void deleter_dat();
 
 Point3D *dataD, *dataR;
 unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
@@ -21,7 +23,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 250/6;
+	float d_max = 100.0, size_box = 250.0, size_node = 250/8;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -108,10 +110,11 @@ int main(int argc, char **argv){
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	//my_hist.make_histoXX(RR, my_hist.meshRand());
-	//my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); //hace historamas XY
+	
 	my_hist.~NODE(); //destruimos objeto
 	
+	//Eliminamos Datos 
+	void deleter_dat();
 	
 	cout << "Termine de hacer todos los histogramas\n" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -138,10 +141,8 @@ int main(int argc, char **argv){
 	save_histogram(nameDRR, bn, DRR);
 	cout << "\nGuarde histograma DRR..." << endl;
 	
-	// Eliminamos los hitogramas 
-	//delete[] DD;
-	//delete[] DR;
-	//delete[] RR;
+	// Eliminamos los hitogramas
+	delete_histos(bn);
 	
 	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
 	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
@@ -193,4 +194,32 @@ void save_histogram(string name, int bns, unsigned int ***histo){
 		file2 << endl;
 	}
 	file2.close();
+}
+
+void delete_histos(int dim){
+    int i,j;
+    for (i = 0; i < dim; i++)
+    {
+        for (j = 0; j < dim; j++)
+        {
+            delete[] *(*(DDD + i) + j);
+            delete[] *(*(DDR + i) + j);
+            delete[] *(*(DRR + i) + j);
+            delete[] *(*(RRR + i) + j);
+        }
+        delete[] *(DDD + i);
+        delete[] *(DDR + i);
+        delete[] *(DRR + i);
+        delete[] *(RRR + i);
+    }
+    delete[] DDD;
+    delete[] DDR;
+    delete[] DRR;
+    delete[] RRR;
+}
+
+
+void deleter_dat(){
+    delete[] dataD;
+    delete[] dataR;
 }
