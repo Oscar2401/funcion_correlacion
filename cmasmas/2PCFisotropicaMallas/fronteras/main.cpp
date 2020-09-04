@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE.h"
+#include "NODE2PCF.h"
 #include <omp.h>
 #include <cmath>
 
@@ -45,7 +45,6 @@ int main(int argc, char **argv){
 	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
 	nameDD.append(argv[3]);
 	nameRR.append(argv[3]);
-	nameDR.append(argv[3]);
 	nameDD += ".dat";
 	nameRR += ".dat";
 	nameDR += ".dat";
@@ -53,12 +52,10 @@ int main(int argc, char **argv){
 	// inicializamos los histogramas
 	DD = new unsigned int[bn];
 	RR = new unsigned int[bn];
-	DR = new unsigned int[bn];
 	int i;
 	for (i = 0; i < bn; i++){
 		*(DD+i) = 0; // vector[i]
 		*(RR+i) = 0;
-		*(DR+i) = 0;
 	}
 
 	// Abrimos y trabajamos los datos en los histogramas
@@ -87,8 +84,7 @@ int main(int argc, char **argv){
 	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	//my_hist.make_histoXX(RR, my_hist.meshRand());
-	//my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); //hace historamas XY
+	
 	my_hist.~NODE(); //destruimos objeto
 	
 	
@@ -108,12 +104,6 @@ int main(int argc, char **argv){
 	for (i = 0; i<bn; i++){
 		printf("%d \t",RR[i]);
 	}
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA DR:" << endl;
-	for (i = 0; i<bn; i++){
-		printf("%d \t",DR[i]);
-	}
 	
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
@@ -121,9 +111,7 @@ int main(int argc, char **argv){
 	cout << "\nGuarde histograma DD..." << endl;
 	save_histogram(nameRR, bn, RR);
 	cout << "\nGuarde histograma RR..." << endl;
-	save_histogram(nameDR, bn, DR);
-	cout << "\nGuarde histograma DR..." << endl;
-	
+
 	// Eliminamos los hitogramas 
 	//delete[] DD;
 	//delete[] DR;
@@ -139,7 +127,6 @@ int main(int argc, char **argv){
 //====================================================================
 //============ Sección de Funciones ================================== 
 //====================================================================
-
 void open_files(string name_file, int pts, Point3D *datos){
 	/* Función para abrir nuestros archivos de datos */
 	ifstream file;
@@ -161,8 +148,6 @@ void open_files(string name_file, int pts, Point3D *datos){
 }
 
 //====================================================================
-
-
 void save_histogram(string name, int bns, unsigned int *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;

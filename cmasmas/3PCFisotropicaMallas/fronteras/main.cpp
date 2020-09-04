@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE.h"
+#include "NODE3PCF.h"
 #include <omp.h>
 #include <cmath>
 
@@ -16,14 +16,13 @@ void delete_dat();
 Point3D *dataD, *dataR;
 unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
 Node ***nodeD;
-Node ***nodeR;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 250/10;
+	float d_max = 100.0, size_box = 250.0, size_node = 2.176*250/10;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -44,10 +43,10 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	// Nombre de los archivos 
 	string nameDDD = "DDDiso_mesh_3D_", nameRRR = "RRRiso_mesh_3D_", nameDDR = "DDRiso_mesh_3D_", nameDRR = "DRRiso_mesh_3D_";
-	nameDDD.append(argv[3]);
-	nameRRR.append(argv[3]);
-	nameDDR.append(argv[3]);
-	nameDRR.append(argv[3]);
+	nameDDD.append(argv[2]);
+	nameRRR.append(argv[2]);
+	nameDDR.append(argv[2]);
+	nameDRR.append(argv[2]);
 	nameDDD += ".dat";
 	nameRRR += ".dat";
 	nameDDR += ".dat";
@@ -86,35 +85,27 @@ int main(int argc, char **argv){
 
 	// Abrimos y trabajamos los datos en los histogramas
 	open_files(argv[1],n_pts,dataD);
-	open_files(argv[2],n_pts,dataR); // guardo los datos en los Struct
 	
 	// inicializamos las mallas
-	int partitions = (int)((size_box/size_node)+1);
+	int partitions = (int)(ceil(size_box/size_node));
 	nodeD = new Node**[partitions];
-	nodeR = new Node**[partitions];
 	for (i=0; i<partitions; i++){
 		*(nodeD+i) = new Node*[partitions];
-		*(nodeR+i) = new Node*[partitions];
 		for (j=0; j<partitions; j++){
 			*(*(nodeD+i)+j) = new Node[partitions];
-			*(*(nodeR+i)+j) = new Node[partitions];
 		}
 	}	
 	
 	// Iniciamos clase
-	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, dataR, nodeD, nodeR);
-	
+	NODE3P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD);
 	clock_t c_start = clock();
-	
-	my_hist.make_histoXXX(DDD, RRR, my_hist.meshData()); //hace histogramas XX
-	
+	my_hist.make_histoXXX(DDD, my_hist.meshData()); //hace histogramas
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	
-	my_hist.~NODE(); //destruimos objeto
+	my_hist.~NODE3P(); //destruimos objeto
 	
 	//Eliminamos Datos 
-	void delete_dat();
+	delete_dat();
 	
 	cout << "Termine de hacer todos los histogramas\n" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -129,6 +120,7 @@ int main(int argc, char **argv){
 			cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
 		}
 	}
+	
 	// Mostramos los histogramas 
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
@@ -221,5 +213,4 @@ void delete_histos(int dim){
 
 void delete_dat(){
     delete[] dataD;
-    delete[] dataR;
 }

@@ -20,7 +20,7 @@ struct Node{
 //======================== Clase ==================================== 
 //=================================================================== 
 
-class NODE{
+class NODE3P{
 	//Atributos de clase:
 	private:
 		// Asignados
@@ -30,9 +30,7 @@ class NODE{
 		float size_node;
 		float d_max;
 		Node ***nodeD;
-		Node ***nodeR;
 		Point3D *dataD;
-		Point3D *dataR;
 		// Derivados
 		float ll;
 		float dd_max;
@@ -48,50 +46,45 @@ class NODE{
 	// Métodos de Clase:
 	public:
 		//Constructor de clase:
-		NODE(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point3D *_dataD, Point3D *_dataR, Node ***_nodeD, Node  ***_nodeR){
+		NODE3P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point3D *_dataD, Node ***_nodeD){
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
 			size_node = _size_node;
 			d_max = _d_max;
 			dataD = _dataD;
-			dataR = _dataR;
 			nodeD = _nodeD;
-			nodeR = _nodeR;
 			ll = size_box*size_box;
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
-			make_nodos(nodeD,dataD); 
-			make_nodos(nodeR,dataR);
+			make_nodos(nodeD,dataD);
 			std::cout << "Terminé de construir nodos..." << std::endl;
 		}
 		
 		Node ***meshData(){
 			return nodeD;
 		};
-		Node ***meshRand(){
-			return nodeR;
-		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXXX(unsigned int ***, unsigned int ***, Node ***);
+		void make_histoXXX(unsigned int ***, Node ***);
 		void count_3_N111(int, int, int, unsigned int ***, Node ***);
 		void count_3_N112(int, int, int, int, int, int, unsigned int ***, Node ***);
 		void count_3_N122(int, int, int, int, int, int, unsigned int ***, Node ***);
 		void count_3_N123(int, int, int, int, int, int, int, int, int, unsigned int ***, Node ***);
+		void symmetrize(unsigned int ***);
 		//void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		//void histo_front_XY(unsigned int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
-		~NODE();
+		~NODE3P();
 };
 
 //=================================================================== 
 //==================== Funciones ==================================== 
 //=================================================================== 
 
-void NODE::make_nodos(Node ***nod, Point3D *dat){
+void NODE3P::make_nodos(Node ***nod, Point3D *dat){
 	/*
 	Función para crear los nodos con los datos y puntos random
 	
@@ -126,7 +119,7 @@ void NODE::make_nodos(Node ***nod, Point3D *dat){
 
 //=================================================================== 
 
-void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
+void NODE3P::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 	lon++;
 	Point3D *array_aux = new Point3D[lon];
 	for (int i=0; i<lon-1; i++){
@@ -142,8 +135,7 @@ void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 }
 
 //=================================================================== 
-
-void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX){
+void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	/*
 	Función para crear los histogramas DDD y RRR.
 	
@@ -449,23 +441,26 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY, Node ***nodeX
 	}
 	}
 	}
-
-	// Histograma RR (ANALITICA)
-	//======================================
-	/*
-	float dr = (d_max/bn);
-	float alph = 4*(3.14159265359)*(n_pts*n_pts)*dr*dr*dr/(3*size_box*size_box*size_box);
-	float r1;
-	for(int a=0; a<bn; a++) {
-		r1 = (a+1);
-        	*(YY+a) += alph*(r1*r1*r1-a*a*a);
-	}
-	*/
 }
 //=================================================================== 
-
+void NODE3P::symmetrize(unsigned int ***XXX){
+	int i,j,k;
+	float elem;
+	for (i=0; i<bn-2; i++){
+	for (j=i+1; j<bn-1; j++){
+	for (k=j+1; k<bn; k++){
+		elem = XXX[i][j][k] + XXX[i][k][j] + XXX[j][k][i] + XXX[j][i][k] + XXX[k][i][j] + XXX[k][j][i];
+		XXX[i][k][j] = elem;
+		XXX[j][k][i] = elem;
+		XXX[j][i][k] = elem;
+		XXX[k][i][j] = elem;
+		XXX[k][j][i] = elem;
+	}   
+	}
+	}
+}
 //=================================================================== 
-void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***nodeS){
+void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en un mismo Nodo.
 	
@@ -503,7 +498,7 @@ void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
 			}
@@ -512,7 +507,7 @@ void NODE::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***
 	}
 }
 //=================================================================== 
-void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned int ***XXX, Node ***nodeS){
+void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -555,7 +550,7 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 				dz = z3-z1;
 				d13 = dx*dx+dy*dy+dz*dz;
 				if (d13<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
 			}
@@ -564,7 +559,7 @@ void NODE::count_3_N112(int row, int col, int mom, int u, int v, int w, unsigned
 	}
 }
 //=================================================================== 
-void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned int ***XXX, Node ***nodeS){
+void NODE3P::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -607,7 +602,7 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
 			}
@@ -616,7 +611,7 @@ void NODE::count_3_N122(int row, int col, int mom, int u, int v, int w, unsigned
 	}
 }
 //=================================================================== 
-void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, unsigned int ***XXX, Node ***nodeS){
+void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en tres 
 	nodos con un puntos en N1, un punto en N2
@@ -661,7 +656,7 @@ void NODE::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, i
 				dz = z2-z1;
 				d12 = dx*dx+dy*dy+dz*dz;
 				if (d12 <= dd_max){
-				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=3;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
 				}
 				}
 			}
@@ -825,142 +820,8 @@ void NODE::histo_front_XXX(unsigned int *PP, Node ***dat, float disn, float dn_x
 	}
 }
 */
-//====================================================================
-/*
-void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
-	int _pos, i, j;
-	float dis_f, _dis, _d_x, _d_y, _d_z;
-	
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de X
-	if( con_in_x ){
-		// forma de calcular la distancia a las proyecciones usando la distancia entre puntos dentro de la caja
-		dis_f = disn + ll - 2*dn_x*size_box; 
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de Y				
-	if( con_in_y ){
-		dis_f = disn + ll - 2*dn_y*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de Z	
-	if( con_in_z ){
-		dis_f = disn + ll - 2*dn_z*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Y				
-	if( con_in_x && con_in_y ){
-		dis_f = disn + 2*ll - 2*(dn_x+dn_y)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Z	
-	if( con_in_x && con_in_z ){
-		dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de Y y Z		
-	if( con_in_y && con_in_z ){
-		dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X, Y y Z		
-	if( con_in_x && con_in_y && con_in_z ){
-		dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-}
-*/
-NODE::~NODE(){
+
+NODE3P::~NODE3P(){
 	
 }
 

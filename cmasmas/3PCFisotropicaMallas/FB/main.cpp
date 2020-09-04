@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE.h"
+#include "NODE3PCF.h"
 #include <omp.h>
 #include <cmath>
 
@@ -10,11 +10,11 @@ using namespace std;
 
 void open_files(string, int, Point3D *);
 void save_histogram(string, int, unsigned int ***);
+void delete_histos(int);
+void delete_dat();
 
-Point3D *dataD, *dataR;
+Point3D *dataD;
 unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
-Node ***nodeD;
-Node ***nodeR;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
@@ -23,7 +23,6 @@ int main(int argc, char **argv){
 	int n_pts = 1000, bn = 10;
 	float d_max = 100.0, size_box = 250.0;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
-	dataR = new Point3D[n_pts];
 	
 	//Mensaje a usuario
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -41,10 +40,10 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	// Nombre de los archivos 
 	string nameDDD = "DDDiso_mesh_3D_", nameRRR = "RRRiso_mesh_3D_", nameDDR = "DDRiso_mesh_3D_", nameDRR = "DRRiso_mesh_3D_";
-	nameDDD.append(argv[3]);
-	nameRRR.append(argv[3]);
-	nameDDR.append(argv[3]);
-	nameDRR.append(argv[3]);
+	nameDDD.append(argv[2]);
+	nameRRR.append(argv[2]);
+	nameDDR.append(argv[2]);
+	nameDRR.append(argv[2]);
 	nameDDD += ".dat";
 	nameRRR += ".dat";
 	nameDDR += ".dat";
@@ -83,22 +82,16 @@ int main(int argc, char **argv){
 
 	// Abrimos y trabajamos los datos en los histogramas
 	open_files(argv[1],n_pts,dataD);
-	open_files(argv[2],n_pts,dataR); // guardo los datos en los Struct
-	
 	
 	// Iniciamos clase
-	NODE my_hist(bn, n_pts, size_box, d_max, dataD, dataR);
+	NODE3P my_hist(bn, n_pts, size_box, d_max, dataD);
 	
 	clock_t c_start = clock();
-	
-	my_hist.make_histoXXX(DDD, RRR); //hace histogramas XX
-	
+	my_hist.make_histoXXX(DDD); //hace histogramas DDD
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	//my_hist.make_histoXX(RR, my_hist.meshRand());
-	//my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); //hace historamas XY
-	my_hist.~NODE(); //destruimos objeto
-	
+	my_hist.~NODE3P(); //destruimos objeto
+	delete_dat(); //eliminamos datos
 	
 	cout << "Termine de hacer todos los histogramas\n" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -113,6 +106,7 @@ int main(int argc, char **argv){
 			cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
 		}
 	}
+	
 	// Mostramos los histogramas 
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
@@ -126,9 +120,7 @@ int main(int argc, char **argv){
 	cout << "\nGuarde histograma DRR..." << endl;
 	
 	// Eliminamos los hitogramas 
-	//delete[] DD;
-	//delete[] DR;
-	//delete[] RR;
+	delete_histos(bn);
 	
 	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
 	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
@@ -160,7 +152,6 @@ void open_files(string name_file, int pts, Point3D *datos){
 	}
 	file.close();
 }
-
 //====================================================================
 void save_histogram(string name, int bns, unsigned int ***histo){
 	int i,j;
@@ -180,4 +171,28 @@ void save_histogram(string name, int bns, unsigned int ***histo){
 		file2 << endl;
 	}
 	file2.close();
+}
+//====================================================================
+void delete_histos(int n){
+	int i,j;
+	for (i=0; i<n; i++){
+		for (j=0; j<n; j++){
+			delete[] *(*(DDD+i)+j);
+			delete[] *(*(DDR+i)+j);
+			delete[] *(*(DRR+i)+j);
+			delete[] *(*(RRR+i)+j);
+		}
+		delete[] *(DDD+i);
+		delete[] *(DDR+i);
+		delete[] *(DRR+i);
+		delete[] *(RRR+i);
+	}
+	delete[] DDD;
+	delete[] DDR;
+	delete[] DRR;
+	delete[] RRR;
+}
+//====================================================================
+void delete_dat(){
+    delete[] dataD;
 }

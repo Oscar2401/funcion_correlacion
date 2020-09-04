@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
@@ -20,7 +19,7 @@ struct Node{
 //======================== Clase ==================================== 
 //=================================================================== 
 
-class NODE{
+class NODE3P{
 	//Atributos de clase:
 	private:
 		// Asignados
@@ -28,10 +27,7 @@ class NODE{
 		int n_pts;
 		float size_box;
 		float d_max;
-		Node ***nodeD;
-		Node ***nodeR;
 		Point3D *dataD;
-		Point3D *dataR;
 		// Derivados
 		float dd_max;
 		float ds;
@@ -39,36 +35,29 @@ class NODE{
 	// Métodos de Clase:
 	public:
 		//Constructor de clase:
-		NODE(int _bn, int _n_pts, float _size_box, float _d_max, Point3D *_dataD, Point3D *_dataR){
+		NODE3P(int _bn, int _n_pts, float _size_box, float _d_max, Point3D *_dataD){
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
 			d_max = _d_max;
 			dataD = _dataD;
-			dataR = _dataR;
 			dd_max = d_max*d_max;
 			ds = ((float)(bn))/d_max;
 		}
 		
-		Node ***meshData(){
-			return nodeD;
-		};
-		Node ***meshRand(){
-			return nodeR;
-		};
-		
 		// Implementamos Método de mallas:
-		void make_histoXXX(unsigned int ***, unsigned int ***);
+		void make_histoXXX(unsigned int ***);
+		void symmetrize(unsigned int ***);
 		//void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		//void histo_front_XY(unsigned int *, Node ***, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
-		~NODE();
+		~NODE3P();
 };
 
 //=================================================================== 
 //==================== Funciones ==================================== 
 //=================================================================== 
 
-void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY){
+void NODE3P::make_histoXXX(unsigned int ***XXX){
 	/*
 	Función para crear los histogramas DDD y RRR.
 	
@@ -121,23 +110,31 @@ void NODE::make_histoXXX(unsigned int ***XXX, unsigned int ***YYY){
 			}
 		}
 	}
-	
-
-	// Histograma RR (ANALITICA)
-	//======================================
-	/*
-	float dr = (d_max/bn);
-	float alph = 4*(3.14159265359)*(n_pts*n_pts)*dr*dr*dr/(3*size_box*size_box*size_box);
-	float r1;
-	for(int a=0; a<bn; a++) {
-		r1 = (a+1);
-        	*(YY+a) += alph*(r1*r1*r1-a*a*a);
+	//================================
+	// Simetrización:
+	//================================
+	symmetrize(XXX);
+}
+//=================================================================== 
+void NODE3P::symmetrize(unsigned int ***XXX){
+	int i,j,k;
+	float elem;
+	for (i=0; i<bn-2; i++){
+	for (j=i+1; j<bn-1; j++){
+	for (k=j+1; k<bn; k++){
+		elem = XXX[i][j][k] + XXX[i][k][j] + XXX[j][k][i] + XXX[j][i][k] + XXX[k][i][j] + XXX[k][j][i];
+		XXX[i][k][j] = elem;
+		XXX[j][k][i] = elem;
+		XXX[j][i][k] = elem;
+		XXX[k][i][j] = elem;
+		XXX[k][j][i] = elem;
+	}   
 	}
-	*/
+	}
 }
 //=================================================================== 
 /*
-void NODE::histo_front_XXX(unsigned int *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
+void NODE3P::histo_front_XXX(unsigned int *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
 	int i, j;
 	float dis_f,_dis,_d_x,_d_y,_d_z;
 	float _x,_y,_z;
@@ -291,141 +288,7 @@ void NODE::histo_front_XXX(unsigned int *PP, Node ***dat, float disn, float dn_x
 	}
 }
 */
-//====================================================================
-/*
-void NODE::histo_front_XY(unsigned int *XY, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int _row, int _col, int _mom, int _u, int _v, int _w){
-	int _pos, i, j;
-	float dis_f, _dis, _d_x, _d_y, _d_z;
-	
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de X
-	if( con_in_x ){
-		// forma de calcular la distancia a las proyecciones usando la distancia entre puntos dentro de la caja
-		dis_f = disn + ll - 2*dn_x*size_box; 
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z; 
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de Y				
-	if( con_in_y ){
-		dis_f = disn + ll - 2*dn_y*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de Z	
-	if( con_in_z ){
-		dis_f = disn + ll - 2*dn_z*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Y				
-	if( con_in_x && con_in_y ){
-		dis_f = disn + 2*ll - 2*(dn_x+dn_y)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z;
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Z	
-	if( con_in_x && con_in_z ){
-		dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y;
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de Y y Z		
-	if( con_in_y && con_in_z ){
-		dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x;
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X, Y y Z		
-	if( con_in_x && con_in_y && con_in_z ){
-		dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
-		if (dis_f <= ddmax_nod){
-			for ( i = 0; i < dat[_row][_col][_mom].len; i++){
-				for ( j = 0; j < dat[_u][_v][_w].len; j++){
-					_d_x =  size_box-fabs(dat[_row][_col][_mom].elements[i].x-ran[_u][_v][_w].elements[j].x);
-					_d_y =  size_box-fabs(dat[_row][_col][_mom].elements[i].y-ran[_u][_v][_w].elements[j].y);
-					_d_z =  size_box-fabs(dat[_row][_col][_mom].elements[i].z-ran[_u][_v][_w].elements[j].z);
-					_dis = _d_x*_d_x + _d_y*_d_y + _d_z*_d_z;
-					if (_dis <= dd_max){
-						*(XY+(int)(sqrt(_dis)*ds)) += 1;
-					}
-				}
-			}
-		}
-	}
-}
-*/
-NODE::~NODE(){
+//=================================================================== 
+NODE3P::~NODE3P(){
 	
 }
