@@ -119,15 +119,16 @@ void NODE3P::make_histoXXX(unsigned int ***XXX){
 void NODE3P::symmetrize(unsigned int ***XXX){
 	int i,j,k;
 	float elem;
-	for (i=0; i<bn-2; i++){
-	for (j=i+1; j<bn-1; j++){
-	for (k=j+1; k<bn; k++){
-		elem = XXX[i][j][k] + XXX[i][k][j] + XXX[j][k][i] + XXX[j][i][k] + XXX[k][i][j] + XXX[k][j][i];
-		XXX[i][k][j] = elem;
+	for (i=0; i<bn; i++){
+	for (j=i; j<bn; j++){
+	for (k=j; k<bn; k++){
+		elem = XXX[i][j][k] + XXX[k][i][j] + XXX[j][k][i] + XXX[j][i][k] + XXX[k][j][i] + XXX[i][k][j];
+		XXX[i][j][k] = elem;
+		XXX[k][i][j] = elem;
 		XXX[j][k][i] = elem;
 		XXX[j][i][k] = elem;
-		XXX[k][i][j] = elem;
 		XXX[k][j][i] = elem;
+		XXX[i][k][j] = elem;
 	}   
 	}
 	}

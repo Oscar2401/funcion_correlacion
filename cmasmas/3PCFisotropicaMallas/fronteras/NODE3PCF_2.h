@@ -165,277 +165,47 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	//==================================================
 	// Triángulos entre puntos del mismo nodo:
 	//==================================================
-	count_3_N111(row, col, mom, XXX, nodeX);		
+	//count_3_N111(row, col, mom, XXX, nodeX);		// <== Esto está bien
 	//==================================================
 	// Triángulos entre puntos del diferente nodo:
 	//==================================================
-	u = row;
-	v = col;
-	//=======================
-	// Nodo 2 movil en Z:
-	//=======================
-	for (w=mom+1;  w<partitions; ++w){	
-		z2N = nodeX[u][v][w].nodepos.z;
+	
+	for (u=0;  u<partitions; ++u){
+	x2N = nodeX[u][0][0].nodepos.x;
+	for (v=0;  v<partitions; ++v){
+	y2N = nodeX[u][v][0].nodepos.y;
+	for (w=0;  w<partitions; ++w){
+	z2N = nodeX[u][v][w].nodepos.z;
+		dx_nod = x1N-x2N;
+		dy_nod = y1N-y2N;
 		dz_nod = z1N-z2N;
-		dis_nod = dz_nod*dz_nod;
-		if (dis_nod <= ddmax_nod){
-		//==============================================
-		// 2 puntos en N1 y 1 punto en N2
-		//==============================================
-		count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
-		//==============================================
-		// 1 punto en N1 y 2 puntos en N2
-		//==============================================
-		count_3_N122(row, col, mom, u, v, w, XXX, nodeX);
-		//==============================================
-		// 1 punto en N1, 1 punto en N2 y 1 punto en N3
-		//==============================================
-		a = u;
-		b = v;
-		//=======================
-		// Nodo 3 movil en Z:
-		//=======================
-		for (c=w+1;  c<partitions; ++c){
-			z3N = nodeX[a][b][c].nodepos.z;       // En este caso, si la distancia N1-N3 es menor a d_max
-			dz_nod2 = z1N-z3N;			// entonces la distancia N2-N3 tambien lo será. 
-			dis_nod = dz_nod2*dz_nod2;
-			if (dis_nod <= ddmax_nod){
-			count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-			}
-		}
-		a = u;
-		//=======================
-		// Nodo 3 movil en ZY:
-		//=======================
-		for (b=v+1; b<partitions; ++b){
-			y3N = nodeX[a][b][0].nodepos.y;
-			dy_nod = y1N-y3N;
-			for (c=0;  c<partitions; ++c){
-				z3N = nodeX[a][b][c].nodepos.z;
-				dz_nod2 = z1N-z3N;
-				dis_nod = dy_nod*dy_nod + dz_nod2*dz_nod2;
-				if (dis_nod <= ddmax_nod){
-				dz_nod3 = z2N-z3N;
-				dis_nod = dy_nod*dy_nod + dz_nod3*dz_nod3;
-				if (dis_nod <= ddmax_nod){
-				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-				}
-				}
-		}
-		}
-		//=======================
-		// Nodo 3 movil en ZYX:
-		//=======================
-		for (a=u+1; a<partitions; ++a){
-			x3N = nodeX[a][0][0].nodepos.x;
+		dis_nod = dx_nod*dx_nod+ dy_nod*dy_nod + dz_nod*dz_nod;
+		if(dis_nod <= ddmax_nod){
+		for (a=0;  a<partitions; ++a){
+		x3N = nodeX[a][0][0].nodepos.x;
+		for (b=0;  b<partitions; ++b){
+		y3N = nodeX[a][b][0].nodepos.y;
+		for (c=0;  c<partitions; ++c){
+		z3N = nodeX[a][b][c].nodepos.z;
 			dx_nod = x1N-x3N;
-			for (b=0; b<partitions; ++b){
-				y3N = nodeX[a][b][0].nodepos.y;
-				dy_nod = y1N-y3N;
-				for (c=0;  c<partitions; ++c){
-					z3N = nodeX[a][b][c].nodepos.z;
-					dz_nod2 = z1N-z3N;
-					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod2*dz_nod2;
-					if (dis_nod <= ddmax_nod){
-					dz_nod3 = z2N-z3N;
-					dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod3*dz_nod3;
-					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-					}
-					}
-				}
+			dy_nod = y1N-y3N;
+			dz_nod = z1N-z3N;
+			dis_nod = dx_nod*dx_nod+ dy_nod*dy_nod + dz_nod*dz_nod;
+			if(dis_nod <= ddmax_nod){
+			dx_nod = x2N-x3N;
+			dy_nod = y2N-y3N;
+			dz_nod = z2N-z3N;
+			dis_nod = dx_nod*dx_nod+ dy_nod*dy_nod + dz_nod*dz_nod;
+			if(dis_nod <= ddmax_nod){
+				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+			}	
 			}
+		}
+		}
 		}
 		}
 	}
-	u = row;
-	//=======================
-	// Nodo 2 movil en ZY:
-	//=======================
-	for (v=col+1; v<partitions ; ++v){
-		y2N = nodeX[u][v][0].nodepos.y;
-		dy_nod = y1N-y2N;
-		for (w=0; w<partitions ; ++w){		
-			z2N = nodeX[u][v][w].nodepos.z;
-			dz_nod = z1N-z2N;
-			dis_nod = dy_nod*dy_nod + dz_nod*dz_nod;
-			if (dis_nod <= ddmax_nod){
-			//==============================================
-			// 2 puntos en N1 y 1 punto en N2
-			//==============================================
-			count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
-			//==============================================
-			// 2 puntos en N1 y 1 punto en N2
-			//==============================================
-			count_3_N122(row, col, mom, u, v, w, XXX, nodeX);
-			//==============================================
-			// 1 punto en N1, 1 punto en N2 y un punto en N3
-			//==============================================
-			a = u;
-			b = v;
-			//=======================
-			// Nodo 3 movil en Z:
-			//=======================
-			y3N = nodeX[a][b][0].nodepos.y;
-			dy_nod2 = y1N-y3N;
-			for (c=w+1;  c<partitions; ++c){
-				z3N = nodeX[a][b][c].nodepos.z;
-				dz_nod2 = z1N-z3N;
-				dis_nod = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-				if (dis_nod <= ddmax_nod){
-				dz_nod3 = z2N-z3N;
-				dis_nod = dz_nod3*dz_nod3;
-				if (dis_nod <= ddmax_nod){
-				count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-				}
-				}
-			}
-			a = u;
-			//=======================
-			// Nodo 3 movil en ZY:
-			//=======================	
-			for (b=v+1; b<partitions; ++b){
-				y3N = nodeX[a][b][0].nodepos.y;
-				dy_nod2 = y1N-y3N;
-				for (c=0;  c<partitions; ++c){
-					z3N = nodeX[a][b][c].nodepos.z;
-					dz_nod2 = z1N-z3N;
-					dis_nod = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-					if (dis_nod <= ddmax_nod){
-					dy_nod3 = y2N-y3N;
-					dz_nod3 = z2N-z3N;
-					dis_nod = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-					}
-					}
-				}
-			}
-			//=======================
-			// Nodo 3 movil en ZYX:
-			//=======================
-			for (a=u+1; a<partitions; ++a){
-				x3N = nodeX[a][0][0].nodepos.x;
-				dx_nod = x1N-x3N;
-				for (b=0; b<partitions; ++b){
-					y3N = nodeX[a][b][0].nodepos.y;
-					dy_nod2 = y1N-y3N;
-					for (c=0;  c<partitions; ++c){
-						z3N = nodeX[a][b][c].nodepos.z;
-						dz_nod2 = z1N-z3N;
-						dis_nod = dx_nod*dx_nod + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-						if (dis_nod <= ddmax_nod){
-						dx_nod2 = x2N-x3N;
-						dy_nod3 = y2N-y3N;
-						dz_nod3 = z2N-z3N;
-						dis_nod = dx_nod2*dx_nod2 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-						if (dis_nod <= ddmax_nod){
-						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-						}
-						}
-					}
-				}
-			}
-			}
-		}	
-	}			
-	//=======================
-	// Nodo 2 movil en ZYX:
-	//=======================
-	for (u=row+1; u<partitions; ++u){
-		x2N = nodeX[u][0][0].nodepos.x;
-		dx_nod = x1N-x2N;
-		for (v=0; v<partitions; ++v){
-			y2N = nodeX[u][v][0].nodepos.y;
-			dy_nod = y1N-y2N;
-			for (w=0; w<partitions; ++w){
-				z2N = nodeX[u][v][w].nodepos.z;
-				dz_nod = z1N-z2N;
-				dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
-				if (dis_nod <= ddmax_nod){
-				//==============================================
-				// 2 puntos en N1 y 1 punto en N2
-				//==============================================
-				count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
-				//==============================================
-				// 2 puntos en N1 y 1 punto en N2
-				//==============================================
-				count_3_N122(row, col, mom, u, v, w, XXX, nodeX);
-				//==============================================
-				// 1 punto en N1, 1 punto en N2 y un punto en N3
-				//==============================================
-				a = u;
-				b = v;
-				//=======================
-				// Nodo 3 movil en Z:
-				//=======================
-				x3N = nodeX[a][0][0].nodepos.x;
-				y3N = nodeX[a][b][0].nodepos.y;
-				dx_nod2 = x3N-x1N;
-				dy_nod2 = y3N-y1N;
-				for (c=w+1;  c<partitions; ++c){	
-					z3N = nodeX[a][b][c].nodepos.z;
-					dz_nod2 = z1N-z3N;
-					dis_nod = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-					if (dis_nod <= ddmax_nod){
-					dz_nod3 = z2N-z3N;
-					dis_nod = dz_nod3*dz_nod3;
-					if (dis_nod <= ddmax_nod){
-					count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-					}
-					}
-				}
-				a = u;
-				//=======================
-				// Nodo 3 movil en ZY:
-				//=======================
-				x3N = nodeX[a][0][0].nodepos.x;
-				dx_nod2 = x3N-x1N;
-				for (b=v+1; b<partitions; ++b){
-					y3N = nodeX[a][b][0].nodepos.y;
-					dy_nod2 = y3N-y1N;
-					for (c=0;  c<partitions; ++c){
-						z3N = nodeX[a][b][c].nodepos.z;
-						dz_nod2 = z3N-z1N;
-						dis_nod = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-						if (dis_nod <= ddmax_nod){
-						dy_nod3 = y3N-y2N;
-						dz_nod3 = z3N-z2N;
-						dis_nod = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-						if (dis_nod <= ddmax_nod){
-						count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-						}
-						}
-					}
-				}
-				//=======================
-				// Nodo 3 movil en ZYX:
-				//=======================		
-				for (a=u+1; a<partitions; ++a){
-					x3N = nodeX[a][0][0].nodepos.x;
-					dx_nod2 = x3N-x1N;
-					for (b=0; b<partitions; ++b){
-						y3N = nodeX[a][b][0].nodepos.y;
-						dy_nod2 = y3N-y1N;
-						for (c=0;  c<partitions; ++c){
-							z3N = nodeX[a][b][c].nodepos.z;
-							dz_nod2 = z3N-z1N;
-							dis_nod = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
-							if (dis_nod <= ddmax_nod){
-							dx_nod3 = x3N-x2N;
-							dy_nod3 = y3N-y2N;
-							dz_nod3 = z3N-z2N;
-							dis_nod = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-							if (dis_nod <= ddmax_nod){
-							count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
-							}
-							}
-						}
-					}
-				}				
-				}
-			}	
-		}
+	}
 	}
 	}
 	}
@@ -443,15 +213,15 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	//================================
 	// Simetrización:
 	//================================
-	//symmetrize(XXX); 
+	//symmetrize(XXX);
 }
 //=================================================================== 
 void NODE3P::symmetrize(unsigned int ***XXX){
 	int i,j,k;
 	float elem;
-	for (i=0; i<bn; i++){
-	for (j=i; j<bn; j++){
-	for (k=j; k<bn; k++){
+	for (i=0; i<bn-2; i++){
+	for (j=i+1; j<bn-1; j++){
+	for (k=j+1; k<bn; k++){
 		elem = XXX[i][j][k] + XXX[k][i][j] + XXX[j][k][i] + XXX[j][i][k] + XXX[k][j][i] + XXX[i][k][j];
 		XXX[i][j][k] = elem;
 		XXX[k][i][j] = elem;
@@ -464,7 +234,7 @@ void NODE3P::symmetrize(unsigned int ***XXX){
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***PPP, Node ***nodeS){
+void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en un mismo Nodo.
 	
@@ -476,11 +246,11 @@ void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***PPP, Node *
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	int a, b, c;
-	for (i=0; i<nodeS[row][col][mom].len; ++i){
+	for (i= 0; i<nodeS[row][col][mom].len-2; ++i){
 		x1 = nodeS[row][col][mom].elements[i].x;
 		y1 = nodeS[row][col][mom].elements[i].y;
 		z1 = nodeS[row][col][mom].elements[i].z;
-		for (j=0; j<nodeS[row][col][mom].len; ++j){
+		for (j=i+1; j<nodeS[row][col][mom].len-1; ++j){
 			x2 = nodeS[row][col][mom].elements[j].x;
 			y2 = nodeS[row][col][mom].elements[j].y;
 			z2 = nodeS[row][col][mom].elements[j].z;
@@ -489,7 +259,7 @@ void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***PPP, Node *
 			dz = z2-z1;
 			d12 = dx*dx+dy*dy+dz*dz;
 			if (d12<=dd_max){
-			for (k=0; k<nodeS[row][col][mom].len; ++k){ 
+			for (k=j+1; k<nodeS[row][col][mom].len; ++k){ 
 				x3 = nodeS[row][col][mom].elements[k].x;
 				y3 = nodeS[row][col][mom].elements[k].y;
 				z3 = nodeS[row][col][mom].elements[k].z;
@@ -506,13 +276,13 @@ void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***PPP, Node *
 				a = (int)(sqrt(d12)*ds);
 				b = (int)(sqrt(d13)*ds);
 				c = (int)(sqrt(d23)*ds);
-				//*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
-				PPP[a][b][c] += 1;
-				PPP[c][a][b] += 1;
-				PPP[b][c][a] += 1;
-				PPP[b][a][c] += 1;
-				PPP[c][b][a] += 1;
-				PPP[a][c][b] += 1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				//XXX[a][b][c] += 1;
+				//XXX[c][a][b] += 1;
+				//XXX[b][c][a] += 1;
+				//XXX[b][a][c] += 1;
+				//XXX[c][b][a] += 1;
+				//XXX[a][c][b] += 1;
 				}
 				}
 			}
@@ -535,46 +305,42 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, unsign
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	int a, b, c;
-	for (i=0; i<nodeS[u][v][w].len-1; ++i){
-		// 1er punto en N2
-		x1 = nodeS[u][v][w].elements[i].x;
-		y1 = nodeS[u][v][w].elements[i].y;
-		z1 = nodeS[u][v][w].elements[i].z;
-		for (j=0; j<nodeS[row][col][mom].len; ++j){
-			// 2do punto en N1
-			x2 = nodeS[row][col][mom].elements[j].x;
-			y2 = nodeS[row][col][mom].elements[j].y;
-			z2 = nodeS[row][col][mom].elements[j].z;
+	for (i= 0; i<nodeS[row][col][mom].len-1; ++i){
+		// 1er punto en N1
+		x1 = nodeS[row][col][mom].elements[i].x;
+		y1 = nodeS[row][col][mom].elements[i].y;
+		z1 = nodeS[row][col][mom].elements[i].z;
+		for (j=0; j<nodeS[u][v][w].len; ++j){
+			// 2do punto en N2
+			x2 = nodeS[u][v][w].elements[j].x;
+			y2 = nodeS[u][v][w].elements[j].y;
+			z2 = nodeS[u][v][w].elements[j].z;
 			dx = x2-x1;
 			dy = y2-y1;
 			dz = z2-z1;
 			d12 = dx*dx+dy*dy+dz*dz;
 			if (d12<=dd_max){
-			for (k=j+1; k<nodeS[row][col][mom].len; ++k){
+			for (k=i+1; k<nodeS[row][col][mom].len; ++k){
 				// 3er punto en N1
 				x3 = nodeS[row][col][mom].elements[k].x;
 				y3 = nodeS[row][col][mom].elements[k].y;
 				z3 = nodeS[row][col][mom].elements[k].z;
-				dx = x3-x1;
-				dy = y3-y1;
-				dz = z3-z1;
-				d13 = dx*dx+dy*dy+dz*dz;
-				if (d13<=dd_max){
 				dx = x3-x2;
 				dy = y3-y2;
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				a = (int)(sqrt(d12)*ds);
-				b = (int)(sqrt(d13)*ds);
-				c = (int)(sqrt(d23)*ds);
-				//*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
-				XXX[a][b][c] += 1;
-				XXX[c][a][b] += 1;
-				XXX[b][c][a] += 1;
-				XXX[b][a][c] += 1;
-				XXX[c][b][a] += 1;
-				XXX[a][c][b] += 1;
+				dx = x3-x1;
+				dy = y3-y1;
+				dz = z3-z1;
+				d13 = dx*dx+dy*dy+dz*dz;
+				if (d13<=dd_max){
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				//a = (int)(sqrt(d12)*ds);
+				//b = (int)(sqrt(d13)*ds);
+				//c = (int)(sqrt(d23)*ds);
+				//XXX[a][b][c] += 1;
+				//XXX[a][c][b] += 1;
 				}
 				}
 			}
@@ -597,7 +363,7 @@ void NODE3P::count_3_N122(int row, int col, int mom, int u, int v, int w, unsign
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
 	int a, b, c;
-	for (i=0; i<nodeS[row][col][mom].len; ++i){
+	for (i= 0; i<nodeS[row][col][mom].len; ++i){
 		// 1er punto en N1
 		x1 = nodeS[row][col][mom].elements[i].x;
 		y1 = nodeS[row][col][mom].elements[i].y;
@@ -627,16 +393,12 @@ void NODE3P::count_3_N122(int row, int col, int mom, int u, int v, int w, unsign
 				dz = z3-z2;
 				d23 = dx*dx+dy*dy+dz*dz;
 				if (d23<=dd_max){
-				a = (int)(sqrt(d12)*ds);
-				b = (int)(sqrt(d13)*ds);
-				c = (int)(sqrt(d23)*ds);
-				//*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
-				XXX[a][b][c] += 1;
-				XXX[c][a][b] += 1;
-				XXX[b][c][a] += 1;
-				XXX[b][a][c] += 1;
-				XXX[c][b][a] += 1;
-				XXX[a][c][b] += 1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				//a = (int)(sqrt(d12)*ds);
+				//b = (int)(sqrt(d13)*ds);
+				//c = (int)(sqrt(d23)*ds);
+				//XXX[a][b][c] += 1;
+				//XXX[c][b][a] += 1;
 				}
 				}
 			}
@@ -656,10 +418,11 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 	a, b, c => posición de N3.
 	
 	*/
-	int i,j,k, n, m, l;
+	int i,j,k;
 	float dx,dy,dz;
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
+	int n, m, l;
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
 		// 1er punto en N1
 		x1 = nodeS[row][col][mom].elements[i].x;
@@ -693,13 +456,13 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 				n = (int)(sqrt(d12)*ds);
 				m = (int)(sqrt(d13)*ds);
 				l = (int)(sqrt(d23)*ds);
-				//*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
-				XXX[n][m][l] += 1;
-				XXX[l][n][m] += 1;
-				XXX[m][l][n] += 1;
-				XXX[m][n][l] += 1;
-				XXX[l][m][n] += 1;
-				XXX[n][l][m] += 1;
+				*(*(*(XXX+(int)(sqrt(d12)*ds))+(int)(sqrt(d13)*ds))+(int)(sqrt(d23)*ds))+=1;
+				//XXX[n][m][l] += 1;
+				//XXX[l][n][m] += 1;
+				//XXX[m][l][n] += 1;
+				//XXX[m][n][l] += 1;
+				//XXX[l][m][n] += 1;
+				//XXX[n][l][m] += 1;
 				}
 				}
 			}

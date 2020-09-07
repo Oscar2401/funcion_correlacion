@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 2.176*250/10;
+	float d_max = 100.0, size_box = 250.0, size_node = 2.17*250/10;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -112,7 +112,7 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DDD:" << endl;
 	
-	i = 0;
+	i = 1;
 	for (j = 0; j<bn; j++){
 		 printf("\n");
 		for (k = 0; k<bn; k++){
