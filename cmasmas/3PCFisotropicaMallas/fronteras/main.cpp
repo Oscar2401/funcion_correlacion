@@ -112,10 +112,10 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DDD:" << endl;
 	
-	i = 1;
-	for (j = 0; j<bn; j++){
+	i = 8;
+	for (j=0; j<bn; j++){
 		 printf("\n");
-		for (k = 0; k<bn; k++){
+		for (k=0; k<bn; k++){
 			string num = to_string(DDD[i][j][k]);
 			cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
 		}

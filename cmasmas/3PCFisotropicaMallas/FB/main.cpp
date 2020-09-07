@@ -98,7 +98,7 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DDD:" << endl;
 	
-	i = 1;
+	i = 8;
 	for (j = 0; j<bn; j++){
 		 printf("\n");
 		for (k = 0; k<bn; k++){
