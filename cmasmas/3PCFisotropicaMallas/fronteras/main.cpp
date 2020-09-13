@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE3PCF.h"
+#include "NODE3PCF_frontV2.h"
 #include <omp.h>
 #include <cmath>
 
@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 2.17*250/10;
+	float d_max = 100.0, size_box = 250.0, size_node = 2*250/10;
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -112,7 +112,7 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DDD:" << endl;
 	
-	i = 8;
+	i = 1;
 	for (j=0; j<bn; j++){
 		 printf("\n");
 		for (k=0; k<bn; k++){
@@ -146,7 +146,6 @@ int main(int argc, char **argv){
 //====================================================================
 //============ Sección de Funciones ================================== 
 //====================================================================
-
 void open_files(string name_file, int pts, Point3D *datos){
 	/* Función para abrir nuestros archivos de datos */
 	ifstream file;
@@ -166,51 +165,55 @@ void open_files(string name_file, int pts, Point3D *datos){
 	}
 	file.close();
 }
-
 //====================================================================
 void save_histogram(string name, int bns, unsigned int ***histo){
-	int i,j;
-	int bbns = bns*bns;
-	//puntero a todo el array
-	unsigned int (*arr_pnt)[bns][bbns] = reinterpret_cast<unsigned int(*)[bns][bbns]>(histo);
-	ofstream file2;
-	file2.open(name.c_str(),ios::out | ios::binary);
-	if (file2.fail()){
+	int i, j, k, d=0;
+	unsigned int **reshape = new unsigned int*[bns];
+	for (i=0; i<bns; i++){
+		*(reshape+i) = new unsigned int[bns*bns];
+        }
+	for (i=0; i<bns; i++){
+	for (j=0; j<bns; j++){
+	for (k=0; k<bns; k++){
+		reshape[i][bns*j+k] = histo[i][j][k];
+	}
+	}
+	}
+	ofstream file;
+	file.open(name.c_str(),ios::out | ios::binary);
+	if (file.fail()){
 		cout << "Error al guardar el archivo " << endl;
 		exit(1);
 	}
-	for (i = 0; i < bns; i++){
-		for ( j = 0; j < bbns; j++){
-			file2 << (*arr_pnt)[i][j] << " "; 
+	for (i=0; i<bns; i++){
+		for (j=0; j<bns*bns; j++){
+			file << reshape[i][j] << " "; 
 		}
-		file2 << endl;
+		file << endl;
 	}
-	file2.close();
+	file.close();
 }
-
+//====================================================================
 void delete_histos(int dim){
-    int i,j;
-    for (i = 0; i < dim; i++)
-    {
-        for (j = 0; j < dim; j++)
-        {
-            delete[] *(*(DDD + i) + j);
-            delete[] *(*(DDR + i) + j);
-            delete[] *(*(DRR + i) + j);
-            delete[] *(*(RRR + i) + j);
-        }
-        delete[] *(DDD + i);
-        delete[] *(DDR + i);
-        delete[] *(DRR + i);
-        delete[] *(RRR + i);
-    }
-    delete[] DDD;
-    delete[] DDR;
-    delete[] DRR;
-    delete[] RRR;
+	int i,j;
+	for (i = 0; i < dim; i++){
+	for (j = 0; j < dim; j++){
+		delete[] *(*(DDD + i) + j);
+		delete[] *(*(DDR + i) + j);
+		delete[] *(*(DRR + i) + j);
+		delete[] *(*(RRR + i) + j);
+	}
+	delete[] *(DDD + i);
+	delete[] *(DDR + i);
+	delete[] *(DRR + i);
+	delete[] *(RRR + i);
+	}
+	delete[] DDD;
+	delete[] DDR;
+	delete[] DRR;
+	delete[] RRR;
 }
-
-
+//====================================================================
 void delete_dat(){
     delete[] dataD;
 }
