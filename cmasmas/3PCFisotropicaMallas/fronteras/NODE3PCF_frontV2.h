@@ -389,7 +389,6 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	int part_front;
 	make_fron(nodeFront, nodeX, part_front);
 	
-	
 }
 //=================================================================== 
 void NODE3P::symmetrize(unsigned int ***XXX){
@@ -633,16 +632,24 @@ void NODE3P::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 }
 //=================================================================== 
 void NODE3P::add_front(Node *front, Point3D *&array, int len, float xN, float yN, float zN, short int sig1, short int sig2, short int sig3, int n){
-	front[n].nodepos.x = xN+(size_box*(sig1));
+	/* 
+	Intento de función para crear copias proyecciones de los nodos en la frontera
+	*/
+	
+	front[n].nodepos.x = xN+(size_box*(sig1)); // el sig es para ubicar la proyeccion fuera de la caja 
 	front[n].nodepos.y = yN+(size_box*(sig2));
 	front[n].nodepos.z = zN+(size_box*(sig3));
 	front[n].len = len;
 	front[n].elements = new Point3D[len];
-	for (int i=0; i<len; ++i){
-		front[n].elements[i].z = array[i].x;
-		front[n].elements[i].y = array[i].y;
-		front[n].elements[i].z = array[i].z;
-	}	
+	std::cout << "--------" << len << "--------" << std::endl;
+	for (int i=0; i<len; i++){
+		front[n].elements[i].x = array[i].x+(size_box*(sig1));
+		front[n].elements[i].y = array[i].y+(size_box*(sig2));
+		front[n].elements[i].z = array[i].z+(size_box*(sig3));
+		std::cout << front[n].elements[i].x << std::endl;
+	}
+	std::cout << "----------------" << n << std::endl;
+	std::cout << "----------------" << std::endl;
 }
 //=================================================================== 
 void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
@@ -683,6 +690,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_x){ // Nodos en paredes X
 		if (con_xup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la pared X contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, -1, 0, 0, n);
 		++n;
 	 	}
@@ -695,6 +703,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_y){ // Nodos en paredes Y
 		if (con_yup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la pared Y contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, 0, -1, 0, n);
 		++n;
 	 	}
@@ -707,6 +716,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_z){ // Nodos en paredes Z
 		if (con_zup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la pared Z contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, 0, 0, -1, n);
 		++n;
 	 	}
@@ -719,6 +729,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_x && con_y){ // Nodos en esquinas XY
 		if (con_xup && con_yup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la esquina XY contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, -1, -1, 0, n);
 		++n;
 		}
@@ -741,6 +752,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_x && con_z){ // Nodos en esquinas XZ
 		if (con_xup && con_zup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la esquina XZ contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, -1, 0, -1, n);
 		++n;
 		}
@@ -763,6 +775,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_y && con_z){ // Nodos en esquinas YZ
 		if (con_yup && con_zup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la esquina YZ contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, 0, -1, -1, n);
 		++n;
 		}
@@ -785,6 +798,7 @@ void NODE3P::make_fron(Node *nodeFront, Node ***node, int n){
 	if(con_x && con_y && con_z){ // Nodos en esquinas XYZ
 		if (con_xup && con_yup && con_zup){
 		len = node[row][col][mom].len;
+		//Haacemos una copia en la esquina XYZ contraria:
 		add_front(nodeFront, node[row][col][mom].elements, len, x1N,  y1N,  z1N, -1, -1, -1, n);
 		++n;
 		}
