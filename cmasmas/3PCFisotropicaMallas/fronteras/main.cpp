@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE3PCF_frontV2.h"
+#include "NODE3PCF_frontV3.h"
 #include <omp.h>
 #include <cmath>
 
@@ -112,10 +112,10 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	cout << "HITOGRAMA DDD:" << endl;
 	
-	i = 1;
-	for (j=0; j<bn; j++){
+	k = 0;
+	for (i=0; i<bn; i++){
 		 printf("\n");
-		for (k=0; k<bn; k++){
+		for (j=0; j<bn; j++){
 			string num = to_string(DDD[i][j][k]);
 			cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
 		}
