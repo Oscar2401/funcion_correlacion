@@ -388,8 +388,9 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	//===============================================================================
 	
 	short int sx1, sy1, sz1, sx2, sy2, sz2;
-	float d_max_nod = size_box - (d_max + size_node) ;
-	d_max_nod *= d_max_nod;
+	float d_max_nod = size_box - (d_max + size_node);
+	float _d_max_nod = - d_max_nod;
+	float dd_max_nod = d_max_nod*d_max_nod;
 	
 	//=======================
 	// Nodo 2 movil en ZYX:
@@ -405,40 +406,30 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	
 	u = row;
 	v = col;
-	x2N = nodeX[u][0][0].nodepos.x;
-	dx_nod = x2N-x1N;
-	dx_nod *= dx_nod;
-	sx1 = 0;
-	if (d_max_nod <= dx_nod){
-		dx_nod = size_box - sqrt(dx_nod);
-		dx_nod *= dx_nod;
-		sx1 = 1;
-	}
 	
+	x2N = nodeX[u][0][0].nodepos.x;
+	sx1 = 0;
+
 	y2N = nodeX[u][v][0].nodepos.y;
-	dy_nod = y2N-y1N;
-	dy_nod *= dy_nod;
 	sy1 = 0;
-	if (d_max_nod <= dy_nod){
-		dy_nod = size_box - sqrt(dy_nod);
-		dy_nod *= dy_nod;
-		sy1 = 1;
-	}
+
 	//=======================
 	// Nodo 2 movil en Z:
 	//=======================
 	for (w=mom+1;  w<partitions; ++w){
 		z2N = nodeX[u][v][w].nodepos.z;
 		dz_nod = z2N-z1N;
-		dz_nod *= dz_nod;
 		sz1 = 0;
 		if ( d_max_nod <= dz_nod ){
-			dz_nod = size_box - sqrt(dz_nod);
-			dz_nod *= dz_nod;
+			dz_nod = size_box - dz_nod;
+			sz1 = 1;
+		}
+		else if (_d_max_nod >= dz_nod ){
+			dz_nod = size_box + dz_nod;
 			sz1 = 1;
 		}
 		if (sx1==1 || sy1==1 || sz1==1){
-		dis_nod = dz_nod;
+		dis_nod = dz_nod*dz_nod;
 		if (dis_nod <= ddmax_nod){
 			//==============================================
 			// 2 puntos en N y 1 punto en N'
@@ -457,26 +448,30 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			for (c=w+1;  c<partitions; ++c){
 				z3N = nodeX[a][b][c].nodepos.z; 
 				dz_nod2 = z3N-z1N;
-				dz_nod2 *= dz_nod2;
 				sz2 = 0;
 				if (d_max_nod <= dz_nod2){
-					dz_nod2 = size_box - sqrt(dz_nod2);
-					dz_nod2 *= dz_nod2;
+					dz_nod2 = size_box - dz_nod2;
+					sz2 = 1;
+				}
+				else if (_d_max_nod >= dz_nod2){
+					dz_nod2 = size_box + dz_nod2;
 					sz2 = 1;
 				}
 				if (sz2==1){
-				dis_nod2 = dz_nod2;
-				
+				dis_nod2 = dz_nod2*dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
+				
 				dz_nod3 = z3N-z2N;
 				dz_nod3 *= dz_nod3;
-				if ( d_max_nod <= dz_nod3 ){
+				if ( dd_max_nod <= dz_nod3 ){
 					dz_nod3 = size_box - sqrt(dz_nod3);
 					dz_nod3 *= dz_nod3;
 				}
 				dis_nod3 = dz_nod3;
 				if (dis_nod3 <= ddmax_nod){
+				
 				count_3_N123_front(row, col, mom, u, v, w, a, b, c, XXX, nodeX, sx1, sy1, sz1, sx2, sy2, sz2);
+				
 				}
 				}
 				}
@@ -488,38 +483,42 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			for (b=v+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
-				dy_nod2 *= dy_nod2;
 				sy2 = 0;
 				if (d_max_nod <= dy_nod2){
-					dy_nod2 = size_box - sqrt(dy_nod2);
-					dy_nod2 *= dy_nod2;
+					dy_nod2 = size_box - dy_nod2;
+					sy2 = 1;
+				}
+				else if (_d_max_nod >= dy_nod2){
+					dy_nod2 = size_box + dy_nod2;
 					sy2 = 1;
 				}
 				for (c=0;  c<partitions; ++c){
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dz_nod2 *= dz_nod2;
 					sz2 = 0;
 					if (d_max_nod <= dz_nod2){
-						dz_nod2 = size_box - sqrt(dz_nod2);
-						dz_nod2 *= dz_nod2;
+						dz_nod2 = size_box - dz_nod2;
+						sz2 = 1;
+					}
+					else if (_d_max_nod >= dz_nod2){
+						dz_nod2 = size_box + dz_nod2;
 						sz2 = 1;
 					}
 					if (sy2==1 || sz2==1){
-					dis_nod2 = dy_nod2 + dz_nod2;
+					dis_nod2 = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					//==================================================================
 					
 					dy_nod3 = y3N-y2N;
 					dy_nod3 *= dy_nod3;
-					if ( d_max_nod <= dy_nod3 ){
+					if ( dd_max_nod <= dy_nod3 ){
 						dy_nod3 = size_box - sqrt(dy_nod3);
 						dy_nod3 *= dy_nod3;
 					}
 					
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
-					if ( d_max_nod <= dz_nod3 ){
+					if ( dd_max_nod <= dz_nod3 ){
 						dz_nod3 = size_box - sqrt(dz_nod3);
 						dz_nod3 *= dz_nod3;
 					}
@@ -539,54 +538,60 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			for (a=u+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x3N-x1N;
-				dx_nod2 *= dx_nod2;
 				sx2=0;
 				if (d_max_nod <= dx_nod2){
-					dx_nod2 = size_box - sqrt(dx_nod2);
-					dx_nod2 *= dx_nod2;
+					dx_nod2 = size_box - dx_nod2;
+					sx2=1;
+				}
+				else if (_d_max_nod >= dx_nod2){
+					dx_nod2 = size_box + dx_nod2;
 					sx2=1;
 				}
 				for (b=0; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
-					dy_nod2 *= dy_nod2;
 					sy2=0;
 					if (d_max_nod <= dy_nod2){
-						dy_nod2 = size_box - sqrt(dy_nod2);
-						dy_nod2 *= dy_nod2;
+						dy_nod2 = size_box - dy_nod2;
+						sy2=1;
+					}
+					else if (_d_max_nod >= dy_nod2){
+						dy_nod2 = size_box + dy_nod2;
 						sy2=1;
 					}
 					for (c=0;  c<partitions; ++c){
 						z3N = nodeX[a][b][c].nodepos.z;
 						dz_nod2 = z3N-z1N;
-						dz_nod2 *= dz_nod2;
 						sz2=0;
 						if (d_max_nod <= dz_nod2){
-							dz_nod2 = size_box - sqrt(dz_nod2);
-							dz_nod2 *= dz_nod2;
+							dz_nod2 = size_box - dz_nod2;
+							sz2=1;
+						}
+						else if (_d_max_nod >= dz_nod2){
+							dz_nod2 = size_box + dz_nod2;
 							sz2=1;
 						}
 						if (sx2==1 || sy2==1 || sz2==1){
-						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
+						dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						//==================================================================
 						dx_nod3 = x3N-x2N;
 						dx_nod3 *= dx_nod3;
-						if ( d_max_nod <= dx_nod3 ){
+						if ( dd_max_nod <= dx_nod3 ){
 							dx_nod3 = size_box - sqrt(dx_nod3);
 							dx_nod3 *= dx_nod3;
 						}
 						
 						dy_nod3 = y3N-y2N;
 						dy_nod3 *= dy_nod3;
-						if ( d_max_nod <= dy_nod3 ){
+						if ( dd_max_nod <= dy_nod3 ){
 							dy_nod3 = size_box - sqrt(dy_nod3);
 							dy_nod3 *= dy_nod3;
 						}
 						
 						dz_nod3 = z3N-z2N;
 						dz_nod3 *= dz_nod3;
-						if ( d_max_nod <= dz_nod3 ){
+						if ( dd_max_nod <= dz_nod3 ){
 							dz_nod3 = size_box - sqrt(dz_nod3);
 							dz_nod3 *= dz_nod3;
 						}
@@ -607,39 +612,36 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	
 	u = row;
 	x2N = nodeX[u][0][0].nodepos.x;
-	dx_nod = x2N-x1N;
-	dx_nod *= dx_nod;
 	sx1=0;
-	if (d_max_nod <= dx_nod){
-		dx_nod = size_box - sqrt(dx_nod);
-		dx_nod *= dx_nod;
-		sx1=1;
-	}
 	//=======================
 	// Nodo 2 movil en ZY:
 	//=======================
 	for (v=col+1; v<partitions ; ++v){
 		y2N = nodeX[u][v][0].nodepos.y;
 		dy_nod = y2N-y1N;
-		dy_nod *= dy_nod;
 		sy1=0;
 		if (d_max_nod <= dy_nod){
-			dy_nod = size_box - sqrt(dy_nod);
-			dy_nod *= dy_nod;
+			dy_nod = size_box - dy_nod;
+			sy1=1;
+		}
+		else if (_d_max_nod >= dy_nod){
+			dy_nod = size_box + dy_nod;
 			sy1=1;
 		}
 		for (w=0; w<partitions ; ++w){		
 			z2N = nodeX[u][v][w].nodepos.z;
 			dz_nod = z2N-z1N;
-			dz_nod *= dz_nod;
 			sz1=0;
 			if (d_max_nod <= dz_nod){
-				dz_nod = size_box - sqrt(dz_nod);
-				dz_nod *= dz_nod;
+				dz_nod = size_box - dz_nod;
+				sz1=1;
+			}
+			else if (_d_max_nod >= dz_nod){
+				dz_nod = size_box + dz_nod;
 				sz1=1;
 			}
 			if (sx1==1 || sy1==1 || sz1==1){
-			dis_nod = dy_nod + dz_nod;
+			dis_nod = dy_nod*dy_nod + dz_nod*dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
 			// 2 puntos en N y 1 punto en N'
@@ -658,31 +660,35 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			
 			y3N = nodeX[a][b][0].nodepos.y;
 			dy_nod2 = y3N-y1N;
-			dy_nod2 *= dy_nod2;
 			sy2 = 0;
 			if (d_max_nod <= dy_nod2){
-				dy_nod2 = size_box - sqrt(dy_nod2);
-				dy_nod2 *= dy_nod2;
+				dy_nod2 = size_box - dy_nod2;
+				sy2 = 1;
+			}
+			else if (_d_max_nod >= dy_nod2){
+				dy_nod2 = size_box + dy_nod2;
 				sy2 = 1;
 			}
 			for (c=w+1;  c<partitions; ++c){
 				z3N = nodeX[a][b][c].nodepos.z;
 				dz_nod2 = z3N-z1N;
-				dz_nod2 *= dz_nod2;
 				sz2 = 0;
 				if (d_max_nod <= dz_nod2){
-					dz_nod2 = size_box - sqrt(dz_nod2);
-					dz_nod2 *= dz_nod2;
+					dz_nod2 = size_box - dz_nod2;
+					sz2 = 1;
+				}
+				else if (_d_max_nod >= dz_nod2){
+					dz_nod2 = size_box + dz_nod2;
 					sz2 = 1;
 				}
 				if (sy2==1 || sz2==1){
-				dis_nod2 = dy_nod2 + dz_nod2;
+				dis_nod2 = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				//==================================================================
 				
 				dz_nod3 = z3N-z2N;
 				dz_nod3 *= dz_nod3;
-				if ( d_max_nod <= dz_nod3 ){
+				if ( dd_max_nod <= dz_nod3 ){
 					dz_nod3 = size_box - sqrt(dz_nod3);
 					dz_nod3 *= dz_nod3;
 				}
@@ -702,37 +708,41 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			for (b=v+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
-				dy_nod2 *= dy_nod2;
 				sy2 = 0;
 				if (d_max_nod <= dy_nod2){
-					dy_nod2 = size_box - sqrt(dy_nod2);
-					dy_nod2 *= dy_nod2;
+					dy_nod2 = size_box - dy_nod2;
+					sy2 = 1;
+				}
+				else if (_d_max_nod >= dy_nod2){
+					dy_nod2 = size_box + dy_nod2;
 					sy2 = 1;
 				}
 				for (c=0;  c<partitions; ++c){
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dz_nod2 *= dz_nod2;
 					sz2 = 0;
 					if (d_max_nod <= dz_nod2){
-						dz_nod2 = size_box - sqrt(dz_nod2);
-						dz_nod2 *= dz_nod2;
+						dz_nod2 = size_box - dz_nod2;
+						sz2 = 1;
+					}
+					else if (_d_max_nod >= dz_nod2){
+						dz_nod2 = size_box + dz_nod2;
 						sz2 = 1;
 					}
 					if (sy2==1 || sz2==1){
-					dis_nod2 = dy_nod2 + dz_nod2;
+					dis_nod2 = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					//==================================================================
 					dy_nod3 = y3N-y2N;
 					dy_nod3 *= dy_nod3;
-					if ( d_max_nod <= dy_nod3 ){
+					if ( dd_max_nod <= dy_nod3 ){
 						dy_nod3 = size_box - sqrt(dy_nod3);
 						dy_nod3 *= dy_nod3;
 					}
 					
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
-					if ( d_max_nod <= dz_nod3 ){
+					if ( dd_max_nod <= dz_nod3 ){
 						dz_nod3 = size_box - sqrt(dz_nod3);
 						dz_nod3 *= dz_nod3;
 					}
@@ -752,54 +762,60 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 			for (a=u+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x2N-x1N;
-				dx_nod2 *= dx_nod2;
 				sx2 = 0;
 				if (d_max_nod <= dx_nod2){
-					dx_nod2 = size_box - sqrt(dx_nod2);
-					dx_nod2 *= dx_nod2;
+					dx_nod2 = size_box - dx_nod2;
+					sx2 = 1;
+				}
+				else if (_d_max_nod >= dx_nod2){
+					dx_nod2 = size_box + dx_nod2;
 					sx2 = 1;
 				}
 				for (b=0; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
-					dy_nod2 *= dy_nod2;
 					sy2 = 0;
 					if (d_max_nod <= dy_nod2){
-						dy_nod2 = size_box - sqrt(dy_nod2);
-						dy_nod2 *= dy_nod2;
+						dy_nod2 = size_box - dy_nod2;
+						sy2 = 1;
+					}
+					else if (_d_max_nod >= dy_nod2){
+						dy_nod2 = size_box + dy_nod2;
 						sy2 = 1;
 					}
 					for (c=0;  c<partitions; ++c){
 						z3N = nodeX[a][b][c].nodepos.z;
 						dz_nod2 = z3N-z1N;
-						dz_nod2 *= dz_nod2;
 						sz2 = 0;
 						if (d_max_nod <= dz_nod2){
-							dz_nod2 = size_box - sqrt(dz_nod2);
-							dz_nod2 *= dz_nod2;
+							dz_nod2 = size_box - dz_nod2;
+							sz2 = 1;
+						}
+						else if (_d_max_nod >= dz_nod2){
+							dz_nod2 = size_box + dz_nod2;
 							sz2 = 1;
 						}
 						if (sx2==1 || sy2==1 || sz2==1){
-						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
+						dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						//==================================================================
 						dx_nod3 = x3N-x2N;
 						dx_nod3 *= dx_nod3;
-						if ( d_max_nod <= dx_nod3 ){
+						if ( dd_max_nod <= dx_nod3 ){
 							dx_nod3 = size_box - sqrt(dx_nod3);
 							dx_nod3 *= dx_nod3;
 						}
 						
 						dy_nod3 = y3N-y2N;
 						dy_nod3 *= dy_nod3;
-						if ( d_max_nod <= dy_nod3 ){
+						if ( dd_max_nod <= dy_nod3 ){
 							dy_nod3 = size_box - sqrt(dy_nod3);
 							dy_nod3 *= dy_nod3;
 						}
 						
 						dz_nod3 = z3N-z2N;
 						dz_nod3 *= dz_nod3;
-						if ( d_max_nod <= dz_nod3 ){
+						if ( dd_max_nod <= dz_nod3 ){
 							dz_nod3 = size_box - sqrt(dz_nod3);
 							dz_nod3 *= dz_nod3;
 						}
@@ -824,35 +840,41 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	for (u=row+1; u<partitions; ++u){
 		x2N = nodeX[u][0][0].nodepos.x;
 		dx_nod = x2N-x1N;
-		dx_nod *= dx_nod;
 		sx1 = 0;
 		if (d_max_nod <= dx_nod){
-			dx_nod = size_box - sqrt(dx_nod);
-			dx_nod *= dx_nod;
+			dx_nod = size_box - dx_nod;
+			sx1 = 1;
+		}
+		else if (_d_max_nod >= dx_nod){
+			dx_nod = size_box + dx_nod;
 			sx1 = 1;
 		}
 		for (v=0; v<partitions; ++v){
 			y2N = nodeX[u][v][0].nodepos.y;
 			dy_nod = y2N-y1N;
-			dy_nod *= dy_nod;
 			sy1 = 0;
 			if (d_max_nod <= dy_nod){
-				dy_nod = size_box - sqrt(dy_nod);
-				dy_nod *= dy_nod;
+				dy_nod = size_box - dy_nod;
+				sy1 = 1;
+			}
+			else if (_d_max_nod >= dy_nod){
+				dy_nod = size_box + dy_nod;
 				sy1 = 1;
 			}
 			for (w=0; w<partitions; ++w){
 				z2N = nodeX[u][v][w].nodepos.z;
 				dz_nod = z2N-z1N;
-				dz_nod *= dz_nod;
 				sz1 = 0;
 				if (d_max_nod <= dz_nod){
-					dz_nod = size_box - sqrt(dz_nod);
-					dz_nod *= dz_nod;
+					dz_nod = size_box - dz_nod;
+					sz1 = 1;
+				}
+				else if (_d_max_nod >= dz_nod){
+					dz_nod = size_box + dz_nod;
 					sz1 = 1;
 				}
 				if ( sx1==1 || sy1==1 || sz1==1){ //tenemos frontera
-				dis_nod = dx_nod + dy_nod + dz_nod; // distancia entre nodo caja y nodo frontera
+				dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod; // distancia entre nodo caja y nodo frontera
 				if (dis_nod <= ddmax_nod){
 				//==============================================
 				// 2 puntos en N y 1 punto en N'
@@ -868,40 +890,46 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 				//=======================
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x3N-x1N;
-				dx_nod2 *= dx_nod2;
 				sx2 = 0;
 				if (d_max_nod <= dx_nod2){
-					dx_nod2 = size_box - sqrt(dx_nod2);
-					dx_nod2 *= dx_nod2;
+					dx_nod2 = size_box - dx_nod2;
+					sx2 = 1;
+				}
+				else if (_d_max_nod >= dx_nod2){
+					dx_nod2 = size_box + dx_nod2;
 					sx2 = 1;
 				}
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
-				dy_nod2 *= dy_nod2;
 				sy2 = 0;
 				if (d_max_nod <= dy_nod2){
-					dy_nod2 = size_box - sqrt(dy_nod2);
-					dy_nod2 *= dy_nod2;
+					dy_nod2 = size_box - dy_nod2;
+					sy2 = 1;
+				}
+				else if (_d_max_nod >= dy_nod2){
+					dy_nod2 = size_box + dy_nod2;
 					sy2 = 1;
 				}
 				for (c=w+1;  c<partitions; ++c){	
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dz_nod2 *= dz_nod2;
 					sz2 = 0;
 					if (d_max_nod <= dz_nod2){
-						dz_nod2 = size_box - sqrt(dz_nod2);
-						dz_nod2 *= dz_nod2;
+						dz_nod2 = size_box - dz_nod2;
+						sz2 = 1;
+					}
+					else if (_d_max_nod >= dz_nod2){
+						dz_nod2 = size_box + dz_nod2;
 						sz2 = 1;
 					}
 					if (sx2==1 || sy2==1 || sz2==1){
-					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
+					dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					//==================================================================
 					
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
-					if ( d_max_nod <= dz_nod3 ){
+					if ( dd_max_nod <= dz_nod3 ){
 						dz_nod3 = size_box - sqrt(dz_nod3);
 						dz_nod3 *= dz_nod3;
 					}
@@ -919,48 +947,54 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 				//=======================
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x3N-x1N;
-				dx_nod2 *= dx_nod2;
 				sx2 = 0;
 				if (d_max_nod <= dx_nod2){
-					dx_nod2 = size_box - sqrt(dx_nod2);
-					dx_nod2 *= dx_nod2;
+					dx_nod2 = size_box - dx_nod2;
+					sx2 = 1;
+				}
+				else if (_d_max_nod >= dx_nod2){
+					dx_nod2 = size_box + dx_nod2;
 					sx2 = 1;
 				}
 				for (b=v+1; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
-					dy_nod2 *= dy_nod2;
 					sy2 = 0;
 					if (d_max_nod <= dy_nod2){
-						dy_nod2 = size_box - sqrt(dy_nod2);
-						dy_nod2 *= dy_nod2;
+						dy_nod2 = size_box - dy_nod2;
+						sy2 = 1;
+					}
+					else if (_d_max_nod >= dy_nod2){
+						dy_nod2 = size_box + dy_nod2;
 						sy2 = 1;
 					}
 					for (c=0;  c<partitions; ++c){
 						z3N = nodeX[a][b][c].nodepos.z;
 						dz_nod2 = z3N-z1N;
-						dz_nod2 *= dz_nod2;
 						sz2 = 0;
 						if (d_max_nod <= dz_nod2){
-							dz_nod2 = size_box - sqrt(dz_nod2);
-							dz_nod2 *= dz_nod2;
+							dz_nod2 = size_box - dz_nod2;
+							sz2 = 1;
+						}
+						else if (_d_max_nod >= dz_nod2){
+							dz_nod2 = size_box + dz_nod2;
 							sz2 = 1;
 						}
 						if (sx2==1 || sy2==1 || sz2==1){
-						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
+						dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						//==================================================================
 						
 						dy_nod3 = y3N-y2N;
 						dy_nod3 *= dy_nod3;
-						if ( d_max_nod <= dy_nod3 ){
+						if ( dd_max_nod <= dy_nod3 ){
 							dy_nod3 = size_box - sqrt(dy_nod3);
 							dy_nod3 *= dy_nod3;
 						}
 					
 						dz_nod3 = z3N-z2N;
 						dz_nod3 *= dz_nod3;
-						if ( d_max_nod <= dz_nod3 ){
+						if ( dd_max_nod <= dz_nod3 ){
 							dz_nod3 = size_box - sqrt(dz_nod3);
 							dz_nod3 *= dz_nod3;
 						}
@@ -980,57 +1014,63 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 				for (a=u+1; a<partitions; ++a){
 					x3N = nodeX[a][0][0].nodepos.x;
 					dx_nod2 = x3N-x1N;
-					dx_nod2 *= dx_nod2;
 					sx2 = 0;
 					if (d_max_nod <= dx_nod2){
-						dx_nod2 = size_box - sqrt(dx_nod2);
-						dx_nod2 *= dx_nod2;
+						dx_nod2 = size_box - dx_nod2;
+						sx2 = 1;
+					}
+					else if (_d_max_nod >= dx_nod2){
+						dx_nod2 = size_box + dx_nod2;
 						sx2 = 1;
 					}
 					for (b=0; b<partitions; ++b){
 						y3N = nodeX[a][b][0].nodepos.y;
 						dy_nod2 = y3N-y1N;
-						dy_nod2 *= dy_nod2;
 						sy2 = 0;
 						if (d_max_nod <= dy_nod2){
-							dy_nod2 = size_box - sqrt(dy_nod2);
-							dy_nod2 *= dy_nod2;
+							dy_nod2 = size_box - dy_nod2;
+							sy2 = 1;
+						}
+						else if (_d_max_nod >= dy_nod2){
+							dy_nod2 = size_box + dy_nod2;
 							sy2 = 1;
 						}
 						for (c=0;  c<partitions; ++c){
 							z3N = nodeX[a][b][c].nodepos.z;
 							dz_nod2 = z3N-z1N;
-							dz_nod2 *= dz_nod2;
 							sz2 = 0;
 							if (d_max_nod <= dz_nod2){
-								dz_nod2 = size_box - sqrt(dz_nod2);
-								dz_nod2 *= dz_nod2;
+								dz_nod2 = size_box - dz_nod2;
+								sz2 = 1;
+							}
+							else if (_d_max_nod >= dz_nod2){
+								dz_nod2 = size_box + dz_nod2;
 								sz2 = 1;
 							}
 							
 							if (sx2==1 || sy2==1 || sz2==1){
 							
-							dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
+							dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
 							if (dis_nod2 <= ddmax_nod){
 							//==================================================================
 							
 							dx_nod3 = x3N-x2N;
 							dx_nod3 *= dx_nod3;
-							if ( d_max_nod <= dx_nod3 ){
+							if ( dd_max_nod <= dx_nod3 ){
 								dx_nod3 = size_box - sqrt(dx_nod3);
 								dx_nod3 *= dx_nod3;
 							}
 							
 							dy_nod3 = y3N-y2N;
 							dy_nod3 *= dy_nod3;
-							if ( d_max_nod <= dy_nod3 ){
+							if ( dd_max_nod <= dy_nod3 ){
 								dy_nod3 = size_box - sqrt(dy_nod3);
 								dy_nod3 *= dy_nod3;
 							}
 							
 							dz_nod3 = z3N-z2N;
 							dz_nod3 *= dz_nod3;
-							if ( d_max_nod <= dz_nod3 ){
+							if ( dd_max_nod <= dz_nod3 ){
 								dz_nod3 = size_box - sqrt(dz_nod3);
 								dz_nod3 *= dz_nod3;
 							}
@@ -1466,6 +1506,7 @@ void NODE3P::count_3_N123_front(int row, int col, int mom, int u, int v, int w, 
 					dz23 = size_box - sqrt(dz23);
 					dz23 *= dz23;
 				}
+				
 				d23 = dx23+dy23+dz23;
 				if (d23<=dd_max){
 				n = (int)(sqrt(d12)*ds);
