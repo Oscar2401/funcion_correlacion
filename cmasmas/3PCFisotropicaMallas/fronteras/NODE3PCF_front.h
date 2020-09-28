@@ -197,7 +197,6 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 	//=======================
 	// Nodo 2 movil en ZY:
 	//=======================
-	x2N = nodeX[u][0][0].nodepos.x;
 	for (v=col+1; v<partitions ; ++v){
 		y2N = nodeX[u][v][0].nodepos.y;
 		dy_nod = y2N-y1N;
@@ -325,8 +324,6 @@ void NODE3P::make_histoXXX(unsigned int ***XXX, Node ***nodeX){
 				//=======================
 				// Nodo 3 movil en ZY:
 				//=======================
-				x3N = nodeX[a][0][0].nodepos.x;
-				dx_nod2 = x3N-x1N;
 				for (b=v+1; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
@@ -486,7 +483,7 @@ void NODE3P::count_3_N111(int row, int col, int mom, unsigned int ***XXX, Node *
 	float dx,dy,dz;
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
-	int a, b, c;
+
 	for (i=0; i<nodeS[row][col][mom].len-2; ++i){
 		x1 = nodeS[row][col][mom].elements[i].x;
 		y1 = nodeS[row][col][mom].elements[i].y;
@@ -536,7 +533,7 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, unsign
 	float dx,dy,dz;
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;
-	int a, b, c;
+
 	for (i=0; i<nodeS[u][v][w].len; ++i){
 		// 1er punto en N2
 		x1 = nodeS[u][v][w].elements[i].x;
@@ -606,7 +603,7 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 	a, b, c => posición de N3.
 	
 	*/
-	int i,j,k, n, m, l;
+	int i,j,k;
 	float dx,dy,dz;
 	float d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3;

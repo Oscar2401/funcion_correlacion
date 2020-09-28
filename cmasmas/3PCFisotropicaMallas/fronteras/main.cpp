@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE3PCF_frontV5.h"
+#include "NODE3PCF_front.h"
 #include <omp.h>
 #include <cmath>
 
@@ -21,8 +21,8 @@ int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
-	int n_pts = 1000, bn = 10;
-	float d_max = 100.0, size_box = 250.0, size_node = 2.17 * 250/10;
+	int n_pts = 5000, bn = 10;
+	float d_max = 30.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
