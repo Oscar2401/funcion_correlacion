@@ -1,16 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-DD_mesh = np.loadtxt('DDaiso_mesh_3D_full.dat')
+DD_mesh = np.loadtxt('DDiso_mesh_3D_full.dat')
 RR_mesh = np.loadtxt('RRiso_mesh_3D_full.dat')
-DR_mesh = np.loadtxt('DRiso_mesh_3D_full.dat')
 
 #Función de correlación Landy-Szalay
-def estim_LS(NDD, NRR, NDR):
+def estim_LS(NDD, NRR):
     return (NDD - NRR)/NRR
 
-eps_LS = estim_LS(DD_mesh, RR_mesh, DR_mesh)
-r = np.linspace(0,110,30)
+eps_LS = estim_LS(DD_mesh, RR_mesh)
+r = np.linspace(0,60,100*20)
 
 fig = plt.figure(figsize=(14,8))
 plt.scatter(r,eps_LS, s=50, c='g',label='LS')

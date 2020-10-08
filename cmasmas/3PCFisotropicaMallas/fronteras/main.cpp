@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE3PCF_front.h"
+#include "3PCF_front.h"
 #include <omp.h>
 #include <cmath>
 
@@ -10,19 +10,21 @@ using namespace std;
 
 void open_files(string, int, Point3D *);
 void save_histogram(string, int, unsigned int ***);
+void save_histogram_analitic(string, int, float ***);
 void delete_histos(int);
 void delete_dat();
 
 Point3D *dataD, *dataR;
-unsigned int  ***DDD, ***RRR, ***DDR, ***DRR;
+unsigned int  ***DDD;
+float ***RRR, ***DDR, ***DRR;
 Node ***nodeD;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
-	int n_pts = 5000, bn = 10;
-	float d_max = 30.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
+	int n_pts = 32*32*32, bn = 20;
+	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new Point3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new Point3D[n_pts];
 	
@@ -54,20 +56,20 @@ int main(int argc, char **argv){
 	
 	// inicializamos los histogramas
 	DDD = new unsigned int**[bn];
-	RRR = new unsigned int**[bn];
-	DDR = new unsigned int**[bn];
-	DRR = new unsigned int**[bn];
+	RRR = new float**[bn];
+	DDR = new float**[bn];
+	DRR = new float**[bn];
 	int i,j,k;
 	for (i=0; i<bn; i++){
 		*(DDD+i) = new unsigned int*[bn];
-		*(RRR+i) = new unsigned int*[bn];
-		*(DDR+i) = new unsigned int*[bn];
-		*(DRR+i) = new unsigned int*[bn];
+		*(RRR+i) = new float*[bn];
+		*(DDR+i) = new float*[bn];
+		*(DRR+i) = new float*[bn];
 		for (j = 0; j < bn; j++){
 			*(*(DDD+i)+j) = new unsigned int[bn];
-			*(*(RRR+i)+j) = new unsigned int[bn];
-			*(*(DDR+i)+j) = new unsigned int[bn];
-			*(*(DRR+i)+j) = new unsigned int[bn];
+			*(*(RRR+i)+j) = new float[bn];
+			*(*(DDR+i)+j) = new float[bn];
+			*(*(DRR+i)+j) = new float[bn];
 		}
 	}
 	
@@ -76,9 +78,9 @@ int main(int argc, char **argv){
 	 	for (j=0; j<bn; j++){
 	 		for (k = 0; k < bn; k++){
 	 			*(*(*(DDD+i)+j)+k)= 0;
-	 			*(*(*(DDR+i)+j)+k)= 0;   
-	 			*(*(*(DRR+i)+j)+k)= 0;
-	 			*(*(*(RRR+i)+j)+k)= 0;
+	 			*(*(*(DDR+i)+j)+k)= 0.0;   
+	 			*(*(*(DRR+i)+j)+k)= 0.0;
+	 			*(*(*(RRR+i)+j)+k)= 0.0;
 	 		}
 	 	} 
 	 }
@@ -99,49 +101,81 @@ int main(int argc, char **argv){
 	// Iniciamos clase
 	NODE3P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD);
 	clock_t c_start = clock();
-	my_hist.make_histoXXX(DDD, my_hist.meshData()); //hace histogramas
+	//my_hist.make_histoXXX(DDD, my_hist.meshData()); //hace histogramas
+	
+	my_hist.make_histo_RRR(DDR, RRR, my_hist.meshData() ); //hace histogramas analíticos
+	
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
+	
 	my_hist.~NODE3P(); //destruimos objeto
 	
 	//Eliminamos Datos 
 	delete_dat();
 	
 	cout << "Termine de hacer todos los histogramas\n" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA DDD:" << endl;
+	//cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
+	//cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
+	//cout << "HITOGRAMA DDD:" << endl;
 	
-	k = 0;
-	for (i=0; i<bn; i++){
-		 printf("\n");
-		for (j=0; j<bn; j++){
-			string num = to_string(DDD[i][j][k]);
-			cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
-		}
-	}
+	//k = 0;
+	//for (i=0; i<bn; i++){
+	//	 printf("\n");
+	//	for (j=0; j<bn; j++){
+	//		string num = to_string(DDD[i][j][k]);
+	//		cout << DDD[i][j][k] << std::string(7-num.size(), ' ');
+	//	}
+	//}
 	
 	unsigned long int conteo;
 	
 	for (i=0; i<bn; i++){
 		for (j=0; j<bn; j++){
 			for (k=0; k<bn; k++){
-				conteo += DDD[i][j][k];
+				conteo += RRR[i][j][k];
 			}
 		}
 	}
+	
+	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
+	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
+	cout << "HITOGRAMA RRR:" << endl;
+	
+	k = 0;
+	for (i=0; i<bn; i++){
+		 printf("\n");
+		for (j=0; j<bn; j++){
+			string num = to_string(RRR[i][j][k]);
+			//cout << RRR[i][j][k] << std::string(7-num.size(), ' ');
+		}
+	}
+	
 	cout << "\n Cantidad de tripletes:" << conteo << endl;
+	
+	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
+	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
+	cout << "HITOGRAMA DDR:" << endl;
+	
+	k = 0;
+	for (i=0; i<bn; i++){
+		 printf("\n");
+		for (j=0; j<bn; j++){
+			string num = to_string(DDR[i][j][k]);
+			//cout << DDR[i][j][k] << std::string(7-num.size(), ' ');
+		}
+	}
+	
 	
 	// Mostramos los histogramas 
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	save_histogram(nameDDD, bn, DDD);
 	cout << "\nGuarde histograma DDD..." << endl;
-	save_histogram(nameRRR, bn, RRR);
+	save_histogram_analitic(nameRRR, bn, RRR);
 	cout << "\nGuarde histograma RRR..." << endl;
-	save_histogram(nameDDR, bn, DDR);
+	save_histogram_analitic(nameDDR, bn, DDR);
 	cout << "\nGuarde histograma DDR..." << endl;
-	save_histogram(nameDRR, bn, DRR);
+	save_histogram_analitic(nameDRR, bn, DRR);
 	cout << "\nGuarde histograma DRR..." << endl;
 	
 	// Eliminamos los hitogramas
@@ -182,6 +216,34 @@ void save_histogram(string name, int bns, unsigned int ***histo){
 	unsigned int **reshape = new unsigned int*[bns];
 	for (i=0; i<bns; i++){
 		*(reshape+i) = new unsigned int[bns*bns];
+        }
+	for (i=0; i<bns; i++){
+	for (j=0; j<bns; j++){
+	for (k=0; k<bns; k++){
+		reshape[i][bns*j+k] = histo[i][j][k];
+	}
+	}
+	}
+	ofstream file;
+	file.open(name.c_str(),ios::out | ios::binary);
+	if (file.fail()){
+		cout << "Error al guardar el archivo " << endl;
+		exit(1);
+	}
+	for (i=0; i<bns; i++){
+		for (j=0; j<bns*bns; j++){
+			file << reshape[i][j] << " "; 
+		}
+		file << endl;
+	}
+	file.close();
+}
+//====================================================================
+void save_histogram_analitic(string name, int bns, float ***histo){
+	int i, j, k, d=0;
+	float **reshape = new float*[bns];
+	for (i=0; i<bns; i++){
+		*(reshape+i) = new float[bns*bns];
         }
 	for (i=0; i<bns; i++){
 	for (j=0; j<bns; j++){

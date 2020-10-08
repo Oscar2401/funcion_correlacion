@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "2PCF.h"
+#include "My_octree.h"
 #include <omp.h>
 #include <cmath>
 
@@ -10,12 +10,9 @@ using namespace std;
 
 void open_files(string, int, Point3D *);
 void save_histogram(string, int, unsigned int *);
-void save_histogram_analitic(string, int, float *);
 
 Point3D *dataD;
-unsigned int  *DD; 
-float *RR;
-Node ***nodeD;
+unsigned int  *DD, *RR, *DR;
 
 int main(int argc, char **argv){
 	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
@@ -51,90 +48,29 @@ int main(int argc, char **argv){
 	
 	// inicializamos los histogramas
 	DD = new unsigned int[bn];
-	RR = new float[bn];
+	RR = new unsigned int[bn];
 	int i;
 	for (i = 0; i < bn; i++){
 		*(DD+i) = 0; // vector[i]
-		*(RR+i) = 0.0;
+		*(RR+i) = 0;
 	}
 
 	// Abrimos y trabajamos los datos en los histogramas
-	open_files(argv[1],n_pts,dataD); // guardo los datos en los Struct
+	open_files(argv[1],n_pts,dataD); 
 	
-	// inicializamos las mallas
-	int partitions = (int)(ceil(size_box/size_node));
-	nodeD = new Node**[partitions];
-	for ( i = 0; i < partitions; i++){
-		*(nodeD + i) = new Node*[partitions];
-		for (int j = 0; j < partitions; j++){
-			*(*(nodeD + i)+j) = new Node[partitions];
-		}
-	}	
+	// Iniciamos clase octree
+	Octree tree(0, 0, 0, 250, 250, 250, 3); 
 	
-	// Iniciamos clase
-	NODE my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD);
-	
-	clock_t c_start = clock();
-	
-	my_hist.make_histoXX(DD, RR, my_hist.meshData()); //hace histogramas XX
-	
-	clock_t c_end = clock();
-	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
-	
-	my_hist.~NODE(); //destruimos objeto
-	
-	
-	cout << "Termine de hacer todos los histogramas\n" << endl;
-	
-	int bins = 20;
-	int ptt = 50;
-	float dr = d_max/(float)bins;
-	float dr_ptt = d_max/(float)bn;
-	float f_av;
-	
-	// Calculamos las f_averrage
-	cout << "f promedio: \n" << endl;
-	for(i=0; i<bins; ++i){
-		f_av = 0;
-		float ri = (float)(i)*dr;
-		for(int j = 0; j<ptt; ++j){
-			float rj = ((float)(j)+0.5)*dr_ptt;
-			f_av += (ri + rj)*((((float)*(DD+(i*ptt)+j))/(*(RR+(i*ptt)+j))) - 1);
-		}
-		cout << f_av/ptt << endl;
+	int c;
+	float x, y, z;
+	for (c=0; c<n_pts; ++c)
+	{
+		x = dataD[c].x;
+		y = dataD[c].y;
+		z = dataD[c].z;
+		tree.insert(x, y, z);
 	}
 	
-	// Mostramos los histogramas 
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA DD:" << endl;
-	
-	for (i = 0; i<bn; i++){
-		printf("%d \t",DD[i]);
-	}
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	cout << "HITOGRAMA RR:" << endl;
-	for (i = 0; i<bn; i++){
-		printf("%f \t",RR[i]);
-	}
-	
-	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	save_histogram(nameDD, bn, DD);
-	cout << "\nGuarde histograma DD..." << endl;
-	save_histogram_analitic(nameRR, bn, RR);
-	cout << "\nGuarde histograma RR..." << endl;
-
-	// Eliminamos los hitogramas 
-	//delete[] DD;
-	//delete[] DR;
-	//delete[] RR;
-	
-	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
-	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
-	cout << "Programa finalizado..." << endl;
-	cin.get();
 	return 0;
 }
 
@@ -163,21 +99,6 @@ void open_files(string name_file, int pts, Point3D *datos){
 
 //====================================================================
 void save_histogram(string name, int bns, unsigned int *histo){
-	/* Función para guardar nuestros archivos de histogramas */
-	ofstream file2;
-	file2.open(name.c_str(), ios::out | ios::binary);
-	
-	if (file2.fail()){
-		cout << "Error al guardar el archivo " << endl;
-		exit(1);
-	}
-	for (int i = 0; i < bns; i++){
-		file2 << histo[i] << endl;
-	}
-	file2.close();
-}
-//====================================================================
-void save_histogram_analitic(string name, int bns, float *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);

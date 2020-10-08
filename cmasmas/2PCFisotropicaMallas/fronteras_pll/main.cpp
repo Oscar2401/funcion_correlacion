@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "NODE.h"
+#include "2PCFV2.h"
 #include <omp.h>
 #include <cmath>
 

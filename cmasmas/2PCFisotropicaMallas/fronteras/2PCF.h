@@ -30,9 +30,7 @@ class NODE{
 		float size_node;
 		float d_max;
 		Node ***nodeD;
-		Node ***nodeR;
 		Point3D *dataD;
-		Point3D *dataR;
 		// Derivados
 		float ll;
 		float dd_max;
@@ -48,36 +46,35 @@ class NODE{
 	// Métodos de Clase:
 	public:
 		//Constructor de clase:
-		NODE(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point3D *_dataD, Point3D *_dataR, Node ***_nodeD, Node  ***_nodeR){
+		NODE(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, Point3D *_dataD, Node ***_nodeD){
+			
+			// Asignados
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
 			size_node = _size_node;
 			d_max = _d_max;
 			dataD = _dataD;
-			dataR = _dataR;
 			nodeD = _nodeD;
-			nodeR = _nodeR;
+			
+			// Derivados
 			ll = size_box*size_box;
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
+			
 			make_nodos(nodeD,dataD); 
-			make_nodos(nodeR,dataR);
 			std::cout << "Terminé de contruir nodos..." << std::endl;
 		}
 		
 		Node ***meshData(){
 			return nodeD;
 		};
-		Node ***meshRand(){
-			return nodeR;
-		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(unsigned int *, unsigned int *, Node ***);
+		void make_histoXX(unsigned int *, float*, Node ***);
 		void histo_front_XX(unsigned int *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		~NODE();
 };
@@ -138,7 +135,7 @@ void NODE::add(Point3D *&array, int &lon, float _x, float _y, float _z){
 
 //=================================================================== 
 
-void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
+void NODE::make_histoXX(unsigned int *XX, float *YY, Node ***nodeX){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -305,11 +302,14 @@ void NODE::make_histoXX(unsigned int *XX, unsigned int *YY, Node ***nodeX){
 	//======================================
 	
 	float dr = (d_max/bn);
-	float alph = 4*(3.14159265359)*(n_pts*n_pts)*dr*dr*dr/(3*size_box*size_box*size_box);
-	float r1;
-	for(int a=0; a<bn; a++) {
-		r1 = (a+1);
-        	*(YY+a) += alph*(r1*r1*r1-a*a*a);
+	float V = size_box*size_box*size_box;
+	float beta1 = n_pts*n_pts/V;
+	float alph = 4*(2*acos(0.0))*(beta1)*dr*dr*dr/3;
+	float r1, r2;
+	for(int a=0; a<bn; ++a) {
+		r2 = (float) a;
+		r1 = r2+1;
+        	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
 	}
 }
 
