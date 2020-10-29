@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "3PCF_front.h"
+#include "3PCFani.h"
 #include <omp.h>
 #include <cmath>
 
@@ -109,11 +109,11 @@ int main(int argc, char **argv){
 	nodeD = new Node**[partitions];
 	nodeR = new Node**[partitions];
 	for (i=0; i<partitions; i++){
-		*(nodeD+i) = new Node*[partitions];
-		*(nodeR+i) = new Node*[partitions];
+	*(nodeD+i) = new Node*[partitions];
+	*(nodeR+i) = new Node*[partitions];
 		for (j=0; j<partitions; j++){
-			*(*(nodeD+i)+j) = new Node[partitions];
-			*(*(nodeR+i)+j) = new Node[partitions];
+		*(*(nodeD+i)+j) = new Node[partitions];
+		*(*(nodeR+i)+j) = new Node[partitions];
 		}
 	}	
 	
@@ -168,10 +168,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 		cout << "Error al cargar el archivo " << endl;
 		exit(1);
 	}
-	for ( int c = 0; c < pts; ++c)
-	{
-		file >> datos[c].x >> datos[c].y >> datos[c].z >> datos[c].w; 
-	}
+	for ( int c = 0; c < pts; ++c) file >> datos[c].x >> datos[c].y >> datos[c].z >> datos[c].w; 
 	file.close();
 }
 //====================================================================

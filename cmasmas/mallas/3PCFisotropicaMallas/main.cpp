@@ -23,7 +23,7 @@ int main(int argc, char **argv){
 	//int n_pts = 32768, bn = 10;
 	int n_pts = 32*32*32, bn = 20;
 	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
-	dataD = new PointW3D[n_pts]; // Asignamos meoria a esta variable
+	dataD = new PointW3D[n_pts]; 
 	dataR = new PointW3D[n_pts];
 	
 	//Mensaje a usuario
