@@ -231,13 +231,16 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 		for (a=u+1; a<partitions; ++a){
 		x3N = nodeX[a][0][0].nodepos.x;
 		dx_nod2 = x3N-x1N;
+		dx_nod2 *= dx_nod2;
 			for (b=0; b<partitions; ++b){
 			y3N = nodeX[a][b][0].nodepos.y;
 			dy_nod2 = y3N-y1N;
+			dy_nod2 *= dy_nod2;
 				for (c=0;  c<partitions; ++c){
 				z3N = nodeX[a][b][c].nodepos.z;
 				dz_nod2 = z3N-z1N;
-				dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+				dz_nod2 *= dz_nod2;
+				dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dx_nod3 = x3N-x2N;
 				dy_nod3 = y3N-y2N;
@@ -256,10 +259,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 	for (v=col+1; v<partitions ; ++v){
 	y2N = nodeX[u][v][0].nodepos.y;
 	dy_nod = y2N-y1N;
+	dy_nod *= dy_nod;
 		for (w=0; w<partitions ; ++w){		
 		z2N = nodeX[u][v][w].nodepos.z;
 		dz_nod = z2N-z1N;
-		dis_nod = dy_nod*dy_nod + dz_nod*dz_nod;
+		dz_nod *= dz_nod;
+		dis_nod = dy_nod + dz_nod;
 		if (dis_nod <= ddmax_nod){
 		//==============================================
 		// 2 puntos en N y 1 punto en N'
@@ -275,10 +280,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 		//=======================
 		y3N = nodeX[a][b][0].nodepos.y;
 		dy_nod2 = y3N-y1N;
+		dy_nod2 *= dy_nod2;
 			for (c=w+1;  c<partitions; ++c){
 			z3N = nodeX[a][b][c].nodepos.z;
 			dz_nod2 = z3N-z1N;
-			dis_nod2 = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+			dz_nod2 *= dz_nod2;
+			dis_nod2 = dy_nod2 + dz_nod2;
 			if (dis_nod2 <= ddmax_nod){
 			dz_nod3 = z3N-z2N;
 			dis_nod3 = dz_nod3*dz_nod3;
@@ -291,10 +298,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 			for (b=v+1; b<partitions; ++b){
 			y3N = nodeX[a][b][0].nodepos.y;
 			dy_nod2 = y3N-y1N;
+			dy_nod2 *= dy_nod2;
 				for (c=0;  c<partitions; ++c){
 				z3N = nodeX[a][b][c].nodepos.z;
 				dz_nod2 = z3N-z1N;
-				dis_nod2 = dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+				dz_nod2 *= dz_nod2;
+				dis_nod2 = dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dy_nod3 = y3N-y2N;
 				dz_nod3 = z3N-z2N;
@@ -309,13 +318,16 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 			for (a=u+1; a<partitions; ++a){
 			x3N = nodeX[a][0][0].nodepos.x;
 			dx_nod2 = x3N-x1N;
+			dx_nod2 *= dx_nod2;
 				for (b=0; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
+				dy_nod2 *= dy_nod2;
 					for (c=0;  c<partitions; ++c){
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+					dz_nod2 *= dz_nod2;
+					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					dx_nod3 = x3N-x2N;
 					dy_nod3 = y3N-y2N;
@@ -335,13 +347,16 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 	for (u=row+1; u<partitions; ++u){
 	x2N = nodeX[u][0][0].nodepos.x;
 	dx_nod = x2N-x1N;
+	dx_nod *= dx_nod;
 		for (v=0; v<partitions; ++v){
 		y2N = nodeX[u][v][0].nodepos.y;
 		dy_nod = y2N-y1N;
+		dy_nod *= dy_nod;
 			for (w=0; w<partitions; ++w){
 			z2N = nodeX[u][v][w].nodepos.z;
 			dz_nod = z2N-z1N;
-			dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
+			dz_nod *= dz_nod;
+			dis_nod = dx_nod + dy_nod + dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
 			// 2 puntos en N y 1 punto en N'
@@ -358,11 +373,14 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 			x3N = nodeX[a][0][0].nodepos.x;
 			y3N = nodeX[a][b][0].nodepos.y;
 			dx_nod2 = x3N-x1N;
+			dx_nod2 *= dx_nod2; 
 			dy_nod2 = y3N-y1N;
+			dy_nod2 *= dy_nod2;
 				for (c=w+1;  c<partitions; ++c){	
 				z3N = nodeX[a][b][c].nodepos.z;
 				dz_nod2 = z3N-z1N;
-				dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+				dz_nod2 *= dz_nod2;
+				dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
@@ -375,10 +393,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 				for (b=v+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
+				dy_nod2 *= dy_nod2;
 					for (c=0;  c<partitions; ++c){
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+					dz_nod2 *= dz_nod2;
+					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					dy_nod3 = y3N-y2N;
 					dz_nod3 = z3N-z2N;
@@ -393,13 +413,16 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 				for (a=u+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x3N-x1N;
+				dx_nod2 *= dx_nod2;
 					for (b=0; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
+					dy_nod2 *= dy_nod2;
 						for (c=0;  c<partitions; ++c){
 						z3N = nodeX[a][b][c].nodepos.z;
 						dz_nod2 = z3N-z1N;
-						dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+						dz_nod2 *= dz_nod2;
+						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						dx_nod3 = x3N-x2N;
 						dy_nod3 = y3N-y2N;

@@ -74,8 +74,8 @@ int main(int argc, char **argv){
 	//inicialización
 	for (i=0; i<bn; i++){
 	for (j=0; j<bn; j++){
-	for (k = 0; k < bn; k++){
-		*(*(*(DDD+i)+j)+k)= 0;
+	for (k=0; k<bn; k++){
+		*(*(*(DDD+i)+j)+k)= 0.0;
 		*(*(*(DDR+i)+j)+k)= 0.0;   
 		*(*(*(DRR+i)+j)+k)= 0.0;
 		*(*(*(RRR+i)+j)+k)= 0.0;

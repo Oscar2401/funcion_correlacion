@@ -9,11 +9,11 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *);
-void save_histogram(string, int, unsigned int *);
+void save_histogram(string, int, float *);
 void save_histogram_analitic(string, int, float *);
 
 PointW3D *dataD;
-unsigned int  *DD; 
+float *DD; 
 float *RR;
 Node ***nodeD;
 
@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new unsigned int[bn];
+	DD = new float[bn];
 	RR = new float[bn];
 	int i, j;
 	for (i = 0; i < bn; ++i){
@@ -118,7 +118,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 }
 
 //====================================================================
-void save_histogram(string name, int bns, unsigned int *histo){
+void save_histogram(string name, int bns, float *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);
