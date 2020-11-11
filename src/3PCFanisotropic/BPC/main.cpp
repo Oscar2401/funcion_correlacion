@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 	//float d_max = stof(argv[5]);
 	//int n_pts = 32768, bn = 10;
 	//int n_pts = 32*32*32, bn = 20;
-	int n_pts = 500, bn = 20;
+	int n_pts = 5000, bn = 20;
 	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; // Asignamos meoria a esta variable
 	dataR = new PointW3D[n_pts];
@@ -121,10 +121,13 @@ int main(int argc, char **argv){
 	NODE3P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD, dataR, nodeR);
 	clock_t c_start = clock();
 	
-	my_hist.make_histoXXX(DDD, my_hist.meshData()); 
+	std::cout << "-> Estoy haciendo histograma DDD..." << std::endl;
+	my_hist.make_histoXXX(DDD, my_hist.meshData());
+	std::cout << "-> Estoy haciendo histograma RRR..." << std::endl; 
 	my_hist.make_histoXXX(RRR, my_hist.meshRand()); 
-	
+	std::cout << "-> Estoy haciendo histograma DDR..." << std::endl;
 	my_hist.make_histoXXY(DDR, my_hist.meshData(), my_hist.meshRand(), dataD, dataR); 
+	std::cout << "-> Estoy haciendo histograma DRR..." << std::endl;
 	my_hist.make_histoXXY(DRR, my_hist.meshRand(), my_hist.meshData(), dataR, dataD);
 	; 
 	clock_t c_end = clock();
