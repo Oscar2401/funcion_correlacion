@@ -91,22 +91,22 @@ class NODE3P{
 		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXXX(float ***, Node ***);
-		void count_3_N111(int, int, int, float ***, Node ***);
-		void count_3_N112(int, int, int, int, int, int, float ***, Node ***);
-		void count_3_N123(int, int, int, int, int, int, int, int, int, float ***, Node ***);
-		void symmetrize(float ***);
-		void symmetrize_analitic(float ***);
-		void BPC(float ***, PointW3D *);
+		void make_histoXXX(double ***, Node ***);
+		void count_3_N111(int, int, int, double ***, Node ***);
+		void count_3_N112(int, int, int, int, int, int, double ***, Node ***);
+		void count_3_N123(int, int, int, int, int, int, int, int, int, double ***, Node ***);
+		void symmetrize(double ***);
+		void symmetrize_analitic(double ***);
+		void BPC(double ***, PointW3D *);
 		
-		void front_node_112(int, int, int, int, int, int, bool, bool, bool, float ***, Node ***);
-		void front_112(int,int,int,int,int,int,short int,short int,short int,float ***,Node ***);
-		void front_node_123(int,int,int,int,int,int,int,int,int,bool,bool,bool,float ***,Node ***);
-		void front_123(int,int,int,int,int,int,int,int,int,short int,short int,short int,short int,short int,short int,short int,short int,short int,float ***, Node ***);
+		void front_node_112(int, int, int, int, int, int, bool, bool, bool, double ***, Node ***);
+		void front_112(int,int,int,int,int,int,short int,short int,short int, double ***,Node ***);
+		void front_node_123(int,int,int,int,int,int,int,int,int,bool,bool,bool, double ***,Node ***);
+		void front_123(int,int,int,int,int,int,int,int,int,short int,short int,short int,short int,short int,short int,short int,short int,short int,double ***, Node ***);
 		
-		void make_histo_analitic(float ***, float ***, Node ***);
-		void make_histoXX(float *, float *, Node ***, int);
-		void histo_front_XX(float *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int, float);
+		void make_histo_analitic(double ***, double ***, Node ***);
+		void make_histoXX(double *, double *, Node ***, int);
+		void histo_front_XX(double *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int, float);
 		
 		~NODE3P();
 };
@@ -190,7 +190,7 @@ void NODE3P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 	array[lon-1].fz = _fz;
 }
 //=================================================================== 
-void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
+void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	/*
 	Función para crear los histogramas DDD.
 	
@@ -783,7 +783,7 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 	symmetrize(XXX); 	
 }
 //=================================================================== 
-void NODE3P::count_3_N111(int row, int col, int mom, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en un mismo Nodo.
 	
@@ -837,7 +837,7 @@ void NODE3P::count_3_N111(int row, int col, int mom, float ***XXX, Node ***nodeS
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -914,7 +914,7 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, float 
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en tres 
 	nodos con un puntos en N1, un punto en N2
@@ -966,7 +966,7 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 	}
 }
 //=================================================================== 
-void NODE3P::symmetrize(float ***XXX){
+void NODE3P::symmetrize(double ***XXX){
 	/*
 	Función para simetrizar histograma
 	
@@ -995,7 +995,7 @@ void NODE3P::symmetrize(float ***XXX){
 //================ Funciones para BPC ===================
 //=======================================================
 
-void NODE3P::front_node_112(int row, int col, int mom, int u, int v, int w, bool conx, bool cony, bool conz, float ***XXX, Node ***nodeS){
+void NODE3P::front_node_112(int row, int col, int mom, int u, int v, int w, bool conx, bool cony, bool conz, double ***XXX, Node ***nodeS){
 	
 	float x1N = nodeS[row][0][0].nodepos.x;
 	float y1N = nodeS[row][col][0].nodepos.y;
@@ -1071,7 +1071,7 @@ void NODE3P::front_node_112(int row, int col, int mom, int u, int v, int w, bool
 	}
 }
 //=================================================================== 
-void NODE3P::front_112(int row,int col,int mom,int u,int v,int w,short int fx2,short int fy2,short int fz2,float ***XXX,Node ***nodeS){
+void NODE3P::front_112(int row,int col,int mom,int u,int v,int w,short int fx2,short int fy2,short int fz2,double ***XXX,Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -1155,7 +1155,7 @@ void NODE3P::front_112(int row,int col,int mom,int u,int v,int w,short int fx2,s
 	}
 }
 //=================================================================== 
-void NODE3P::front_node_123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, bool conx, bool cony, bool conz, float ***XXX, Node ***nodeS){
+void NODE3P::front_node_123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, bool conx, bool cony, bool conz, double ***XXX, Node ***nodeS){
 	
 	float fx1N = nodeS[row][0][0].nodepos.fx, x1N = nodeS[row][0][0].nodepos.x;
 	float fy1N = nodeS[row][col][0].nodepos.fy, y1N = nodeS[row][col][0].nodepos.y;
@@ -1361,7 +1361,7 @@ void NODE3P::front_node_123(int row, int col, int mom, int u, int v, int w, int 
 	}	
 }
 //=================================================================== 
-void NODE3P::front_123(int row,int col,int mom,int u,int v,int w,int a,int b,int c,short int fx1N,short int fy1N,short int fz1N,short int fx2N,short int fy2N,short int fz2N,short int fx3N,short int fy3N,short int fz3N,float ***XXX, Node ***nodeS){
+void NODE3P::front_123(int row,int col,int mom,int u,int v,int w,int a,int b,int c,short int fx1N,short int fy1N,short int fz1N,short int fx2N,short int fy2N,short int fz2N,short int fx3N,short int fy3N,short int fz3N,double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en tres 
 	nodos con un puntos en N1, un punto en N2
@@ -1428,7 +1428,7 @@ void NODE3P::front_123(int row,int col,int mom,int u,int v,int w,int a,int b,int
 //================ Funciones para formulas analíticas =============== 
 //=================================================================== 
 
-void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
+void NODE3P::make_histo_analitic(double ***XXY, float ***XXX, Node ***nodeX){
 	/*
 	Función para construir histogramas con funciones analíticas
 	
@@ -1474,10 +1474,10 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	int bins = ptt*bn;
 	float dr_ptt = d_max/(float)bins;
 	float dr_ptt2 = dr_ptt/2;
-	float  *DD;
-	float *RR;
-	DD = new float[bins];
-	RR = new float[bins];
+	double *DD;
+	double *RR;
+	DD = new double[bins];
+	RR = new double[bins];
 	for (i = 0; i < bins; ++i){
 		*(DD+i) = 0; 
 		*(RR+i) = 0.0;
@@ -1487,8 +1487,8 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	make_histoXX(DD, RR, nodeX, bins);
 	
 	// Iniciamos un arreglo para la funcion f_averrage
-	float *ff_av;
-	ff_av = new float[bn];
+	double *ff_av;
+	ff_av = new double[bn];
 	for (i=0; i<bn; ++i) *(ff_av+i) = 0;
 	
 	// Calculamos las f_averrage
@@ -1499,7 +1499,7 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	i_ = i*ptt;
 		for(j = 0; j<ptt; ++j){
 		rj = (j+0.5)*dr_ptt;
-		f_av += (ri + rj)*(((float)(*(DD+i_+j)) /(*(RR+i_+j))) - 1);
+		f_av += (ri + rj)*(((double)(*(DD+i_+j)) /(*(RR+i_+j))) - 1);
 		}
 	*(ff_av+i) = f_av/ptt;
 	}
@@ -1513,8 +1513,8 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	int bins_ref = ptt*bn_ref*bn;
 	float dr_ptt_ref = d_max/(float)bins_ref;
 	float dr_ptt_ref2 = dr_ptt_ref/2;
-	DD = new float[bins_ref];
-	RR = new float[bins_ref];
+	DD = new double[bins_ref];
+	RR = new double[bins_ref];
 	for (i = 0; i < bins_ref; i++){
 		*(DD+i) = 0; 
 		*(RR+i) = 0.0;
@@ -1524,8 +1524,8 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	make_histoXX(DD, RR, nodeX, bins_ref);
 	
 	// Iniciamos un arreglo para la funcion f_averrage del refinamiento
-	float *ff_av_ref;
-	ff_av_ref = new float[bn_ref*bn];
+	double *ff_av_ref;
+	ff_av_ref = new double[bn_ref*bn];
 	for (i=0; i<bn_ref*bn; ++i) *(ff_av_ref+i) = 0.0;
 	
 	// Calculamos las f_averrage del refinamiento
@@ -1539,7 +1539,7 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 		j_ = j*ptt;
 			for(k = 0; k<ptt; ++k){
 				rk = (k+0.5)*dr_ptt_ref;
-				f_av += (ri+rj+rk)*(((float)(*(DD+i_+j_+k))/(*(RR+i_+j_+k)))-1);
+				f_av += (ri+rj+rk)*(((double)(*(DD+i_+j_+k))/(*(RR+i_+j_+k)))-1);
 			}
 			*(ff_av_ref+i_+j) = f_av/ptt;
 		}
@@ -1629,7 +1629,7 @@ void NODE3P::make_histo_analitic(float ***XXY, float ***XXX, Node ***nodeX){
 	
 }
 //=================================================================== 
-void NODE3P::make_histoXX(float *XX, float *YY, Node ***nodeX, int bins){
+void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -1807,7 +1807,7 @@ void NODE3P::make_histoXX(float *XX, float *YY, Node ***nodeX, int bins){
 }
 
 //=================================================================== 
-void NODE3P::histo_front_XX(float *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w, float ds_new){
+void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w, float ds_new){
 	int i, j;
 	float dis_f, dis, d_x, d_y, d_z;
 	float x, y, z, a;
@@ -1953,7 +1953,7 @@ void NODE3P::histo_front_XX(float *PP, Node ***dat, float disn, float dn_x, floa
 	}
 }
 //=================================================================== 
-void NODE3P::symmetrize_analitic(float ***XXX){
+void NODE3P::symmetrize_analitic(double ***XXX){
 	int i,j,k;
 	float elem;
 	for (i=0; i<bn; i++){

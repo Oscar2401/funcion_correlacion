@@ -86,9 +86,9 @@ class NODE2P{
 		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(float **, Node ***);
-		void make_histoXY(float **, Node ***, Node ***);
-		void histo_front(float **, Node ***, Node ***, float, float, float, bool, bool, bool, int, int, int, int, int, int, float);
+		void make_histoXX(double **, Node ***);
+		void make_histoXY(double **, Node ***, Node ***);
+		void histo_front(double **, Node ***, Node ***, float, float, float, bool, bool, bool, int, int, int, int, int, int, float);
 		~NODE2P();
 };
 
@@ -150,7 +150,7 @@ void NODE2P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 
 //=================================================================== 
 
-void NODE2P::make_histoXX(float **XX, Node ***nodeX){
+void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -339,7 +339,7 @@ void NODE2P::make_histoXX(float **XX, Node ***nodeX){
 }
 //=================================================================== 
 
-void NODE2P::make_histoXY(float **XY, Node ***nodeX, Node ***nodeY){
+void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	/*
 	Función para crear los histogramas DR.
 	
@@ -421,7 +421,7 @@ void NODE2P::make_histoXY(float **XY, Node ***nodeX, Node ***nodeY){
 }
 //=================================================================== 
 
-void NODE2P::histo_front(float **PP, Node ***dat, Node ***ran, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w, float q){
+void NODE2P::histo_front(double **PP, Node ***dat, Node ***ran, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w, float q){
 	int i, j;
 	float dis_f,dis,d_x,d_y,d_z;
 	float dx_nod, dy_nod, dz_nod;

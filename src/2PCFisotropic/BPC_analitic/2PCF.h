@@ -22,13 +22,13 @@ struct Node{
 };
 
 //=================================================================== 
-//======================== Clase ==================================== 
+//======================== Class ==================================== 
 //=================================================================== 
 
 class NODE2P{
-	//Atributos de clase:
+	// Class attributes:
 	private:
-		// Asignados
+		// Assigned
 		int bn;
 		int n_pts;
 		float size_box;
@@ -36,7 +36,7 @@ class NODE2P{
 		float d_max;
 		Node ***nodeD;
 		PointW3D *dataD;
-		// Derivados
+		// Derivatives
 		float ll;
 		float dd_max;
 		float corr;
@@ -79,8 +79,8 @@ class NODE2P{
 		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(float *, float*, Node ***);
-		void histo_front_XX(float *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
+		void make_histoXX(double*, double*, Node ***);
+		void histo_front_XX(double *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		~NODE2P();
 };
 
@@ -142,7 +142,7 @@ void NODE2P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 
 //=================================================================== 
 
-void NODE2P::make_histoXX(float *XX, float *YY, Node ***nodeX){
+void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	/*
 	Función para crear los histogramas DD y RR.
 	
@@ -318,20 +318,20 @@ void NODE2P::make_histoXX(float *XX, float *YY, Node ***nodeX){
 	// Histograma RR (ANALITICA)
 	//======================================
 	std::cout << "-> Estoy haciendo histograma RR..." << std::endl;
-	float dr = (d_max/bn);
-	float V = size_box*size_box*size_box;
-	float beta1 = n_pts*n_pts/V;
-	float alph = 4*(2*acos(0.0))*(beta1)*dr*dr*dr/3;
-	float r1, r2;
+	double dr = (d_max/bn);
+	double V = size_box*size_box*size_box;
+	double beta1 = n_pts*n_pts/V;
+	double alph = 4*(2*acos(0.0))*(beta1)*dr*dr*dr/3;
+	double r1, r2;
 	for(int a=0; a<bn; ++a) {
-		r2 = (float) a;
+		r2 = (double) a;
 		r1 = r2+1;
         	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
 	}
 }
 
 //=================================================================== 
-void NODE2P::histo_front_XX(float *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w){
+void NODE2P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w){
 	int i, j;
 	float dis_f,dis,d_x,d_y,d_z;
 	float x,y,z,w1;

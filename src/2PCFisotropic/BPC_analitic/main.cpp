@@ -9,20 +9,18 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *);
-void save_histogram(string, int, float *);
-void save_histogram_analitic(string, int, float *);
+void save_histogram(string, int, double *);
+void save_histogram_analitic(string, int, double *);
 
 PointW3D *dataD;
-float *DD; 
-float *RR;
+double *DD; 
+double *RR;
 Node ***nodeD;
 
 int main(int argc, char **argv){
-	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
-	//float d_max = stof(argv[5]);
-	//int n_pts = 32768, bn = 10;
-	int n_pts = 32*32*32, bn = 1000;
-	float d_max = 60.0, size_box = 250.0, alpha = 2.176;
+
+	int n_pts = 32*32*32, bn = 100;
+	float d_max = 140.0, size_box = 250.0, alpha = 2.176;
 	float size_node = alpha*(size_box/pow((float)(n_pts),1/3.));
 	dataD = new PointW3D[n_pts]; // Asignamos meoria a esta variable
 	
@@ -50,11 +48,11 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new float[bn];
-	RR = new float[bn];
+	DD = new double[bn];
+	RR = new double[bn];
 	int i, j;
 	for (i = 0; i < bn; ++i){
-		*(DD+i) = 0; // vector[i]
+		*(DD+i) = 0.0;
 		*(RR+i) = 0.0;
 	}
 
@@ -118,7 +116,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 }
 
 //====================================================================
-void save_histogram(string name, int bns, float *histo){
+void save_histogram(string name, int bns, double *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);
@@ -131,7 +129,7 @@ void save_histogram(string name, int bns, float *histo){
 	file2.close();
 }
 //====================================================================
-void save_histogram_analitic(string name, int bns, float *histo){
+void save_histogram_analitic(string name, int bns, double *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);

@@ -9,13 +9,13 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *);
-void save_histogram(string, int, float **);
+void save_histogram(string, int, double **);
 
 PointW3D *dataD;
 PointW3D *dataR;
-float **DD; 
-float **RR;
-float **DR;
+double **DD; 
+double **RR;
+double **DR;
 Node ***nodeD;
 Node ***nodeR;
 
@@ -54,14 +54,14 @@ int main(int argc, char **argv){
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new float*[bn];
-	RR = new float*[bn];
-	DR = new float*[bn];
+	DD = new double*[bn];
+	RR = new double*[bn];
+	DR = new double*[bn];
 	int i, j;
 	for (i=0; i<bn; ++i){
-		*(DD+i) = new float[bn];
-		*(RR+i) = new float[bn];
-		*(DR+i) = new float[bn];
+		*(DD+i) = new double[bn];
+		*(RR+i) = new double[bn];
+		*(DR+i) = new double[bn];
 	}
 	for (i=0; i<bn; ++i){
 	for (j=0; j<bn; ++j){
@@ -120,7 +120,6 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	
 	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
-	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
 	cout << "Programa finalizado..." << endl;
 	cin.get();
 	return 0;
@@ -142,7 +141,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 }
 
 //====================================================================
-void save_histogram(string name, int bns, float **histo){
+void save_histogram(string name, int bns, double **histo){
 	int i, j;
 	ofstream file;
 	file.open(name.c_str(),ios::out | ios::binary);

@@ -9,18 +9,16 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *, float size_box, float d_max);
-void save_histogram(string, int, float ***);
+void save_histogram(string, int, double ***);
 void delete_histos(int);
 void delete_dat();
 
 PointW3D *dataD, *dataR;
-float  ***DDD, ***RRR, ***DDR, ***DRR;
+double  ***DDD, ***RRR, ***DDR, ***DRR;
 Node ***nodeD;
 
 int main(int argc, char **argv){
-	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
-	//float d_max = stof(argv[5]);
-	//int n_pts = 32768, bn = 10;
+
 	int n_pts = 5000, bn = 20;
 	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; 
@@ -52,21 +50,21 @@ int main(int argc, char **argv){
 	nameDRR += ".dat";
 	
 	// inicializamos los histogramas
-	DDD = new float**[bn];
-	RRR = new float**[bn];
-	DDR = new float**[bn];
-	DRR = new float**[bn];
+	DDD = new double**[bn];
+	RRR = new double**[bn];
+	DDR = new double**[bn];
+	DRR = new double**[bn];
 	int i,j,k;
 	for (i=0; i<bn; i++){
-	*(DDD+i) = new float*[bn];
-	*(RRR+i) = new float*[bn];
-	*(DDR+i) = new float*[bn];
-	*(DRR+i) = new float*[bn];
+	*(DDD+i) = new double*[bn];
+	*(RRR+i) = new double*[bn];
+	*(DDR+i) = new double*[bn];
+	*(DRR+i) = new double*[bn];
 		for (j = 0; j < bn; j++){
-		*(*(DDD+i)+j) = new float[bn];
-		*(*(RRR+i)+j) = new float[bn];
-		*(*(DDR+i)+j) = new float[bn];
-		*(*(DRR+i)+j) = new float[bn];
+		*(*(DDD+i)+j) = new double[bn];
+		*(*(RRR+i)+j) = new double[bn];
+		*(*(DDR+i)+j) = new double[bn];
+		*(*(DRR+i)+j) = new double[bn];
 		}
 	}
 	
@@ -165,7 +163,7 @@ void open_files(string name_file, int pts, PointW3D *datos, float size_box, floa
 	}
 }
 //====================================================================
-void save_histogram(string name, int bns, float ***histo){
+void save_histogram(string name, int bns, double ***histo){
 	int i, j, k;
 	ofstream file;
 	file.open(name.c_str(),ios::out | ios::binary);

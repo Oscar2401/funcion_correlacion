@@ -86,16 +86,16 @@ class NODE3P{
 		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXXX(float ***, Node ***);
-		void count_3_N111(int, int, int, float ***, Node ***);
-		void count_3_N112(int, int, int, int, int, int, float ***, Node ***);
-		void count_3_N123(int, int, int, int, int, int, int, int, int, float ***, Node ***);
+		void make_histoXXX(double ***, Node ***);
+		void count_3_N111(int, int, int, double ***, Node ***);
+		void count_3_N112(int, int, int, int, int, int, double ***, Node ***);
+		void count_3_N123(int, int, int, int, int, int, int, int, int, double ***, Node ***);
 		
-		void make_histoXXY(float ***, Node ***, Node ***);
-		void count_3_N112_xxy(int, int, int, int, int, int, float ***, Node ***, Node ***);
-		void count_3_N123_xxy(int, int, int, int, int, int, int, int, int, float ***, Node ***, Node ***);
+		void make_histoXXY(double ***, Node ***, Node ***);
+		void count_3_N112_xxy(int, int, int, int, int, int, double ***, Node ***, Node ***);
+		void count_3_N123_xxy(int, int, int, int, int, int, int, int, int, double ***, Node ***, Node ***);
 		
-		void symmetrize(float ***);
+		void symmetrize(double ***);
 		
 		~NODE3P();
 };
@@ -153,7 +153,7 @@ void NODE3P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 	array[lon-1].w = _w; 
 }
 //=================================================================== 
-void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
+void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	/*
 	Función para crear los histogramas DDD.
 	
@@ -227,8 +227,10 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 			dis_nod2 = dy_nod2 + dz_nod2;
 			if (dis_nod2 <= ddmax_nod){
 			dy_nod3 = y3N-y2N;
+			dy_nod3 *= dy_nod3;
 			dz_nod3 = z3N-z2N;
-			dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+			dz_nod3 *= dz_nod3;
+			dis_nod3 = dy_nod3 + dz_nod3;
 			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 			}
 			}
@@ -251,9 +253,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 				dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dx_nod3 = x3N-x2N;
+				dx_nod3 *= dx_nod3;
 				dy_nod3 = y3N-y2N;
+				dy_nod3 *= dy_nod3;
 				dz_nod3 = z3N-z2N;
-				dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+				dz_nod3 *= dz_nod3;
+				dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
 				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 				}
 				}
@@ -314,8 +319,10 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 				dis_nod2 = dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dy_nod3 = y3N-y2N;
+				dy_nod3 *= dy_nod3;
 				dz_nod3 = z3N-z2N;
-				dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+				dz_nod3 *= dz_nod3;
+				dis_nod3 = dy_nod3 + dz_nod3;
 				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 				}
 				}
@@ -338,9 +345,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					dx_nod3 = x3N-x2N;
+					dx_nod3 *= dx_nod3;
 					dy_nod3 = y3N-y2N;
+					dy_nod3 *= dy_nod3;
 					dz_nod3 = z3N-z2N;
-					dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+					dz_nod3 *= dz_nod3;
+					dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
 					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 					}
 					}
@@ -409,8 +419,10 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					dy_nod3 = y3N-y2N;
+					dy_nod3 *= dy_nod3;
 					dz_nod3 = z3N-z2N;
-					dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+					dz_nod3 *= dz_nod3;
+					dis_nod3 = dy_nod3 + dz_nod3;
 					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 					}
 					}
@@ -433,9 +445,12 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						dx_nod3 = x3N-x2N;
+						dx_nod3 *= dx_nod3;
 						dy_nod3 = y3N-y2N;
+						dy_nod3 *= dy_nod3;
 						dz_nod3 = z3N-z2N;
-						dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+						dz_nod3 *= dz_nod3;
+						dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
 						if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
 						}
 						}
@@ -454,7 +469,7 @@ void NODE3P::make_histoXXX(float ***XXX, Node ***nodeX){
 	symmetrize(XXX); 
 }
 //=================================================================== 
-void NODE3P::count_3_N111(int row, int col, int mom, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en un mismo Nodo.
 	
@@ -508,7 +523,7 @@ void NODE3P::count_3_N111(int row, int col, int mom, float ***XXX, Node ***nodeS
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -585,7 +600,7 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, float 
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, float ***XXX, Node ***nodeS){
+void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXX, Node ***nodeS){
 	/*
 	Funcion para contar los triangulos en tres 
 	nodos con un puntos en N1, un punto en N2
@@ -642,7 +657,7 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 	}
 }
 //=================================================================== 
-void NODE3P::symmetrize(float ***XXX){
+void NODE3P::symmetrize(double ***XXX){
 	/*
 	Función para simetrizar histograma
 	
@@ -667,7 +682,7 @@ void NODE3P::symmetrize(float ***XXX){
 	}
 }
 //=================================================================== 
-void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
+void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	/*
 	Función para crear los histogramas DDR y DRR.
 	
@@ -698,13 +713,16 @@ void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
 	for (u=0; u<partitions; ++u){
 	x2N = nodeY[u][0][0].nodepos.x;
 	dx_nod = x2N-x1N;
+	dx_nod *= dx_nod;
 		for (v=0; v<partitions; ++v){
 		y2N = nodeY[u][v][0].nodepos.y;
 		dy_nod = y2N-y1N;
+		dy_nod *= dy_nod;
 			for (w=0; w<partitions; ++w){
 			z2N = nodeY[u][v][w].nodepos.z;
 			dz_nod = z2N-z1N;
-			dis_nod = dx_nod*dx_nod + dy_nod*dy_nod + dz_nod*dz_nod;
+			dz_nod *= dz_nod;
+			dis_nod = dx_nod + dy_nod + dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
 			// 2 puntos en N y 1 punto en N'
@@ -721,11 +739,14 @@ void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
 			x3N = nodeX[a][0][0].nodepos.x;
 			y3N = nodeX[a][b][0].nodepos.y;
 			dx_nod2 = x3N-x1N;
+			dx_nod2 *= dx_nod2;
 			dy_nod2 = y3N-y1N;
+			dy_nod2 *= dy_nod2;
 				for (c=mom+1;  c<partitions; ++c){	
 				z3N = nodeX[a][b][c].nodepos.z;
 				dz_nod2 = z3N-z1N;
-				dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+				dz_nod2 *= dz_nod2;
+				dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 				if (dis_nod2 <= ddmax_nod){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
@@ -740,14 +761,18 @@ void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
 				for (b=col+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
 				dy_nod2 = y3N-y1N;
+				dy_nod2 *= dy_nod2;
 					for (c=0;  c<partitions; ++c){
 					z3N = nodeX[a][b][c].nodepos.z;
 					dz_nod2 = z3N-z1N;
-					dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+					dz_nod2 *= dz_nod2;
+					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 					if (dis_nod2 <= ddmax_nod){
 					dy_nod3 = y3N-y2N;
+					dy_nod3 *= dy_nod3;
 					dz_nod3 = z3N-z2N;
-					dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+					dz_nod3 *= dz_nod3;
+					dis_nod3 = dy_nod3 + dz_nod3;
 					if (dis_nod3 <= ddmax_nod){
 						count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, XXY, nodeX, nodeY);
 					}
@@ -760,18 +785,24 @@ void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
 				for (a=row+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
 				dx_nod2 = x3N-x1N;
+				dx_nod2 *= dx_nod2;
 					for (b=0; b<partitions; ++b){
 					y3N = nodeX[a][b][0].nodepos.y;
 					dy_nod2 = y3N-y1N;
+					dy_nod2 *= dy_nod2;
 						for (c=0;  c<partitions; ++c){
 						z3N = nodeX[a][b][c].nodepos.z;
 						dz_nod2 = z3N-z1N;
-						dis_nod2 = dx_nod2*dx_nod2 + dy_nod2*dy_nod2 + dz_nod2*dz_nod2;
+						dz_nod2 *= dz_nod2;
+						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
 						if (dis_nod2 <= ddmax_nod){
 						dx_nod3 = x3N-x2N;
+						dx_nod3 *= dx_nod3;
 						dy_nod3 = y3N-y2N;
+						dy_nod3 *= dy_nod3;
 						dz_nod3 = z3N-z2N;
-						dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
+						dz_nod3 *= dz_nod3;
+						dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
 						if (dis_nod3 <= ddmax_nod){
 							count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, XXY, nodeX, nodeY);
 						}
@@ -788,7 +819,7 @@ void NODE3P::make_histoXXY(float ***XXY, Node ***nodeX, Node ***nodeY){
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, float ***XXY, Node ***nodeS, Node ***nodeT){
+void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, double ***XXY, Node ***nodeS, Node ***nodeT){
 	/*
 	Funcion para contar los triangulos en dos 
 	nodos con dos puntos en N1 y un punto en N2.
@@ -849,7 +880,7 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, fl
 	}
 }
 //=================================================================== 
-void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, int a, int b, int c, float ***XXY, Node ***nodeS, Node ***nodeT){
+void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXY, Node ***nodeS, Node ***nodeT){
 	/*
 	
 	Funcion para contar los triangulos en tres 

@@ -9,12 +9,11 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *);
-void save_histogram(string, int, float *);
-void save_histogram_analitic(string, int, float *);
+void save_histogram(string, int, double *);
 
 PointW3D *dataD;
-float *DD; 
-float *RR;
+double *DD; 
+double *RR;
 Node ***nodeD;
 
 int main(int argc, char **argv){
@@ -43,23 +42,24 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	// Nombre de los archivos 
 	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
-	nameDD.append(argv[2]);
-	nameRR.append(argv[2]);
+	nameDD.append(argv[3]);
+	nameRR.append(argv[3]);
 	nameDD += ".dat";
 	nameRR += ".dat";
 	nameDR += ".dat";
 	
 	// inicializamos los histogramas
-	DD = new float[bn];
-	RR = new float[bn];
+	DD = new double[bn];
+	RR = new double[bn];
 	int i, j;
 	for (i = 0; i < bn; ++i){
-		*(DD+i) = 0; // vector[i]
+		*(DD+i) = 0.0; // vector[i]
 		*(RR+i) = 0.0;
 	}
 
 	// Abrimos y trabajamos los datos en los histogramas
 	open_files(argv[1],n_pts,dataD); // guardo los datos en los Struct
+	open_files(argv[2],n_pts,dataR);
 	
 	// inicializamos las mallas
 	int partitions = (int)(ceil(size_box/size_node));
@@ -67,6 +67,11 @@ int main(int argc, char **argv){
 	for ( i = 0; i < partitions; ++i){
 		*(nodeD + i) = new Node*[partitions];
 		for (int j = 0; j < partitions; ++j) *(*(nodeD + i)+j) = new Node[partitions];
+	}
+	nodeR = new Node**[partitions];
+	for ( i = 0; i < partitions; ++i){
+		*(nodeR + i) = new Node*[partitions];
+		for (int j = 0; j < partitions; ++j) *(*(nodeR + i)+j) = new Node[partitions];
 	}	
 	
 	// Iniciamos clase
@@ -132,7 +137,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 }
 
 //====================================================================
-void save_histogram(string name, int bns, float *histo){
+void save_histogram(string name, int bns, double *histo){
 	/* Función para guardar nuestros archivos de histogramas */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);

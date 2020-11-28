@@ -9,19 +9,19 @@
 using namespace std;
 
 void open_files(string, int, PointW3D *);
-void save_histogram(string, int, float *****);
+void save_histogram(string, int, double *****);
 void delete_histos(int);
 void delete_dat();
 
 PointW3D *dataD, *dataR;
-float  *****DDD, *****RRR, *****DDR, *****DRR;
+double *****DDD;
+double *****RRR;
+double *****DDR;
+double *****DRR;
 Node ***nodeD, ***nodeR;
 
 int main(int argc, char **argv){
-	//int n_pts = stoi(argv[3]), bn = stoi(argv[4]);
-	//float d_max = stof(argv[5]);
-	//int n_pts = 32768, bn = 10;
-	//int n_pts = 32*32*32, bn = 20;
+
 	int n_pts = 5000, bn = 20;
 	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; // Asignamos meoria a esta variable
@@ -53,31 +53,31 @@ int main(int argc, char **argv){
 	nameDRR += ".dat";
 	
 	// inicializamos los histogramas
-	DDD = new float****[bn];
-	RRR = new float****[bn];
-	DDR = new float****[bn];
-	DRR = new float****[bn];
+	DDD = new double****[bn];
+	RRR = new double****[bn];
+	DDR = new double****[bn];
+	DRR = new double****[bn];
 	int i,j,k,a,b;
 	for (i=0; i<bn; ++i){
-	*(DDD+i) = new float***[bn];
-	*(RRR+i) = new float***[bn];
-	*(DDR+i) = new float***[bn];
-	*(DRR+i) = new float***[bn];
+	*(DDD+i) = new double***[bn];
+	*(RRR+i) = new double***[bn];
+	*(DDR+i) = new double***[bn];
+	*(DRR+i) = new double***[bn];
 		for (j=0; j<bn; ++j){
-		*(*(DDD+i)+j) = new float**[bn];
-		*(*(RRR+i)+j) = new float**[bn];
-		*(*(DDR+i)+j) = new float**[bn];
-		*(*(DRR+i)+j) = new float**[bn];
+		*(*(DDD+i)+j) = new double**[bn];
+		*(*(RRR+i)+j) = new double**[bn];
+		*(*(DDR+i)+j) = new double**[bn];
+		*(*(DRR+i)+j) = new double**[bn];
 			for (k=0; k<bn; ++k){
-			*(*(*(DDD+i)+j)+k) = new float*[bn];
-			*(*(*(RRR+i)+j)+k) = new float*[bn];
-			*(*(*(DDR+i)+j)+k) = new float*[bn];
-			*(*(*(DRR+i)+j)+k) = new float*[bn];
+			*(*(*(DDD+i)+j)+k) = new double*[bn];
+			*(*(*(RRR+i)+j)+k) = new double*[bn];
+			*(*(*(DDR+i)+j)+k) = new double*[bn];
+			*(*(*(DRR+i)+j)+k) = new double*[bn];
 				for (a=0; a<bn; ++a){
-				*(*(*(*(DDD+i)+j)+k)+a) = new float[bn];
-				*(*(*(*(RRR+i)+j)+k)+a) = new float[bn];
-				*(*(*(*(DDR+i)+j)+k)+a) = new float[bn];
-				*(*(*(*(DRR+i)+j)+k)+a) = new float[bn];
+				*(*(*(*(DDD+i)+j)+k)+a) = new double[bn];
+				*(*(*(*(RRR+i)+j)+k)+a) = new double[bn];
+				*(*(*(*(DDR+i)+j)+k)+a) = new double[bn];
+				*(*(*(*(DRR+i)+j)+k)+a) = new double[bn];
 				}
 			}	
 		}
@@ -93,11 +93,7 @@ int main(int argc, char **argv){
 	 	*(*(*(*(*(DDR+i)+j)+k)+a)+b) = 0.0;   
 	 	*(*(*(*(*(DRR+i)+j)+k)+a)+b) = 0.0;
 	 	*(*(*(*(*(RRR+i)+j)+k)+a)+b) = 0.0;
-	 }
-	 } 
-	 }
-	 }
-	 }
+	 }}}}}
 
 	// Abrimos y trabajamos los datos en los histogramas
 	open_files(argv[1],n_pts,dataD);
@@ -153,7 +149,6 @@ int main(int argc, char **argv){
 	delete_histos(bn);
 	
 	printf("\nTiempo en CPU usado = %.4f seg.\n", time_elapsed_s );
-	//printf("\nTiempo implementado = %.4f seg.\n", ((float))/CLOCKS_PER_SEC);
 	cout << "Programa finalizado..." << endl;
 	cin.get();
 	return 0;
@@ -174,7 +169,7 @@ void open_files(string name_file, int pts, PointW3D *datos){
 	file.close();
 }
 //====================================================================
-void save_histogram(string name, int bns, float *****histo){
+void save_histogram(string name, int bns, double *****histo){
 	int i, j, k, l, m;
 	ofstream file;
 	file.open(name.c_str(),ios::out | ios::binary);
