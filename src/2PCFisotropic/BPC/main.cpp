@@ -13,9 +13,11 @@ void save_histogram(string, int, double *);
 void save_histogram_analitic(string, int, double *);
 
 PointW3D *dataD;
+PointW3D *dataR;
 double *DD; 
 double *RR;
 Node ***nodeD;
+Node ***nodeR;
 
 int main(int argc, char **argv){
 
@@ -23,6 +25,7 @@ int main(int argc, char **argv){
 	float d_max = 180.0, size_box = 250.0, alpha = 2.176;
 	float size_node = alpha*(size_box/pow((float)(n_pts),1/3.));
 	dataD = new PointW3D[n_pts]; 
+	dataR = new PointW3D[n_pts]; 
 	
 	cout << "\n        ISOTROPIC 2-POINT CORRELATION FUNCTION        \n" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
@@ -42,8 +45,8 @@ int main(int argc, char **argv){
 	
 	// File names
 	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_";
-	nameDD.append(argv[2]);
-	nameRR.append(argv[2]);
+	nameDD.append(argv[3]);
+	nameRR.append(argv[3]);
 	nameDD += ".dat";
 	nameRR += ".dat";
 	
@@ -57,39 +60,45 @@ int main(int argc, char **argv){
 	}
 
 	open_files(argv[1],n_pts,dataD);
+	open_files(argv[2],n_pts,dataR);
 	
 	// Initialize the grid
 	int partitions = (int)(ceil(size_box/size_node));
 	nodeD = new Node**[partitions];
+	nodeR = new Node**[partitions];
 	for ( i = 0; i < partitions; ++i){
 		*(nodeD + i) = new Node*[partitions];
-		for (int j = 0; j < partitions; ++j) *(*(nodeD + i)+j) = new Node[partitions];
+		*(nodeR + i) = new Node*[partitions];
+		for (int j = 0; j < partitions; ++j){
+			*(*(nodeD + i)+j) = new Node[partitions];
+			*(*(nodeR + i)+j) = new Node[partitions];
+		}
 	}	
 	
 	// Start class
-	NODE2P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD);
+	NODE2P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD, dataR, nodeR);
 	
 	clock_t c_start = clock();
 	
 	//construct histograms
-	my_hist.make_histoXX(DD, RR, my_hist.meshData()); 
-	
+	//===============================================
+	my_hist.make_histoXX(DD, my_hist.meshData()); 
+	save_histogram(nameDD, bn, DD);
+	cout << "Save histogram DD ..." << endl;
+	delete[] DD;
+	//===============================================
+	my_hist.make_histoXX(RR, my_hist.meshRand()); 
+	save_histogram_analitic(nameRR, bn, RR);
+	cout << "Save histogram RR ..." << endl;
+	delete[] RR;
+	//===============================================
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
 	
 	my_hist.~NODE2P();
 	
-	save_histogram(nameDD, bn, DD);
-	cout << "Save histogram DD ..." << endl;
-	save_histogram_analitic(nameRR, bn, RR);
-	cout << "Save histogram RR ..." << endl;
 	
 	cout << "Finish making all histograms" << endl;
-	
-	// Eliminamos los hitogramas 
-	delete[] DD;
-	delete[] RR;
-	
 	printf("\nCPU time used = %.4f seg.\n", time_elapsed_s );
 	cout << "Program completed SUCCESSFULLY!" << endl;
 	cin.get();

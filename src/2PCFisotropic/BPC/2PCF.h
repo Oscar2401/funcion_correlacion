@@ -36,6 +36,8 @@ class NODE2P{
 		float d_max;
 		Node ***nodeD;
 		PointW3D *dataD;
+		Node ***nodeR;
+		PointW3D *dataR;
 		// Derivatives
 		float ll;
 		float dd_max;
@@ -51,7 +53,7 @@ class NODE2P{
 	// Class Methods:
 	public:
 		// Class constructor:
-		NODE2P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD){
+		NODE2P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
 			
 			// Assigned
 			bn = _bn;
@@ -61,6 +63,8 @@ class NODE2P{
 			d_max = _d_max;
 			dataD = _dataD;
 			nodeD = _nodeD;
+			dataR = _dataR;
+			nodeR = _nodeR;
 			
 			// Derivatives
 			ll = size_box*size_box;
@@ -70,16 +74,20 @@ class NODE2P{
 			ds = ((float)(bn))/d_max;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
 			
-			make_nodos(nodeD,dataD); 
+			make_nodos(nodeD,dataD);
+			make_nodos(nodeR,dataR); 
 			std::cout << "I finished building nodes ..." << std::endl;
 		}
 		
 		Node ***meshData(){
 			return nodeD;
 		};
+		Node ***meshRand(){
+			return nodeR;
+		};
 		
 		// Implementamos Método de mallas:
-		void make_histoXX(double*, double*, Node ***);
+		void make_histoXX(double*, Node ***);
 		void histo_front_XX(double *, Node ***, float, float, float, float, bool, bool, bool, int, int, int, int, int, int);
 		~NODE2P();
 };
@@ -140,7 +148,7 @@ void NODE2P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 
 //=================================================================== 
 
-void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
+void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	/*
 	Function to create the DD and RR histograms.
 
@@ -152,7 +160,6 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
-	std::cout << "-> doing DD histogram ..." << std::endl;
 	
 	#pragma omp parallel num_threads(2) 
 	{
@@ -319,26 +326,6 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 		}
 	}
 	}
-	}
-	}
-	// ======================================
-	// RR Histogram (ANALYTICAL)
-	// ======================================
-	std::cout << "-> doing RR histogram ..." << std::endl;
-	#pragma omp parallel num_threads(2) 
-	{
-	double dr = (d_max/bn);
-	double V = size_box*size_box;
-	double beta1 = n_pts*n_pts/(V*size_box);
-	double alph = 4*(2*acos(0.0))*(beta1)/3;
-	alph *= dr*dr*dr;
-	double r1, r2;
-	int a;
-	#pragma omp for schedule(dynamic)
-	for(a=0; a<bn; ++a) {
-		r2 = (double)(a);
-		r1 = r2+1;
-        	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
 	}
 	}
 }
