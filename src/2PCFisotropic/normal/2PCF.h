@@ -36,6 +36,8 @@ class NODE2P{
 		float d_max;
 		Node ***nodeD;
 		PointW3D *dataD;
+		Node ***nodeR;
+		PointW3D *dataR;
 		// Derivatives
 		float ll;
 		float dd_max;
@@ -158,7 +160,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	
 	int partitions = (int)((size_box/size_node)+1);
 	
-	#pragma omp parallel num_threads(4)
+	#pragma omp parallel num_threads(2)
 	{
 	
 	// Private variables in threads:
@@ -167,14 +169,15 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
-	bool con_x, con_y, con_z;
 	
-	#pragma omp for collapse(3)  schedule(dynamic)
+	#pragma omp for collapse(3) schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	x1D = nodeX[row][0][0].nodepos.x;
+	
 	for (col = 0; col < partitions; ++col){
-	y1D = nodeX[row][col][0].nodepos.y;
+	
 	for (mom = 0; mom < partitions; ++mom){
+	x1D = nodeX[row][0][0].nodepos.x;
+	y1D = nodeX[row][col][0].nodepos.y;
 	z1D = nodeX[row][col][mom].nodepos.z;			
 		//==================================================
 		// Pairs of points in the same node:
@@ -189,7 +192,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 			dy = y-nodeX[row][col][mom].elements[j].y;
 			dz = z-nodeX[row][col][mom].elements[j].z;
 			dis = dx*dx+dy*dy+dz*dz;
-			if (dis <= dd_max){
+			if (dis < dd_max){
 			*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[row][col][mom].elements[j].w;
 			}
 			}
@@ -217,7 +220,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 				dy = y-nodeX[u][v][w].elements[j].y;
 				dz = z-nodeX[u][v][w].elements[j].z;
 				dis = dx*dx+dy*dy+dz*dz;
-				if (dis <= dd_max){
+				if (dis < dd_max){
 				*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 				}
 				}
@@ -247,7 +250,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 					dy =  y-nodeX[u][v][w].elements[j].y;
 					dz =  z-nodeX[u][v][w].elements[j].z;
 					dis = dx*dx+dy*dy+dz*dz;
-					if (dis <= dd_max){
+					if (dis < dd_max){
 					*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 					}
 					}
@@ -282,7 +285,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 						dy = y-nodeX[u][v][w].elements[j].y;
 						dz = z-nodeX[u][v][w].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
-						if (dis <= dd_max){
+						if (dis < dd_max){
 							*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 						}
 						}
@@ -298,7 +301,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 }
 //=================================================================== 
 
-void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
+void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 	/*
 	Function to create the DR histograms.
 
@@ -310,59 +313,60 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	
 	int partitions = (int)((size_box/size_node)+1);
 	
-	#pragma omp parallel num_threads(4)
+	#pragma omp parallel num_threads(2)
 	{
-	int i, j, row, col, mom, u, v, w;
-	float dis, dis_nod;
+	// Private variables in threads:
+	int i, j, row, col, mom, u, v, w, h;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
 	float dis_nod, dis;
-	bool con_x, con_y, con_z;
 	
-	#pragma omp for collapse(3)  schedule(dynamic)
+	#pragma omp for collapse(3) schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	x1D = nodeX[row][0][0].nodepos.x;
+	
 	for (col = 0; col < partitions; ++col){
-	y1D = nodeX[row][col][0].nodepos.y;
+
 	for (mom = 0; mom < partitions; ++mom){
+	x1D = nodeX[row][0][0].nodepos.x;
+	y1D = nodeX[row][col][0].nodepos.y;
 	z1D = nodeX[row][col][mom].nodepos.z;			
-	//=========================
-	// N2 mobile in ZYX
-	//=========================
-	for (u=0; u<partitions; ++u){
-	x2R = nodeY[u][0][0].nodepos.x;
-	dx_nod = x1D-x2R;
-	dx_nod *= dx_nod;
-		for (v=0; v<partitions; ++v){
-		y2R = nodeY[u][v][0].nodepos.y;
-		dy_nod = y1D-y2R;
-		dy_nod *= dy_nod;
-			for (w=0; w<partitions; ++w){
-			z2R = nodeY[u][v][w].nodepos.z;
-			dz_nod = z1D-z2R;
-			dz_nod *= dz_nod; 
-			dis_nod = dx_nod + dy_nod + dz_nod;
-			if (dis_nod <= ddmax_nod){
-				for (i=0; i<nodeX[row][col][mom].len; ++i){
-				x = nodeX[row][col][mom].elements[i].x;
-				y = nodeX[row][col][mom].elements[i].y;
-				z = nodeX[row][col][mom].elements[i].z;
-				w1 = nodeX[row][col][mom].elements[i].w;
-					for (j=0; j<nodeY[u][v][w].len; ++j){	
-					dx = x-nodeY[u][v][w].elements[j].x;
-					dy = y-nodeY[u][v][w].elements[j].y;
-					dz = z-nodeY[u][v][w].elements[j].z;
-					dis = dx*dx + dy*dy + dz*dz;
-					if (dis < dd_max){
-					*(XY+int(sqrt(dis)*ds)) += w1*nodeY[u][v][w].elements[j].w;
+		//=========================
+		// N2 mobile in ZYX
+		//=========================
+		for (u=0; u<partitions; ++u){
+		x2R = nodeY[u][0][0].nodepos.x;
+		dx_nod = x1D-x2R;
+		dx_nod *= dx_nod;
+			for (v=0; v<partitions; ++v){
+			y2R = nodeY[u][v][0].nodepos.y;
+			dy_nod = y1D-y2R;
+			dy_nod *= dy_nod;
+				for (w=0; w<partitions; ++w){
+				z2R = nodeY[u][v][w].nodepos.z;
+				dz_nod = z1D-z2R;
+				dz_nod *= dz_nod; 
+				dis_nod = dx_nod + dy_nod + dz_nod;
+				if (dis_nod <= ddmax_nod){
+					for (i=0; i<nodeX[row][col][mom].len; ++i){
+					x = nodeX[row][col][mom].elements[i].x;
+					y = nodeX[row][col][mom].elements[i].y;
+					z = nodeX[row][col][mom].elements[i].z;
+					w1 = nodeX[row][col][mom].elements[i].w;
+						for (j=0; j<nodeY[u][v][w].len; ++j){	
+						dx = x-nodeY[u][v][w].elements[j].x;
+						dy = y-nodeY[u][v][w].elements[j].y;
+						dz = z-nodeY[u][v][w].elements[j].z;
+						dis = dx*dx + dy*dy + dz*dz;
+						if (dis < dd_max){
+						*(XY + (int)(sqrt(dis)*ds)) += w1*nodeY[u][v][w].elements[j].w;
+						}
+						}
 					}
-					}
-				}
-			}	
-			}	
+				}	
+				}	
+			}
 		}
-	}
 	}
 	}
 	}

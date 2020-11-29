@@ -12,15 +12,17 @@ void open_files(string, int, PointW3D *);
 void save_histogram(string, int, double *);
 
 PointW3D *dataD;
+PointW3D *dataR;
 double *DD; 
 double *RR;
+double *DR;
 Node ***nodeD;
 Node ***nodeR;
 
 int main(int argc, char **argv){
 
-	int n_pts = 32*32*32, bn = 1000;
-	float d_max = 60.0, size_box = 250.0, alpha = 2.176;
+	int n_pts = 32*32*32, bn = 60;
+	float d_max = 150.0, size_box = 250.0, alpha = 2.176;
 	float size_node = alpha*(size_box/pow((float)(n_pts),1/3.));
 	dataD = new PointW3D[n_pts]; 
 	dataR = new PointW3D[n_pts]; 
@@ -33,7 +35,7 @@ int main(int argc, char **argv){
 	cout << "implementing the grid method." << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "Parameters used: \n" << endl;
-	cout << "	Amount of points:     " << np << endl;
+	cout << "	Amount of points:     " << n_pts << endl;
 	cout << "	Histogram Bins:       " << bn << endl;
 	cout << "	Maximum distance:     " << d_max << endl;
 	cout << "	Node size:            " << size_node << endl;
@@ -44,6 +46,7 @@ int main(int argc, char **argv){
 	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
 	nameDD.append(argv[3]);
 	nameRR.append(argv[3]);
+	nameDR.append(argv[3]);
 	nameDD += ".dat";
 	nameRR += ".dat";
 	nameDR += ".dat";
@@ -51,10 +54,12 @@ int main(int argc, char **argv){
 	// Initialize the histograms
 	DD = new double[bn];
 	RR = new double[bn];
+	DR = new double[bn];
 	int i, j;
 	for (i = 0; i < bn; ++i){
 		*(DD+i) = 0.0; 
 		*(RR+i) = 0.0;
+		*(DR+i) = 0.0;
 	}
 	
 	open_files(argv[1],n_pts,dataD); 
@@ -85,17 +90,17 @@ int main(int argc, char **argv){
 	my_hist.make_histoXX(DD, my_hist.meshData()); 
 	save_histogram(nameDD, bn, DD);
 	cout << "Save histogram DD ..." << endl;
-	for (i=0; i<bn; ++i) delete[] *(DD+i);
+	delete[] DD;
 	//==============================================
 	my_hist.make_histoXX(RR, my_hist.meshRand()); 
 	save_histogram(nameRR, bn, RR);
 	cout << "Save histogram RR ..." << endl;
-	for (i=0; i<bn; ++i) delete[] *(RR+i);
+	delete[] RR;
 	//==============================================
 	my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); 
 	save_histogram(nameDR, bn, DR);
 	cout << "Save histogram DR ..." << endl;
-	for (i=0; i<bn; ++i) delete[] *(DR+i);
+	delete[] DR;
 	//==============================================
 	
 	clock_t c_end = clock();
