@@ -1,4 +1,4 @@
-# Two point correlation function (without BPC)
+# Two point correlation function (with BPC)
 
 To compile the code, write:
 
