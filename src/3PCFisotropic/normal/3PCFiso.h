@@ -162,6 +162,9 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	nodeX: malla de datos
 	
 	*/ 
+	
+	#pragma omp parallel num_threads(4) 
+    	{
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
@@ -169,6 +172,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod, dx_nod2, dy_nod2, dz_nod2, dx_nod3, dy_nod3, dz_nod3;
 	bool con_x, con_y, con_z;
 	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
 	x1N = nodeX[row][0][0].nodepos.x;
@@ -463,6 +467,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	}
 	}
 	}
+	}
 	//================================
 	// Simetrización:
 	//================================
@@ -692,6 +697,9 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	nodeY: malla 2.
 	
 	*/ 
+	
+	#pragma omp parallel num_threads(4) 
+    	{
 	int i, j, k, row, col, mom, u, v, w, a, b, c;
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
@@ -699,6 +707,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod, dx_nod2, dy_nod2, dz_nod2, dx_nod3, dy_nod3, dz_nod3;
 	bool con_x, con_y, con_z;
 	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
 	x1N = nodeX[row][0][0].nodepos.x;
@@ -813,6 +822,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 				}
 			}	
 		}
+	}
 	}
 	}
 	}

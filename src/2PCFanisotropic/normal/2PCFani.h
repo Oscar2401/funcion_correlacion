@@ -16,19 +16,19 @@ struct PointW3D{
 	float w;
 };
 struct Node{
-	Point3D nodepos;	// Coordenadas del nodo (posición del nodo).
-	int len;		// Cantidad de elementos en el nodo.
-	PointW3D *elements;	// Elementos del nodo.
+	Point3D nodepos;	// Coordinates of the node (position of the node).
+	int len;		// Number of points in the node
+	PointW3D *elements;	// Points in the node
 };
 
 //=================================================================== 
-//======================== Clase ==================================== 
+//======================== Class ==================================== 
 //=================================================================== 
 
 class NODE2P{
-	//Atributos de clase:
+	// Class attributes:
 	private:
-		// Asignados
+		// Assigned
 		int bn;
 		int n_pts;
 		float size_box;
@@ -38,7 +38,7 @@ class NODE2P{
 		PointW3D *dataD;
 		Node ***nodeR;
 		PointW3D *dataR;
-		// Derivados
+		// Derivatives
 		float dd_max;
 		float corr;
 		float ds;
@@ -48,12 +48,12 @@ class NODE2P{
 		void make_nodos(Node ***, PointW3D *);
 		void add(PointW3D *&, int&, float, float, float, float);
 	
-	// Métodos de Clase:
+	// Class methods:
 	public:
-		//Constructor de clase:
+		// Class constructor:
 		NODE2P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
 			
-			// Asignados
+			// Assigned
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
@@ -64,7 +64,7 @@ class NODE2P{
 			dataR = _dataR;
 			nodeR = _nodeR;
 			
-			// Derivados
+			// Derivatives
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
@@ -84,29 +84,28 @@ class NODE2P{
 			return nodeR;
 		};
 		
-		// Implementamos Método de mallas:
+		// Implementing grid method:
 		void make_histoXX(double **, Node ***);
 		void make_histoXY(double **, Node ***, Node ***);
 		~NODE2P();
 };
 
 //=================================================================== 
-//==================== Funciones ==================================== 
-//===================================================================  
+//==================== Functions ==================================== 
+//=================================================================== 
 
 void NODE2P::make_nodos(Node ***nod, PointW3D *dat){
 	/*
-	Función para crear los nodos con los datos y puntos random
+	This function classifies the data in the nodes
 	
-	Argumentos
-	nod: arreglo donde se crean los nodos.
-	dat: datos a dividir en nodos.
-	
+	Args
+	nod: Node 3D array where the data will be classified
+	dat: array of PointW3D data to be classified and stored in the nodes
 	*/
 	int i, row, col, mom, partitions = (int)((size_box/size_node)+1);
 	float p_med = size_node/2;
 	
-	// Inicializamos los nodos vacíos:
+	// First allocate memory as an empty node:
 	for (row=0; row<partitions; row++){
 	for (col=0; col<partitions; col++){
 	for (mom=0; mom<partitions; mom++){
@@ -115,10 +114,9 @@ void NODE2P::make_nodos(Node ***nod, PointW3D *dat){
 		nod[row][col][mom].nodepos.x = ((float)(row)*(size_node))+p_med;
 		nod[row][col][mom].len = 0;
 		nod[row][col][mom].elements = new PointW3D[0];
-	}
-	}
-	}
-	// Llenamos los nodos con los puntos de dat:
+	}}}
+	
+	// Classificate the ith elment of the data into a node and add that point to the node with the add function:
 	for (i=0; i<n_pts; ++i){
 		row = (int)(dat[i].x/size_node);
         	col = (int)(dat[i].y/size_node);
@@ -149,15 +147,20 @@ void NODE2P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 //=================================================================== 
 void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	/*
-	Función para crear los histogramas DD y RR.
+	Function to create the DD and RR histograms.
 	
-	Argumentos
-	DD: arreglo donde se creará el histograma DD.
-	RR: arreglo donde se creará el histograma RR.
-	
+	Arg
+	XX: arrangement where the DD yRR histogram will be created.
+	nodeX: array of nodes.
+
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
+	
+	#pragma omp parallel num_threads(4) 
+    	{
+	
+	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
@@ -166,8 +169,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	float r_ort,r_ort_nod;
 	bool con_x, con_y, con_z;
 	
-	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
 	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
@@ -175,7 +177,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	for (mom = 0; mom < partitions; ++mom){
 	z1D = nodeX[row][col][mom].nodepos.z;			
 		//==================================================
-		// Distancias entre puntos del mismo nodo:
+		// Pairs of points in the same node:
 		//==================================================
 		for (i=0; i<nodeX[row][col][mom].len-1; ++i){
 		x = nodeX[row][col][mom].elements[i].x;
@@ -196,12 +198,12 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 			}
 		}
 		//==================================================
-		// Distancias entre puntos del diferente nodo:
+		// Pairs of points at different nodes
 		//==================================================
 		u = row;
 		v = col;
 		//=========================
-		// N2 movil en Z
+		// N2 mobile in Z
 		//=========================
 		for (w=mom+1;  w<partitions ; ++w){	
 		z2D = nodeX[u][v][w].nodepos.z;
@@ -230,7 +232,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 		}
 		u = row;
 		//=========================
-		// N2 movil en ZY
+		// N2 mobile in ZY
 		//=========================
 		for (v=col+1; v<partitions; ++v){
 		y2D = nodeX[u][v][0].nodepos.y;
@@ -264,7 +266,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 			}
 		}
 		//=========================
-		// N2 movil en ZYX
+		// N2 mobile in ZYX
 		//=========================
 		for (u=row+1; u<partitions; ++u){
 		x2D = nodeX[u][0][0].nodepos.x;
@@ -305,18 +307,25 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	}
 	}
 	}
+	}
 }
 //=================================================================== 
 void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	/*
-	Función para crear los histogramas DR.
-	
-	Argumentos
-	XY: arreglo donde se creará el histograma DR.
-	
+	Function to create the DR histograms.
+
+	Arg
+	XY: array where the DR histogram will be created.
+	nodeX: array data/random
+	nodeY: array random/data
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
+	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) 
+    	{
+    	
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
@@ -325,8 +334,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	float r_ort,r_ort_nod;
 	bool con_x, con_y, con_z;
 	
-	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic
 	for (row = 0; row < partitions; ++row){
 	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
@@ -334,7 +342,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	for (mom = 0; mom < partitions; ++mom){
 	z1D = nodeX[row][col][mom].nodepos.z;			
 	//=========================
-	// N2 movil en ZYX
+	// N2 mobile in ZYX
 	//=========================
 	for (u=0; u<partitions; ++u){
 	x2R = nodeY[u][0][0].nodepos.x;
@@ -371,6 +379,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 			}	
 			}	
 		}
+	}
 	}
 	}
 	}

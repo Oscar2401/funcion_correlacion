@@ -16,19 +16,19 @@ struct PointW3D{
 	float w;
 };
 struct Node{
-	Point3D nodepos;	// Coordenadas del nodo (posición del nodo).
-	int len;		// Cantidad de elementos en el nodo.
-	PointW3D *elements;	// Elementos del nodo.
+	Point3D nodepos;	// Coordinates of the node (position of the node).
+	int len;		// Number of elements in the node.
+	PointW3D *elements;	// Node elements.
 };
 
 //=================================================================== 
-//======================== Clase ==================================== 
+//======================== Class ==================================== 
 //=================================================================== 
 
 class NODE2P{
-	//Atributos de clase:
+	// Class attributes:
 	private:
-		// Asignados
+		// Assigned
 		int bn;
 		int n_pts;
 		float size_box;
@@ -38,7 +38,7 @@ class NODE2P{
 		PointW3D *dataD;
 		Node ***nodeR;
 		PointW3D *dataR;
-		// Derivados
+		// Derivatives
 		float dd_max;
 		float corr;
 		float front;
@@ -49,9 +49,9 @@ class NODE2P{
 		void make_nodos(Node ***, PointW3D *);
 		void add(PointW3D *&, int&, float, float, float, float);
 	
-	// Métodos de Clase:
+	// Class Methods:
 	public:
-		//Constructor de clase:
+		// Class constructor:
 		NODE2P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
 			
 			// Asignados
@@ -161,6 +161,10 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
+	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) 
+    	{
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
@@ -170,8 +174,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	bool con_x, con_y, con_z;
 	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
 	
-	std::cout << "-> Estoy haciendo histograma XX..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
 	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
@@ -336,6 +339,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	}
 	}
 	}
+	}
 }
 //=================================================================== 
 
@@ -347,8 +351,11 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	XY: arreglo donde se creará el histograma DR.
 	
 	*/
-	
 	int partitions = (int)((size_box/size_node)+1);
+	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) 
+    	{
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
@@ -358,8 +365,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	bool con_x, con_y, con_z;
 	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
 	
-	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
 	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
@@ -414,6 +420,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 			}	
 			}	
 		}
+	}
 	}
 	}
 	}

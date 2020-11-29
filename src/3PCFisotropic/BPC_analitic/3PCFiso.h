@@ -199,6 +199,11 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	nodeX: malla de datos.
 	
 	*/ 
+	
+	std::cout << "-> Estoy haciendo histograma DDD..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) 
+	{
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
@@ -216,8 +221,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	bool con13_x, con13_y, con13_z;
 	bool conx, cony, conz, conx_, cony_, conz_;
 	
-	std::cout << "-> Estoy haciendo histograma DDD..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
 	x1N = nodeX[row][0][0].nodepos.x;
@@ -773,6 +777,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				}
 			}
 		}	
+	}
 	}
 	}
 	}

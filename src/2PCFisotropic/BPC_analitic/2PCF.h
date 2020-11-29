@@ -16,9 +16,9 @@ struct PointW3D{
 	float w;
 };
 struct Node{
-	Point3D nodepos;	// Coordenadas del nodo (posición del nodo).
-	int len;		// Cantidad de elementos en el nodo.
-	PointW3D *elements;	// Elementos del nodo.
+	Point3D nodepos;	// Coordinates of the node (position of the node).
+	int len;		// Number of elements in the node.
+	PointW3D *elements;	// Node elements.
 };
 
 //=================================================================== 
@@ -48,12 +48,12 @@ class NODE2P{
 		void make_nodos(Node ***, PointW3D *);
 		void add(PointW3D *&, int&, float, float, float, float);
 	
-	// Métodos de Clase:
+	// Class Methods:
 	public:
-		//Constructor de clase:
+		// Class constructor:
 		NODE2P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD){
 			
-			// Asignados
+			// Assigned
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
@@ -62,7 +62,7 @@ class NODE2P{
 			dataD = _dataD;
 			nodeD = _nodeD;
 			
-			// Derivados
+			// Derivatives
 			ll = size_box*size_box;
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
@@ -90,17 +90,16 @@ class NODE2P{
 
 void NODE2P::make_nodos(Node ***nod, PointW3D *dat){
 	/*
-	Función para crear los nodos con los datos y puntos random
+	This function classifies the data in the nodes
 	
-	Argumentos
-	nod: arreglo donde se crean los nodos.
-	dat: datos a dividir en nodos.
-	
+	Args
+	nod: Node 3D array where the data will be classified
+	dat: array of PointW3D data to be classified and stored in the nodes
 	*/
 	int i, row, col, mom, partitions = (int)((size_box/size_node)+1);
 	float p_med = size_node/2;
 	
-	// Inicializamos los nodos vacíos:
+	// First allocate memory as an empty node:
 	for (row=0; row<partitions; row++){
 	for (col=0; col<partitions; col++){
 	for (mom=0; mom<partitions; mom++){
@@ -109,10 +108,9 @@ void NODE2P::make_nodos(Node ***nod, PointW3D *dat){
 		nod[row][col][mom].nodepos.x = ((float)(row)*(size_node))+p_med;
 		nod[row][col][mom].len = 0;
 		nod[row][col][mom].elements = new PointW3D[0];
-	}
-	}
-	}
-	// Llenamos los nodos con los puntos de dat:
+	}}}
+	
+	// Classificate the ith elment of the data into a node and add that point to the node with the add function:
 	for (i=0; i<n_pts; ++i){
 		row = (int)(dat[i].x/size_node);
         	col = (int)(dat[i].y/size_node);
@@ -153,6 +151,12 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
+	std::cout << "-> Estoy haciendo histograma DD..." << std::endl;
+	
+	#pragma omp parallel num_threads(4) 
+	{
+    	
+    	//Variables privadas en los hilos:
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
@@ -161,8 +165,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	bool con_x, con_y, con_z;
 	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
 	
-	std::cout << "-> Estoy haciendo histograma DD..." << std::endl;
-	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
 	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
@@ -314,19 +317,25 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	}
 	}
 	}
+	}
 	//======================================
 	// Histograma RR (ANALITICA)
 	//======================================
 	std::cout << "-> Estoy haciendo histograma RR..." << std::endl;
+	#pragma omp parallel num_threads(4) 
+	{
 	double dr = (d_max/bn);
 	double V = size_box*size_box*size_box;
 	double beta1 = n_pts*n_pts/V;
 	double alph = 4*(2*acos(0.0))*(beta1)*dr*dr*dr/3;
 	double r1, r2;
+	
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for(int a=0; a<bn; ++a) {
 		r2 = (double) a;
 		r1 = r2+1;
         	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
+	}
 	}
 }
 
