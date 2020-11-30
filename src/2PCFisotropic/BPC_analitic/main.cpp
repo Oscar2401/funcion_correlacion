@@ -68,6 +68,7 @@ int main(int argc, char **argv){
 	
 	// Start class
 	NODE2P my_hist(bn, n_pts, size_box, size_node, d_max, dataD, nodeD);
+	delete[] dataD;
 	
 	clock_t c_start = clock();
 	

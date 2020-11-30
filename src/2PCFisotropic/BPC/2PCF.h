@@ -154,7 +154,6 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 
 	Arguments
 	XX: array where the DD histogram will be created.
-	YY: array where the RR histogram will be created.
 	nodeX: array of nodes.
 	
 	*/

@@ -66,7 +66,6 @@ class NODE2P{
 			
 			// Derivatives
 			dd_max = d_max*d_max;
-			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
 			ddmax_nod = d_max+corr;
@@ -74,7 +73,7 @@ class NODE2P{
 			
 			make_nodos(nodeD,dataD); 
 			make_nodos(nodeR,dataR); 
-			std::cout << "Terminé de contruir nodos..." << std::endl;
+			std::cout << "I finished building nodes ..." << std::endl;
 		}
 		
 		Node ***meshData(){
@@ -157,7 +156,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	
 	int partitions = (int)((size_box/size_node)+1);
 	
-	#pragma omp parallel num_threads(4) 
+	#pragma omp parallel num_threads(2) 
     	{
 	
 	// Private variables in threads:
@@ -171,10 +170,12 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	x1D = nodeX[row][0][0].nodepos.x;
+	
 	for (col = 0; col < partitions; ++col){
-	y1D = nodeX[row][col][0].nodepos.y;
+	
 	for (mom = 0; mom < partitions; ++mom){
+	x1D = nodeX[row][0][0].nodepos.x;
+	y1D = nodeX[row][col][0].nodepos.y;
 	z1D = nodeX[row][col][mom].nodepos.z;			
 		//==================================================
 		// Pairs of points in the same node:
@@ -321,9 +322,8 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
-	std::cout << "-> Estoy haciendo histograma XY..." << std::endl;
 	
-	#pragma omp parallel num_threads(4) 
+	#pragma omp parallel num_threads(2) 
     	{
     	
 	int i, j, row, col, mom, u, v, w;
@@ -334,12 +334,14 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	float r_ort,r_ort_nod;
 	bool con_x, con_y, con_z;
 	
-	#pragma omp for collapse(3)  schedule(dynamic
+	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	x1D = nodeX[row][0][0].nodepos.x;
+	
 	for (col = 0; col < partitions; ++col){
-	y1D = nodeX[row][col][0].nodepos.y;
+	
 	for (mom = 0; mom < partitions; ++mom){
+	x1D = nodeX[row][0][0].nodepos.x;
+	y1D = nodeX[row][col][0].nodepos.y;
 	z1D = nodeX[row][col][mom].nodepos.z;			
 	//=========================
 	// N2 mobile in ZYX

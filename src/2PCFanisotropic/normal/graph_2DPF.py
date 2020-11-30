@@ -39,6 +39,7 @@ limt = 0.02
 limt_ = -limt
 
 imag(eps_LS,'Función de Correlación','$\epsilon(r)$',cmap='RdBu', limt=limt, limt_=limt_)
+plt.savefig('2PCFani.png')
 
 plt.figure(figsize = (7,7))
 gs1 = gridspec.GridSpec(2, 2)
@@ -64,6 +65,7 @@ rotated_img = ndimage.rotate(eps_LS, 0)
 plt.imshow(rotated_img, cmap='RdBu',interpolation= 'bilinear', vmin=limt_, vmax=limt)
 plt.contour(rotated_img,10,cmap=plt.cm.gray,linewidths=1,  vmin=limt_, vmax=limt)
 plt.axis('off')
+plt.savefig('2PCFani_2.png')
 plt.show()
 
 

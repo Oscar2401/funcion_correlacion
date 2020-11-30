@@ -35,7 +35,7 @@ int main(int argc, char **argv){
 	cout << "implementing the grid method." << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "Parameters used: \n" << endl;
-	cout << "	Amount of points:     " << np << endl;
+	cout << "	Amount of points:     " << n_pts << endl;
 	cout << "	Histogram Bins:       " << bn << endl;
 	cout << "	Maximum distance:     " << d_max << endl;
 	cout << "	Node size:            " << size_node << endl;
