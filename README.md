@@ -8,6 +8,6 @@ In the last decades, the Correlation Functions (CF) have been widely used in Cos
 
 ## Dependencies.
 
-To compile and run these codes is necessary: the gcc C compiler and the GSL libraries. Although it is parallelized for shared with OpenMP.
+To compile and run these codes is necessary: the gcc C compiler and the GSL libraries. Although it is parallelized for shared with OpenMP so it is necessary the compiler extension.
 
-The codes was written in C++ but Python is used to plot and show the outputs of each code. For thise reason, 
+The codes was written in C++ but Python is used to plot and show the outputs of each code. For thise reason, matplotlib and numpy libraries are indispensable.
