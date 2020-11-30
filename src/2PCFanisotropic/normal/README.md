@@ -17,3 +17,8 @@ To build the correlation function and graph it, run the python code
 ```json
 python3 graph_2DPF.py 
 ```
+
+Example:
+
+
+![alt text](https://github.com/Oscar2401/funcion_correlacion/blob/master/src/2PCFanisotropic/normal/2PCFani_2.png "2PCF-anisotropic")
