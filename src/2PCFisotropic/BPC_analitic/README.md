@@ -19,4 +19,4 @@ python3 graph_2DPF.py
 ```
 
 Ejemplo 
-![alt text](https://github.com/Oscar2401/funcion_correlacion/blob/master/src/2PCFisotropic/normal/2PCFiso.png "2PCF-isotropic")
+![alt text](https://github.com/Oscar2401/funcion_correlacion/blob/master/src/2PCFisotropic/BPC_analitic/2PCFiso(BPC).png "2PCF-isotropic/BPC/analitic")
