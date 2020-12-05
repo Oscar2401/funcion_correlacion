@@ -18,9 +18,9 @@ struct PointW3D{
 };
 
 struct Node{
-	Point3D nodepos;	// Coordenadas del nodo (posición del nodo).
-	int len;		// Cantidad de elementos en el nodo.
-	PointW3D *elements;	// Elementos del nodo.
+	Point3D nodepos;	// Coordinates of the node (position of the node).
+	int len;		// Number of points in the node
+	PointW3D *elements;	// Points in the node
 };
 
 
@@ -29,9 +29,9 @@ struct Node{
 //=================================================================== 
 
 class NODE3P{
-	//Atributos de clase:
+	// Class attributes:
 	private:
-		// Asignados
+		// Assigned
 		int bn;
 		int n_pts;
 		int partitions;
@@ -42,7 +42,7 @@ class NODE3P{
 		PointW3D *dataD;
 		Node ***nodeR;
 		PointW3D *dataR;
-		// Derivados
+		// Derivatives
 		float ll;
 		float dd_max;
 		float corr;
@@ -54,10 +54,11 @@ class NODE3P{
 		void make_nodos(Node ***, PointW3D *);
 		void add(PointW3D *&, int&, float, float, float, float);
 	
-	// Métodos de Clase:
+	// Class methods:
 	public:
-		//Constructor de clase:
+		// Class constructor:
 		NODE3P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
+			// Assigned
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
@@ -67,15 +68,17 @@ class NODE3P{
 			nodeD = _nodeD;
 			dataR = _dataR;
 			nodeR = _nodeR;
+			
+			// Derivatives
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
 			ds = ((float)(bn))/d_max;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
 			partitions = (int)(ceil(size_box/size_node));
+			
 			make_nodos(nodeD,dataD);
 			make_nodos(nodeR,dataR);
-			std::cout << "Terminé de construir nodos..." << std::endl;
 		}
 		
 		Node ***meshData(){
@@ -85,7 +88,7 @@ class NODE3P{
 			return nodeR;
 		};
 		
-		// Implementamos Método de mallas:
+		// Implementing grid method:
 		void make_histoXXX(double ***, Node ***);
 		void count_3_N111(int, int, int, double ***, Node ***);
 		void count_3_N112(int, int, int, int, int, int, double ***, Node ***);
@@ -105,17 +108,16 @@ class NODE3P{
 //=================================================================== 
 void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 	/*
-	Función para crear los nodos con los datos y puntos random
+	This function classifies the data in the nodes
 	
-	Argumentos
-	nod: arreglo donde se crean los nodos.
-	dat: datos a dividir en nodos.
-	
+	Args
+	nod: Node 3D array where the data will be classified
+	dat: array of PointW3D data to be classified and stored in the nodes
 	*/
 	int i, row, col, mom;
 	float p_med = size_node/2;
 	
-	// Inicializamos los nodos vacíos:
+	// First allocate memory as an empty node:
 	for (row=0; row<partitions; row++){
 	for (col=0; col<partitions; col++){
 	for (mom=0; mom<partitions; mom++){
@@ -127,7 +129,7 @@ void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 	}
 	}
 	}
-	// Llenamos los nodos con los puntos de dat:
+	// Classificate the ith elment of the data into a node and add that point to the node with the add function:
 	for (i=0; i<n_pts; ++i){
 		row = (int)(dat[i].x/size_node);
         	col = (int)(dat[i].y/size_node);
@@ -155,17 +157,34 @@ void NODE3P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 //=================================================================== 
 void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	/*
-	Función para crear los histogramas DDD.
+	Function to create the DDD and RRR histograms.
 	
-	Argumentos
-	XXX_: arreglo donde se creará el histograma DDD.
-	nodeX: malla de datos
+	Arg
+	XXX: arrangement where the DDD y RRR histogram will be created.
+	nodeX: array of nodes.
+
+	*/
 	
-	*/ 
-	
-	#pragma omp parallel num_threads(4) 
+	#pragma omp parallel num_threads(2) 
     	{
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
+	
+	double ***SSS;
+	
+	SSS = new double**[bn];
+	for (i=0; i<bn; i++){
+	*(SSS+i) = new double*[bn];
+		for (j = 0; j < bn; j++){
+		*(*(SSS+i)+j) = new double[bn];
+		}
+	}
+	
+	for (i=0; i<bn; ++i){
+	for (j=0; j<bn; ++j){
+	for (k=0; k<bn; ++k) *(*(*(SSS+i)+j)+k) = 0.0;
+	}
+	}
+	
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
 	float x, y, z;
@@ -173,24 +192,23 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	bool con_x, con_y, con_z;
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
-	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
-	x1N = nodeX[row][0][0].nodepos.x;
 	for (col=0; col<partitions; ++col){
-	y1N = nodeX[row][col][0].nodepos.y;
 	for (mom=0; mom<partitions; ++mom){
+	x1N = nodeX[row][0][0].nodepos.x;
+	y1N = nodeX[row][col][0].nodepos.y;
 	z1N = nodeX[row][col][mom].nodepos.z;		
 	//==================================================
-	// Triángulos entre puntos del mismo nodo:
+	// Triangles between points of the same node:
 	//==================================================
-	count_3_N111(row, col, mom, XXX, nodeX);		
+	count_3_N111(row, col, mom, SSS, nodeX);		
 	//==================================================
-	// Triángulos entre puntos del diferente nodo:
+	// Triangles between points of the different node:
 	//==================================================
 	u = row;
 	v = col;
 	//=======================
-	// Nodo 2 movil en Z:
+	// Mobile node2 in Z:
 	//=======================
 	x2N = nodeX[u][0][0].nodepos.x;
 	y2N = nodeX[u][v][0].nodepos.y;
@@ -200,25 +218,27 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	dz_nod *= dz_nod;
 	if (dz_nod <= ddmax_nod){
 	//==============================================
-	// 2 puntos en N y 1 punto en N'
+	// 2 points in node1 and 1 point in node2
 	//==============================================
-	count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+	count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 	//==============================================
-	// 1 punto en N1, 1 punto en N2 y 1 punto en N3
+	// 1 point in node1, 1 point in node2 and 1 point in node3
 	//==============================================
 	a = u;
 	b = v;
-	//=======================
-	// Nodo 3 movil en Z:
-	//=======================
+		x3N = nodeX[a][0][0].nodepos.x;
+		y3N = nodeX[a][b][0].nodepos.y;
+		//=======================
+		// Mobile node3 in Z:
+		//=======================
 		for (c=w+1;  c<partitions; ++c){
 		z3N = nodeX[a][b][c].nodepos.z; 
 		dz_nod2 = z3N-z1N;
 		dz_nod2 *= dz_nod2;
-		if (dz_nod2 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+		if (dz_nod2 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 		}
 		//=======================
-		// Nodo 3 movil en ZY:
+		// Mobile node3 in ZY:
 		//=======================
 		for (b=v+1; b<partitions; ++b){
 		y3N = nodeX[a][b][0].nodepos.y;
@@ -235,12 +255,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			dz_nod3 = z3N-z2N;
 			dz_nod3 *= dz_nod3;
 			dis_nod3 = dy_nod3 + dz_nod3;
-			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 			}
 			}
 		}
 		//=======================
-		// Nodo 3 movil en ZYX:
+		// Mobile node3 in ZYX:
 		//=======================
 		for (a=u+1; a<partitions; ++a){
 		x3N = nodeX[a][0][0].nodepos.x;
@@ -263,7 +283,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				dz_nod3 = z3N-z2N;
 				dz_nod3 *= dz_nod3;
 				dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 			}
@@ -271,7 +291,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		}
 	}
 	//=======================
-	// Nodo 2 movil en ZY:
+	// Mobile node2 in ZY:
 	//=======================
 	for (v=col+1; v<partitions ; ++v){
 	y2N = nodeX[u][v][0].nodepos.y;
@@ -284,16 +304,16 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		dis_nod = dy_nod + dz_nod;
 		if (dis_nod <= ddmax_nod){
 		//==============================================
-		// 2 puntos en N y 1 punto en N'
+		// 2 points in node1 and 1 point in node2
 		//==============================================
-		count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+		count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 		//==============================================
-		// 1 punto en N1, 1 punto en N2 y un punto en N3
+		// 1 point in node1, 1 point in node2 and 1 point in node3
 		//==============================================
 		a = u;
 		b = v;
 		//=======================
-		// Nodo 3 movil en Z:
+		// Mobile node3 in Z:
 		//=======================
 		y3N = nodeX[a][b][0].nodepos.y;
 		dy_nod2 = y3N-y1N;
@@ -306,11 +326,11 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			if (dis_nod2 <= ddmax_nod){
 			dz_nod3 = z3N-z2N;
 			dis_nod3 = dz_nod3*dz_nod3;
-			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 			}
 			}
 			//=======================
-			// Nodo 3 movil en ZY:
+			// Mobile node3 in ZY:
 			//=======================	
 			for (b=v+1; b<partitions; ++b){
 			y3N = nodeX[a][b][0].nodepos.y;
@@ -327,12 +347,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				dz_nod3 = z3N-z2N;
 				dz_nod3 *= dz_nod3;
 				dis_nod3 = dy_nod3 + dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 			}
 			//=======================
-			// Nodo 3 movil en ZYX:
+			// Mobile node3 in ZYX:
 			//=======================
 			for (a=u+1; a<partitions; ++a){
 			x3N = nodeX[a][0][0].nodepos.x;
@@ -355,7 +375,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
 					dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
-					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 					}
 					}
 				}
@@ -364,7 +384,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		}	
 	}			
 	//=======================
-	// Nodo 2 movil en ZYX:
+	// Mobile node2 in ZYX:
 	//=======================
 	for (u=row+1; u<partitions; ++u){
 	x2N = nodeX[u][0][0].nodepos.x;
@@ -381,16 +401,16 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			dis_nod = dx_nod + dy_nod + dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
-			// 2 puntos en N y 1 punto en N'
+			// 2 points in node1 and 1 point in node2
 			//==============================================
-			count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+			count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 			//==============================================
-			// 1 punto en N1, 1 punto en N2 y 1 punto en N3
+			// 1 point in node1, 1 point in node2 and 1 point in node3
 			//==============================================
 			a = u;
 			b = v;
 			//=======================
-			// Nodo 3 movil en Z:
+			// Mobile node3 in Z:
 			//=======================
 			x3N = nodeX[a][0][0].nodepos.x;
 			y3N = nodeX[a][b][0].nodepos.y;
@@ -406,11 +426,11 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				if (dis_nod2 <= ddmax_nod){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 				//=======================
-				// Nodo 3 movil en ZY:
+				// Mobile node3 in ZY:
 				//=======================
 				for (b=v+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
@@ -427,12 +447,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
 					dis_nod3 = dy_nod3 + dz_nod3;
-					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 					}
 					}
 				}
 				//=======================
-				// Nodo 3 movil en ZYX:
+				// Mobile node3 in ZYX:
 				//=======================		
 				for (a=u+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
@@ -455,7 +475,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 						dz_nod3 = z3N-z2N;
 						dz_nod3 *= dz_nod3;
 						dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
-						if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+						if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 						}
 						}
 					}
@@ -467,19 +487,29 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	}
 	}
 	}
+	
+	#pragma omp critical
+	for (int i=0; i<bn; ++i){
+	for (int j=0; j<bn; ++j){
+	for (int k=0; k<bn; ++k) *(*(*(XXX+i)+j)+k)+=*(*(*(SSS+i)+j)+k);
+	}
+	}
+	
 	}
 	//================================
-	// Simetrización:
+	// Symmetrization:
 	//================================
 	symmetrize(XXX); 
 }
 //=================================================================== 
 void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en un mismo Nodo.
-	
-	row, col, mom => posición del Nodo. Esto define al Nodo.
-	
+	Function to count the triangles in the same Node.
+
+	Arg
+	row, col, mom => Node1 position.
+	XXX: arrangement where the DD yRR histogram will be created.
+	nodeS: array of nodes.
 	*/
 	int i,j,k;
 	float dx,dy,dz;
@@ -530,11 +560,16 @@ void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***node
 //=================================================================== 
 void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en dos 
-	nodos con dos puntos en N1 y un punto en N2.
+	Function to count the triangles in two
+	nodes with two points on Node1 and one point on Node2.
 	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
+	
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	XXX: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS: array of nodes.
 	
 	*/
 	int i,j,k;
@@ -607,13 +642,17 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double
 //=================================================================== 
 void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en tres 
-	nodos con un puntos en N1, un punto en N2
-	y un punto en N3.
+	Function to count the triangles in three
+	nodes with a points in Node1, a point in Node2
+	and a point in Node3.
 	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
-	a, b, c => posición de N3.
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	a, b, c => Node3 position.
+	XXX: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS: array of nodes.
 	
 	*/
 	int i,j,k;
@@ -664,11 +703,10 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 //=================================================================== 
 void NODE3P::symmetrize(double ***XXX){
 	/*
-	Función para simetrizar histograma
-	
-	Argumentos
-	XXX_: arreglo a simetrizar
-	
+	Function to symmetrize histogram
+
+	Arg
+	XXX: array to symmetrize
 	*/ 
 	int i,j,k;
 	float elem;
@@ -689,18 +727,34 @@ void NODE3P::symmetrize(double ***XXX){
 //=================================================================== 
 void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	/*
-	Función para crear los histogramas DDR y DRR.
+	Function to create the DDR and DRR histograms.
 	
-	Argumentos
-	XXY: arreglo donde se creará el histograma.
-	nodeX: malla 1.
-	nodeY: malla 2.
+	Arg
+	XXY: arrangement where the DDR y DRR histogram will be created.
+	nodeX/nodeY: array of nodes.
+
+	*/
 	
-	*/ 
-	
-	#pragma omp parallel num_threads(4) 
+	#pragma omp parallel num_threads(2) 
     	{
 	int i, j, k, row, col, mom, u, v, w, a, b, c;
+	
+	double ***SSS;
+	
+	SSS = new double**[bn];
+	for (i=0; i<bn; i++){
+	*(SSS+i) = new double*[bn];
+		for (j = 0; j < bn; j++){
+		*(*(SSS+i)+j) = new double[bn];
+		}
+	}
+	
+	for (i=0; i<bn; ++i){
+	for (j=0; j<bn; ++j){
+	for (k=0; k<bn; ++k) *(*(*(SSS+i)+j)+k) = 0.0;
+	}
+	}
+	
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
 	float x, y, z;
@@ -708,16 +762,15 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	bool con_x, con_y, con_z;
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
-	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
-	x1N = nodeX[row][0][0].nodepos.x;
 	for (col=0; col<partitions; ++col){
-	y1N = nodeX[row][col][0].nodepos.y;
 	for (mom=0; mom<partitions; ++mom){
+	x1N = nodeX[row][0][0].nodepos.x;
+	y1N = nodeX[row][col][0].nodepos.y;
 	z1N = nodeX[row][col][mom].nodepos.z;			
 				
 	//=======================
-	// Nodo 2 movil en ZYX:
+	// Mobile Node2 in ZYX:
 	//=======================
 	for (u=0; u<partitions; ++u){
 	x2N = nodeY[u][0][0].nodepos.x;
@@ -734,16 +787,16 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 			dis_nod = dx_nod + dy_nod + dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
-			// 2 puntos en N y 1 punto en N'
+			// 2 points in node1 and 1 point in node2
 			//==============================================
-			count_3_N112_xxy(row, col, mom, u, v, w, XXY, nodeX, nodeY);
+			count_3_N112_xxy(row, col, mom, u, v, w, SSS, nodeX, nodeY);
 			//==============================================
-			// 1 punto en N1, 1 punto en N2 y 1 punto en N3
+			// 1 point in node1, 1 point in node2 and 1 point in node3
 			//==============================================
 			a = row;
 			b = col;
 			//=======================
-			// Nodo 3 movil en Z:
+			// Mobile Node3 in Z:
 			//=======================
 			x3N = nodeX[a][0][0].nodepos.x;
 			y3N = nodeX[a][b][0].nodepos.y;
@@ -760,12 +813,12 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
 				if (dis_nod3 <= ddmax_nod){
-					count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, XXY, nodeX, nodeY);
+					count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 				}
 				}
 				}
 			//=======================
-			// Nodo 3 movil en ZY:
+			// Mobile Node3 in ZY:
 			//=======================
 				for (b=col+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
@@ -783,13 +836,13 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 					dz_nod3 *= dz_nod3;
 					dis_nod3 = dy_nod3 + dz_nod3;
 					if (dis_nod3 <= ddmax_nod){
-						count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, XXY, nodeX, nodeY);
+						count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 					}
 					}
 				}
 				}
 			//=======================
-			// Nodo 3 movil en ZYX:
+			// Mobile Node3 in ZYX:
 			//=======================		
 				for (a=row+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
@@ -813,7 +866,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 						dz_nod3 *= dz_nod3;
 						dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
 						if (dis_nod3 <= ddmax_nod){
-							count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, XXY, nodeX, nodeY);
+							count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 						}
 						}
 						}
@@ -826,16 +879,32 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	}
 	}
 	}
+	#pragma omp critical
+	for (int i=0; i<bn; ++i){
+	for (int j=0; j<bn; ++j){
+	for (int k=0; k<bn; ++k) *(*(*(XXY+i)+j)+k)+=*(*(*(SSS+i)+j)+k);
 	}
+	}
+	}
+	//================================
+	// Simetrización:
+	//================================
+	symmetrize(XXY); 
+	
 }
 //=================================================================== 
 void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, double ***XXY, Node ***nodeS, Node ***nodeT){
 	/*
-	Funcion para contar los triangulos en dos 
-	nodos con dos puntos en N1 y un punto en N2.
+	Function to count the triangles in two
+	nodes with two points on Node1 and one point on Node2.
 	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
+	
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	XXY: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS/nodeT: array of nodes.
 	*/
 	int i,j,k;
 	int a_,b_,c_;
@@ -846,13 +915,11 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
 
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
-	// 1er punto en N1X
 	x1 = nodeS[row][col][mom].elements[i].x;
 	y1 = nodeS[row][col][mom].elements[i].y;
 	z1 = nodeS[row][col][mom].elements[i].z;
 	w1 = nodeS[row][col][mom].elements[i].w;
 		for (j=0; j<nodeT[u][v][w].len; ++j){
-		// 2do punto en N2Y
 		x2 = nodeT[u][v][w].elements[j].x;
 		y2 = nodeT[u][v][w].elements[j].y;
 		z2 = nodeT[u][v][w].elements[j].z;
@@ -864,7 +931,6 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 		if (d12<dd_max){
 		d12 = sqrt(d12);
 			for (k=i+1; k<nodeS[row][col][mom].len; ++k){
-			// 3er punto en N1X
 			x3 = nodeS[row][col][mom].elements[k].x;
 			y3 = nodeS[row][col][mom].elements[k].y;
 			z3 = nodeS[row][col][mom].elements[k].z;
@@ -892,15 +958,17 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 //=================================================================== 
 void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXY, Node ***nodeS, Node ***nodeT){
 	/*
+	Function to count the triangles in three
+	nodes with a points in Node1, a point in Node2
+	and a point in Node3.
 	
-	Funcion para contar los triangulos en tres 
-	nodos con un puntos en N1, un punto en N2
-	y un punto en N3.
-	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
-	a, b, c => posición de N3.
-	
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	a, b, c => Node3 position.
+	XXY: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS/nodeT: array of nodes.
 	*/
 	int i,j,k;
 	int a_,b_,c_;
@@ -911,13 +979,11 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
 
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
-	// 1er punto en N1
 	x1 = nodeS[row][col][mom].elements[i].x;
 	y1 = nodeS[row][col][mom].elements[i].y;
 	z1 = nodeS[row][col][mom].elements[i].z;
 	w1 = nodeS[row][col][mom].elements[i].w;
 		for (j=0; j<nodeT[u][v][w].len; ++j){
-		// 2do punto en N3
 		x2 = nodeT[u][v][w].elements[j].x;
 		y2 = nodeT[u][v][w].elements[j].y;
 		z2 = nodeT[u][v][w].elements[j].z;
@@ -929,7 +995,6 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 		if (d12<dd_max){
 		d12 = sqrt(d12);
 			for (k=0; k<nodeS[a][b][c].len; ++k){
-			// 3er punto en N2
 			x3 = nodeS[a][b][c].elements[k].x;
 			y3 = nodeS[a][b][c].elements[k].y;
 			z3 = nodeS[a][b][c].elements[k].z;

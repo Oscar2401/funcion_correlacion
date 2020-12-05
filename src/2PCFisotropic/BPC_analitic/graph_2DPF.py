@@ -11,7 +11,7 @@ def estim_LS(NDD, NRR):
 DD_mesh[DD_mesh==0] = 0.00000000001
 RR_mesh[RR_mesh==0] = 0.00000000001
 eps_LS = estim_LS(DD_mesh, RR_mesh)
-r = np.linspace(0,180,400)
+r = np.linspace(0,150,100)
 
 fig = plt.figure(figsize=(14,8))
 plt.scatter(r,eps_LS, s=50, c='g',label='LS')

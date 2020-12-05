@@ -23,20 +23,20 @@ struct PointW3D{
 };
 
 struct Node{
-	Point3D nodepos;	// Coordenadas del nodo (posición del nodo).
-	int len;		// Cantidad de elementos en el nodo.
-	PointW3D *elements;	// Elementos del nodo.
+	Point3D nodepos;	// Coordinates of the node (position of the node).
+	int len;		// Number of points in the node
+	PointW3D *elements;	// Points in the node
 };
-
 
 //=================================================================== 
 //======================== Clase ==================================== 
 //=================================================================== 
 
+
 class NODE3P{
-	//Atributos de clase:
+	// Class attributes:
 	private:
-		// Asignados
+		// Assigned
 		int bn;
 		int n_pts;
 		int partitions;
@@ -45,7 +45,7 @@ class NODE3P{
 		float d_max;
 		Node ***nodeD;
 		PointW3D *dataD;
-		// Derivados
+		// Derivatives
 		float ll;
 		float dd_max;
 		float corr;
@@ -60,10 +60,11 @@ class NODE3P{
 		void make_nodos(Node ***, PointW3D *);
 		void add(PointW3D *&, int&, float, float, float, float, short int, short int, short int);
 	
-	// Métodos de Clase:
+	// Class methods:
 	public:
-		//Constructor de clase:
+		// Class constructor:
 		NODE3P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD){
+			// Assigned
 			bn = _bn;
 			n_pts = _n_pts;
 			size_box = _size_box;
@@ -71,7 +72,7 @@ class NODE3P{
 			d_max = _d_max;
 			dataD = _dataD;
 			nodeD = _nodeD;
-			//======================
+			// Derivatives
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
@@ -83,14 +84,13 @@ class NODE3P{
 			size_box_2 =  size_box/2;
 			
 			make_nodos(nodeD,dataD);
-			std::cout << "Terminé de construir nodos..." << std::endl;
 		}
 		
 		Node ***meshData(){
 			return nodeD;
 		};
 		
-		// Implementamos Método de mallas:
+		// Implementing grid method:
 		void make_histoXXX(double ***, Node ***);
 		void count_3_N111(int, int, int, double ***, Node ***);
 		void count_3_N112(int, int, int, int, int, int, double ***, Node ***);
@@ -116,18 +116,20 @@ class NODE3P{
 //=================================================================== 
 void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 	/*
-	Función para crear los nodos con los datos y puntos random
+	This function classifies the data in the nodes
 	
-	Argumentos
-	nod: arreglo donde se crean los nodos.
-	dat: datos a dividir en nodos.
-	
+	Args
+	nod: Node 3D array where the data will be classified
+	dat: array of PointW3D data to be classified and stored in the nodes
 	*/
-	int i, row, col, mom;
-	float p_med = size_node/2;
-	float posx, posy, posz;
 	
-	// Inicializamos los nodos vacíos:
+	float p_med = size_node/2;
+	#pragma omp parallel num_threads(2) 
+    	{
+	int i, row, col, mom;
+	float posx, posy, posz;
+	#pragma omp for collapse(3)  schedule(dynamic)
+	// First allocate memory as an empty node:
 	for (row=0; row<partitions; ++row){
 	for (col=0; col<partitions; ++col){
 	for (mom=0; mom<partitions; ++mom){
@@ -139,16 +141,16 @@ void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 		nod[row][col][mom].nodepos.y = posy;
 		nod[row][col][mom].nodepos.z = posz;
 		
-		// Vemos si el nodo esta en la frontera
-		// frontera x:
+		// We see if the node is on the border
+		// border x:
 		if(posx<=d_max_pm) nod[row][col][mom].nodepos.fx = -1;
 		else if(posx>=front_pm) nod[row][col][mom].nodepos.fx = 1;
 		else nod[row][col][mom].nodepos.fx = 0;
-		// frontera y:
+		// border y:
 		if(posy<=d_max_pm) nod[row][col][mom].nodepos.fy = -1;
 		else if(posy>=front_pm) nod[row][col][mom].nodepos.fy = 1;
 		else nod[row][col][mom].nodepos.fy = 0;
-		// frontera z:
+		// border z:
 		if(posz<=d_max_pm) nod[row][col][mom].nodepos.fz = -1;
 		else if(posz>=front_pm) nod[row][col][mom].nodepos.fz = 1;
 		else nod[row][col][mom].nodepos.fz = 0;
@@ -158,8 +160,10 @@ void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 	}
 	}
 	}
-	// Llenamos los nodos con los puntos de dat:
-	for (i=0; i<n_pts; ++i){
+	}
+	// Fill the nodes with the dat points:
+	int i, row, col, mom;
+	for (int i=0; i<n_pts; ++i){
 		row = (int)(dat[i].x/size_node);
         	col = (int)(dat[i].y/size_node);
         	mom = (int)(dat[i].z/size_node);
@@ -192,19 +196,35 @@ void NODE3P::add(PointW3D *&array, int &lon, float _x, float _y, float _z, float
 //=================================================================== 
 void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	/*
-	Función para crear los histogramas DDD.
+	Function to create the DDD and RRR histograms.
 	
-	Argumentos
-	XXX : arreglo donde se creará el histograma DDD.
-	nodeX: malla de datos.
-	
-	*/ 
-	
-	std::cout << "-> Estoy haciendo histograma DDD..." << std::endl;
-	
-	#pragma omp parallel num_threads(4) 
+	Arg
+	XXX: arrangement where the DDD y RRR histogram will be created.
+	nodeX: array of nodes.
+
+	*/
+	std::cout << "Constructing DDD histogram..." << std::endl;
+	#pragma omp parallel num_threads(2) 
 	{
+	
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
+	
+	double ***SSS;
+	
+	SSS = new double**[bn];
+	for (i=0; i<bn; i++){
+	*(SSS+i) = new double*[bn];
+		for (j = 0; j < bn; j++){
+		*(*(SSS+i)+j) = new double[bn];
+		}
+	}
+	
+	for (i=0; i<bn; ++i){
+	for (j=0; j<bn; ++j){
+	for (k=0; k<bn; ++k) *(*(*(SSS+i)+j)+k) = 0.0;
+	}
+	}
+	
 	float dis, dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
 	float x, y, z;
@@ -222,31 +242,34 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	bool conx, cony, conz, conx_, cony_, conz_;
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
-	// x1N, y1N, z1N => Nodo pivote
 	for (row=0; row<partitions; ++row){
+	
+	for (col=0; col<partitions; ++col){
+	
+	for (mom=0; mom<partitions; ++mom){
 	x1N = nodeX[row][0][0].nodepos.x;
 	fx1N = nodeX[row][0][0].nodepos.fx;
 	con1_x = fx1N != 0;
-	for (col=0; col<partitions; ++col){
+	
 	y1N = nodeX[row][col][0].nodepos.y;
 	fy1N = nodeX[row][col][0].nodepos.fy;
 	con1_y = fy1N != 0;
-	for (mom=0; mom<partitions; ++mom){
+	
 	z1N = nodeX[row][col][mom].nodepos.z;
 	fz1N = nodeX[row][col][mom].nodepos.fz;
 	con1_z = fz1N != 0;
 	
 	//==================================================
-	// Triángulos entre puntos del mismo nodo:
+	// Triangles between points of the same node:
 	//==================================================
-	count_3_N111(row, col, mom, XXX, nodeX);		
+	count_3_N111(row, col, mom, SSS, nodeX);		
 	//==================================================
-	// Triángulos entre puntos del diferente nodo:
+	// Triangles between points of the different node:
 	//==================================================
 	u = row;
 	v = col;
 	//=======================
-	// Nodo 2 movil en Z:
+	// Mobile node2 in Z:
 	//=======================
 	x2N = nodeX[u][0][0].nodepos.x;
 	y2N = nodeX[u][v][0].nodepos.y;
@@ -256,31 +279,31 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	dz_nod = z2N-z1N;
 	dz_nod *= dz_nod;
 	
-	// Caja
+	// inside box
 	
 	if (dz_nod <= ddmax_nod){
 	//==============================================
-	// 2 puntos en N1 y 1 punto en N2
+	// 2 points in node1 and 1 point in node2
 	//==============================================
-	count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+	count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 	//==============================================
-	// 1 punto en N1, 1 punto en N2 y 1 punto en N3
+	// 1 point in node1, 1 point in node2 and 1 point in node3
 	//==============================================
 	a = u;
 	b = v;
 		x3N = nodeX[a][0][0].nodepos.x;
 		y3N = nodeX[a][b][0].nodepos.y;
 		//=======================
-		// Nodo 3 movil en Z:
+		// Mobile node3 in Z:
 		//=======================
 		for (c=w+1; c<partitions; ++c){
 		z3N = nodeX[a][b][c].nodepos.z; 
 		dz_nod2 = z3N-z1N;
 		dz_nod2 *= dz_nod2;
-		if (dz_nod2 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+		if (dz_nod2 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 		}
 		//=======================
-		// Nodo 3 movil en ZY:
+		// Mobile node3 in ZY:
 		//=======================
 		for (b=v+1; b<partitions; ++b){
 		y3N = nodeX[a][b][0].nodepos.y;
@@ -295,12 +318,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			dy_nod3 = y3N-y2N;
 			dz_nod3 = z3N-z2N;
 			dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 			}
 			}
 		}
 		//=======================
-		// Nodo 3 movil en ZYX:
+		// Mobile node3 in ZYX:
 		//=======================
 		for (a=u+1; a<partitions; ++a){
 		x3N = nodeX[a][0][0].nodepos.x;
@@ -320,7 +343,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				dy_nod3 = y3N-y2N;
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 			}
@@ -328,7 +351,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	}
 	}
 	//=======================
-	// Nodo 2 movil en ZY:
+	// Mobile node2 in ZY:
 	//=======================
 	for (v=col+1; v<partitions ; ++v){
 	y2N = nodeX[u][v][0].nodepos.y;
@@ -341,16 +364,16 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		dis_nod = dy_nod + dz_nod;
 		if (dis_nod <= ddmax_nod){
 		//==============================================
-		// 2 puntos en N y 1 punto en N'
+		// 2 points in node1 and 1 point in node2
 		//==============================================
-		count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+		count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 		//==============================================
-		// 1 punto en N1, 1 punto en N2 y un punto en N3
+		// 1 point in node1, 1 point in node2 and 1 point in node3
 		//==============================================
 		a = u;
 		b = v;
 		//=======================
-		// Nodo 3 movil en Z:
+		// Mobile node3 in Z:
 		//=======================
 		y3N = nodeX[a][b][0].nodepos.y;
 		dy_nod2 = y3N-y1N;
@@ -363,11 +386,11 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			if (dis_nod2 <= ddmax_nod){
 			dz_nod3 = z3N-z2N;
 			dis_nod3 = dz_nod3*dz_nod3;
-			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+			if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 			}
 			}
 			//=======================
-			// Nodo 3 movil en ZY:
+			// Mobile node3 in ZY:
 			//=======================	
 			for (b=v+1; b<partitions; ++b){
 			y3N = nodeX[a][b][0].nodepos.y;
@@ -382,12 +405,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				dy_nod3 = y3N-y2N;
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 			}
 			//=======================
-			// Nodo 3 movil en ZYX:
+			// Mobile node3 in ZYX:
 			//=======================
 			for (a=u+1; a<partitions; ++a){
 			x3N = nodeX[a][0][0].nodepos.x;
@@ -407,7 +430,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					dy_nod3 = y3N-y2N;
 					dz_nod3 = z3N-z2N;
 					dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 					}
 					}
 				}
@@ -416,7 +439,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		}	
 	}			
 	//=======================
-	// Nodo 2 movil en ZYX:
+	// Mobile node2 in ZYX:
 	//=======================
 	for (u=row+1; u<partitions; ++u){
 	x2N = nodeX[u][0][0].nodepos.x;
@@ -433,16 +456,16 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			dis_nod = dx_nod + dy_nod + dz_nod;
 			if (dis_nod <= ddmax_nod){
 			//==============================================
-			// 2 puntos en N y 1 punto en N'
+			// 2 points in node1 and 1 point in node2
 			//==============================================
-			count_3_N112(row, col, mom, u, v, w, XXX, nodeX);
+			count_3_N112(row, col, mom, u, v, w, SSS, nodeX);
 			//==============================================
-			// 1 punto en N1, 1 punto en N2 y 1 punto en N3
+			// 1 point in node1, 1 point in node2 and 1 point in node3
 			//==============================================
 			a = u;
 			b = v;
 			//=======================
-			// Nodo 3 movil en Z:
+			// Mobile node3 in Z:
 			//=======================
 			x3N = nodeX[a][0][0].nodepos.x;
 			y3N = nodeX[a][b][0].nodepos.y;
@@ -458,11 +481,11 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				if (dis_nod2 <= ddmax_nod){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
-				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+				if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 				}
 				}
 				//=======================
-				// Nodo 3 movil en ZY:
+				// Mobile node3 in ZY:
 				//=======================
 				for (b=v+1; b<partitions; ++b){
 				y3N = nodeX[a][b][0].nodepos.y;
@@ -477,12 +500,12 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					dy_nod3 = y3N-y2N;
 					dz_nod3 = z3N-z2N;
 					dis_nod3 = dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+					if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 					}
 					}
 				}
 				//=======================
-				// Nodo 3 movil en ZYX:
+				// Mobile node3 in ZYX:
 				//=======================		
 				for (a=u+1; a<partitions; ++a){
 				x3N = nodeX[a][0][0].nodepos.x;
@@ -502,7 +525,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 						dy_nod3 = y3N-y2N;
 						dz_nod3 = z3N-z2N;
 						dis_nod3 = dx_nod3*dx_nod3 + dy_nod3*dy_nod3 + dz_nod3*dz_nod3;
-						if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, XXX, nodeX);
+						if (dis_nod3 <= ddmax_nod) count_3_N123(row, col, mom, u, v, w, a, b, c, SSS, nodeX);
 						}
 						}
 					}
@@ -512,9 +535,9 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		}
 	}
 	
-	//  =========================  Frontera  =========================
+	//  =========================  Border  =========================
 	
-	if (con1_x||con1_y||con1_z){  // si todo es falso, entonces N1 no está en ninguna frontera
+	if (con1_x||con1_y||con1_z){ 
 		
 		u = row;
 		v = col;
@@ -530,7 +553,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		cony_ = !con12_y && con1_y && con2_y;
 		
 		//=======================
-		// Nodo 2 movil en Z:
+		// Mobile node2 in Z:
 		//=======================
 		for (w=mom+1;  w<partitions; ++w){	
 		fz2N = nodeX[u][v][w].nodepos.fz;
@@ -541,7 +564,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		if(con2_x || con2_y || con2_z){ // si todo es falso, entonces N2 no está en ninguna frontera
 			
 			// =======================================================================
-			if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,XXX,nodeX);
+			if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,SSS,nodeX);
 			// =======================================================================
 			
 			a = u;
@@ -563,7 +586,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			con13_z = fz1N == fz3N;
 			conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-			if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+			if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 			
 			}
 			
@@ -578,7 +601,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				con13_z = fz1N == fz3N;
 				conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-				if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+				if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 				
 				}
 			}
@@ -599,7 +622,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					con13_z = fz1N == fz3N;
 					conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 						
-					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 					
 					}
 				}
@@ -607,7 +630,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 		}
 		}
 		//=======================
-		// Nodo 2 movil en ZY:
+		// Mobile node2 in ZY:
 		//=======================
 		for (v=col+1; v<partitions ; ++v){
 		fy2N = nodeX[u][v][0].nodepos.fy;
@@ -623,7 +646,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			if(con2_x || con2_y || con2_z){
 			
 				// =======================================================================
-				if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,XXX,nodeX);
+				if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,SSS,nodeX);
 				// =======================================================================
 				
 				a = u;
@@ -645,7 +668,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				con13_z = fz1N == fz3N;
 				conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-				if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+				if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 				
 				}
 				
@@ -660,7 +683,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					con13_z = fz1N == fz3N;
 					conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 					
 					}
 				}
@@ -681,7 +704,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 						con13_z = fz1N == fz3N;
 						conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-						if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+						if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 						
 						}
 					}
@@ -690,7 +713,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 			}
 		}
 		//=======================
-		// Nodo 2 movil en ZYX:
+		// Mobile node2 in ZYX:
 		//=======================
 		for (u=row+1; u<partitions ; ++u){
 		fx2N = nodeX[u][0][0].nodepos.fx;
@@ -710,7 +733,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 				if(con2_x || con2_y || con2_z){
 					
 					// =======================================================================
-					if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,XXX,nodeX);
+					if (conx_||cony_||conz_) front_node_112(row,col,mom,u,v,w,conx_,cony_,conz_,SSS,nodeX);
 					// =======================================================================
 					
 					a = u;
@@ -732,7 +755,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 					con13_z = fz1N == fz3N;
 					conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 					
-					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+					if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 					
 					}
 					
@@ -747,7 +770,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 						con13_z = fz1N == fz3N;
 						conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 						
-						if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+						if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 						
 						}
 					}
@@ -768,7 +791,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 							con13_z = fz1N == fz3N;
 							conz = !(con12_z && con13_z) && con1_z && con2_z && con3_z;
 							
-							if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,XXX,nodeX);
+							if (conx||cony||conz) front_node_123(row,col,mom,u,v,w,a,b,c,conx,cony,conz,SSS,nodeX);
 							
 							}
 						}
@@ -781,19 +804,29 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	}
 	}
 	}
+	
+	#pragma omp critical
+	for (int i=0; i<bn; ++i){
+	for (int j=0; j<bn; ++j){
+	for (int k=0; k<bn; ++k) *(*(*(XXX+i)+j)+k)+=*(*(*(SSS+i)+j)+k);
+	}
+	}
+	
 	}
 	//================================
-	// Simetrización:
+	// Symmetrization:
 	//================================
 	symmetrize(XXX); 	
 }
 //=================================================================== 
 void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en un mismo Nodo.
-	
-	row, col, mom => posición del Nodo. Esto define al Nodo.
-	
+	Function to count the triangles in the same Node.
+
+	Arg
+	row, col, mom => Node1 position.
+	XXX: arrangement where the DD yRR histogram will be created.
+	nodeS: array of nodes.
 	*/
 	int i,j,k;
 	float dx,dy,dz;
@@ -844,11 +877,16 @@ void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***node
 //=================================================================== 
 void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en dos 
-	nodos con dos puntos en N1 y un punto en N2.
+	Function to count the triangles in two
+	nodes with two points on Node1 and one point on Node2.
 	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
+	
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	XXX: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS: array of nodes.
 	
 	*/
 	int i,j,k;
@@ -921,13 +959,17 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double
 //=================================================================== 
 void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a, int b, int c, double ***XXX, Node ***nodeS){
 	/*
-	Funcion para contar los triangulos en tres 
-	nodos con un puntos en N1, un punto en N2
-	y un punto en N3.
+	Function to count the triangles in three
+	nodes with a points in Node1, a point in Node2
+	and a point in Node3.
 	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
-	a, b, c => posición de N3.
+	Arg
+	row, col, mom => Node1 position.
+	u, v, w => Node2 position.
+	a, b, c => Node3 position.
+	XXX: arrangement where the DD yRR histogram will 
+		be created.
+	nodeS: array of nodes.
 	
 	*/
 	int i,j,k;
@@ -973,11 +1015,10 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 //=================================================================== 
 void NODE3P::symmetrize(double ***XXX){
 	/*
-	Función para simetrizar histograma
-	
-	Argumentos
-	XXX: arreglo a simetrizar
-	
+	Function to symmetrize histogram
+
+	Arg
+	XXX: array to symmetrize
 	*/ 
 	int i,j,k;
 	float elem;
@@ -996,10 +1037,9 @@ void NODE3P::symmetrize(double ***XXX){
 	}
 }
 
-//=======================================================
-//================ Funciones para BPC ===================
-//=======================================================
-
+//=========================================================
+//================ Functions to BPC =======================
+//=========================================================
 void NODE3P::front_node_112(int row, int col, int mom, int u, int v, int w, bool conx, bool cony, bool conz, double ***XXX, Node ***nodeS){
 	
 	float x1N = nodeS[row][0][0].nodepos.x;
@@ -1077,14 +1117,7 @@ void NODE3P::front_node_112(int row, int col, int mom, int u, int v, int w, bool
 }
 //=================================================================== 
 void NODE3P::front_112(int row,int col,int mom,int u,int v,int w,short int fx2,short int fy2,short int fz2,double ***XXX,Node ***nodeS){
-	/*
-	Funcion para contar los triangulos en dos 
-	nodos con dos puntos en N1 y un punto en N2.
-	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
-	
-	*/
+
 	int i,j,k;
 	int n,m,l;
 	float dx,dy,dz;
@@ -1367,16 +1400,6 @@ void NODE3P::front_node_123(int row, int col, int mom, int u, int v, int w, int 
 }
 //=================================================================== 
 void NODE3P::front_123(int row,int col,int mom,int u,int v,int w,int a,int b,int c,short int fx1N,short int fy1N,short int fz1N,short int fx2N,short int fy2N,short int fz2N,short int fx3N,short int fy3N,short int fz3N,double ***XXX, Node ***nodeS){
-	/*
-	Funcion para contar los triangulos en tres 
-	nodos con un puntos en N1, un punto en N2
-	y un punto en N3.
-	
-	row, col, mom => posición de N1.
-	u, v, w => posición de N2.
-	a, b, c => posición de N3.
-	
-	*/
 	
 	int i,j,k;
 	int n,m,l;
@@ -1429,133 +1452,143 @@ void NODE3P::front_123(int row,int col,int mom,int u,int v,int w,int a,int b,int
 	}
 }
 
-//=================================================================== 
-//================ Funciones para formulas analíticas =============== 
-//=================================================================== 
+//========================================================================== 
+//================ Functions for analytical formulas =======================
+//==========================================================================
 
-void NODE3P::make_histo_analitic(double ***XXY, float ***XXX, Node ***nodeX){
+void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 	/*
-	Función para construir histogramas con funciones analíticas
-	
-	Argumentos
-	XXX_: arreglo random
-	XXY: arreglo mixto
-	nodeX: malla de datos
+	Function to construct histograms with analytical functions
+
+	Arguments
+	XXX_: random array
+	XXY: mixed arrangement
+	nodeX: data mesh
 	
 	*/ 
-	//======================================
-	// Histograma RRR, DDR y DRR (ANALITICA)
-	//======================================
-	std::cout << "-> Estoy haciendo histograma RRR y DDR..." << std::endl;
+	//=======================================
+	// RRR, DDR and DRR Histogram (ANALYTICS)
+	//=======================================
 	
 	int i, j, k, u, v, w, a, b, c;
-	short int v_in;
-	bool con;
 	
-	// Constantes para RRR
-	float dr = d_max/(double)bn;
-	float dr2 = dr/2, r1, r2, r3;
-	float ri, rj, rk;
+	// Constants for RRR
+	double dr = d_max/(double)bn;
+	double ri, rj, rk;
 	
-	float V = size_box*size_box*size_box;
-	float beta = n_pts/V;
-	float gama  = 3*8*(2*acos(0.0))*(2*acos(0.0))*(n_pts*beta*beta);
-	float alph = gama*dr*dr*dr;
+	double V = size_box*size_box;
+	double beta = n_pts/V;
+	double gama  = 3*8*(4*acos(0.0)*acos(0.0))*(n_pts*beta*beta);
+	gama /= V;
+	double alph = gama*dr*dr*dr;
 	
-	// Refinamiento para RRR
+	// Refinement for RRR
 	int bn_ref = 200; 
-	float dr_ref = dr/bn_ref;
-	float dr_ref2 = dr_ref/2;
-	float ru, rv, rw;
+	double dr_ref = dr/bn_ref;
 	
-	float alph_ref = gama*dr_ref*dr_ref*dr_ref;
-	float S_av;
-	float f_av;
+	double f_av;
 	
-	//=============================================================================================
+	//=====================================================================
 	
-	// Constantes para DDR
+	// Constants for DDR
 	int ptt = 100;
 	int bins = ptt*bn;
-	float dr_ptt = d_max/(float)bins;
-	float dr_ptt2 = dr_ptt/2;
+	double dr_ptt = d_max/(double)bins;
 	double *DD;
 	double *RR;
 	DD = new double[bins];
 	RR = new double[bins];
 	for (i = 0; i < bins; ++i){
-		*(DD+i) = 0; 
+		*(DD+i) = 0.0; 
 		*(RR+i) = 0.0;
 	}
 	
-	// Hacemos los histogramas DD y RR
+	// Make the DD and RR histograms
 	make_histoXX(DD, RR, nodeX, bins);
 	
-	// Iniciamos un arreglo para la funcion f_averrage
+	// Initiate an arrangement for the function f_averrage
 	double *ff_av;
 	ff_av = new double[bn];
-	for (i=0; i<bn; ++i) *(ff_av+i) = 0;
+	for (i=0; i<bn; ++i) *(ff_av+i) = 0.0;
 	
-	// Calculamos las f_averrage
+	// Calculate the f_averrage
+	
 	int i_;
 	for(i=0; i<bn; ++i){
 	f_av = 0;
 	ri = i*dr;
 	i_ = i*ptt;
-		for(j = 0; j<ptt; ++j){
-		rj = (j+0.5)*dr_ptt;
-		f_av += (ri + rj)*(((double)(*(DD+i_+j)) /(*(RR+i_+j))) - 1);
+		#pragma omp parallel num_threads(1) 
+		{
+		#pragma omp for schedule(dynamic) private(j,rj) reduction(+:f_av)
+		for(j=0; j<ptt; ++j){
+			rj = (j+0.5)*dr_ptt;
+			f_av += (ri + rj)*((*(DD+i_+j) /(*(RR+i_+j))) - 1);
+		}
 		}
 	*(ff_av+i) = f_av/ptt;
 	}
-	
 	delete[] DD;
 	delete[] RR;
 	
-	//=============================================================================================
+	//=====================================================================
 	
-	// Refinamiento para DDR
+	// Refinement for DDR
 	int bins_ref = ptt*bn_ref*bn;
-	float dr_ptt_ref = d_max/(float)bins_ref;
-	float dr_ptt_ref2 = dr_ptt_ref/2;
+	double dr_ptt_ref = d_max/(double)bins_ref;
+	double dr_ptt_ref2 = dr_ptt_ref/2;
 	DD = new double[bins_ref];
 	RR = new double[bins_ref];
 	for (i = 0; i < bins_ref; i++){
-		*(DD+i) = 0; 
+		*(DD+i) = 0.0; 
 		*(RR+i) = 0.0;
 	}
 	
-	// Hacemos los histogramas DD y RR
+	// Make the DD and RR histograms
 	make_histoXX(DD, RR, nodeX, bins_ref);
 	
-	// Iniciamos un arreglo para la funcion f_averrage del refinamiento
+	// Initiate a fix for the refinement function f_averrage
 	double *ff_av_ref;
 	ff_av_ref = new double[bn_ref*bn];
 	for (i=0; i<bn_ref*bn; ++i) *(ff_av_ref+i) = 0.0;
 	
-	// Calculamos las f_averrage del refinamiento
+	// Calculate the f_averrage of the refinement
 	int j_;
 	for(i=0; i<bn; ++i){
 	ri = i*dr;
 	i_ = i*bn_ref;
 		for(j=0; j<bn_ref; ++j){
-		f_av = 0;
 		rj = j*dr_ref;
 		j_ = j*ptt;
-			for(k = 0; k<ptt; ++k){
+			f_av = 0;
+			#pragma omp parallel num_threads(2) shared(f_av,DD,RR)
+			{
+			double rk;
+			#pragma omp for schedule(dynamic) reduction(+:f_av)
+			for(int k=0; k<ptt; ++k){
 				rk = (k+0.5)*dr_ptt_ref;
 				f_av += (ri+rj+rk)*(((double)(*(DD+i_+j_+k))/(*(RR+i_+j_+k)))-1);
 			}
-			*(ff_av_ref+i_+j) = f_av/ptt;
+			}
+		*(ff_av_ref+i_+j) = f_av/ptt;
 		}
 	}
 	
 	delete[] DD;
 	delete[] RR;
 	
-	//=============================================================================================
+	//=====================================================================
 	
-	float c_RRR;
+	double alph_ref = gama*dr_ref*dr_ref*dr_ref;
+	double dr2 = dr/2;
+	double dr_ptt2 = dr_ptt/2;
+	double dr_ref2 = dr_ref/2;
+	std::cout << "Constructing RRR and DDR histograms..." << std::endl;
+	
+	int short v_in;
+	double r1, r2, r3;
+	double ru, rv, rw;
+	double f;
 	
 	for(i=0; i<bn; ++i) {
 	ri = i*dr;
@@ -1565,8 +1598,8 @@ void NODE3P::make_histo_analitic(double ***XXY, float ***XXX, Node ***nodeX){
 	j_ = j*bn_ref;
 	for(k=j; k<bn; ++k) {
 	rk = k*dr;
-		// Checamos vertices del cubo para hacer 
-		// o no refinamiento  
+		// Check vertices of the 
+		// cube to make refinement
 		
 		v_in = 0;
 		
@@ -1583,43 +1616,60 @@ void NODE3P::make_histo_analitic(double ***XXY, float ***XXX, Node ***nodeX){
 		
 		if (v_in==8){
 			*(*(*(XXX+i)+j)+k) += alph*(ri+dr2)*(rj+dr2)*(rk+dr2);
-			*(*(*(XXY+i)+j)+k) += *(*(*(XXX+i)+j)+k)*(1+(*(ff_av+i)/(3*(ri+dr_ptt2)))+(*(ff_av+j)/(3*(rj+dr_ptt2)))+(*(ff_av+k)/(3*(rk+dr_ptt2))));
+			f = 1;
+			f += (*(ff_av+i)/(3*(ri+dr_ptt2)));
+			f += (*(ff_av+j)/(3*(rj+dr_ptt2)));
+			f += (*(ff_av+k)/(3*(rk+dr_ptt2)));
+			f *= *(*(*(XXX+i)+j)+k);
+			*(*(*(XXY+i)+j)+k) += f;
 		}
 		
 		else if (v_in < 8 && v_in > 0){
 			
-			S_av = 0;
-			f_av = 0;
-			con = false;
-			
-			for(u=0; u<bn_ref; ++u) {
+			bool con = false;
+			double S_av = 0.0;
+			double f_av = 0.0;
+			#pragma omp parallel num_threads(2) shared(S_av,f_av,DD,RR)
+			{
+			double ru,rv,rw;
+			double r1,r2,r3;
+			double c_RRR;
+			#pragma omp for collapse(3) schedule(dynamic) reduction(+:S_av,f_av)
+			for(int u=0; u<bn_ref; ++u) {
+			for(int v=0; v<bn_ref; ++v) {
+			for(int w=0; w<bn_ref; ++w) {
 			ru = ri + (u*dr_ref);
-			for(v=0; v<bn_ref; ++v) {
 			rv = rj + (v*dr_ref);
-			for(w=0; w<bn_ref; ++w) {
 			rw = rk + (w*dr_ref);
 			
-				v_in = 0;
+				short int v_in = 0;
 		
-				for (a = 0; a < 2; ++a){
+				for (int a = 0; a < 2; ++a){
 				r1 = ru + (a*dr_ref);
-				for (b = 0; b < 2; ++b){
+				for (int b = 0; b < 2; ++b){
 				r2 = rv + (b*dr_ref);
-				for (c = 0; c < 2; ++c){
+				for (int c = 0; c < 2; ++c){
 				r3 = rw + (c*dr_ref);	
-					if (r1 + r2 >= r3 && r1 + r3 >= r2 && r2 + r3 >= r1) v_in++;
+					if (r1 + r2 >= r3 && r1 + r3 >= r2 && r2 + r3 >= r1) ++v_in;
 				}
 				}
 				}
 				if (v_in==8){
 					c_RRR = (ru+dr_ref2)*(rv+dr_ref2)*(rw+dr_ref2);
 					S_av += c_RRR;
-					f_av += c_RRR*(1+(*(ff_av_ref+i_+u)/(3*(ru+dr_ref2)))+(*(ff_av_ref+j_+v)/(3*(rv+dr_ref2)))+(*(ff_av_ref+(k*bn_ref)+w)/(3*(rw+dr_ref2))));
+					f = 1;
+					f += (*(ff_av_ref+i_+u)/(3*(ru+dr_ref2)));
+					f += (*(ff_av_ref+j_+v)/(3*(rv+dr_ref2)));
+					f += (*(ff_av_ref+(k*bn_ref)+w)/(3*(rw+dr_ref2)));
+					f *= c_RRR;
+					f_av += f;
 					con = true;
 				}
 			}
 			}
 			}
+			}
+			
 			if (con){
 				*(*(*(XXX+i)+j)+k) += alph_ref*S_av;
 				*(*(*(XXY+i)+j)+k) += alph_ref*f_av;
@@ -1628,22 +1678,30 @@ void NODE3P::make_histo_analitic(double ***XXY, float ***XXX, Node ***nodeX){
 	}
 	}
 	}
-	
 	symmetrize_analitic(XXX);
 	symmetrize_analitic(XXY); 
 	
 }
 //=================================================================== 
-void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
+void NODE3P::make_histoXX(double *XX, double *YY, Node ***nodeX, int bins){
 	/*
-	Función para crear los histogramas DD y RR.
-	
-	Argumentos
-	DD: arreglo donde se creará el histograma DD.
-	RR: arreglo donde se creará el histograma RR.
+	Function to create the DD and RR histograms.
+
+	Arg:
+	DD: array where the DD histogram will be created.
+	RR: array where the RR histogram will be created.
 	
 	*/
-	//Variables compartidas en hilos: 
+	float ds_new = ((float)(bins))/d_max;
+	
+	#pragma omp parallel num_threads(2)
+	{
+	
+	double *SS;
+    	SS = new double[bins];
+    	for (int k = 0; k < bins; k++) *(SS+k) = 0.0;
+	
+	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
@@ -1651,17 +1709,16 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
 	bool con_x, con_y, con_z;
 	
-	float ds_new = ((float)(bins))/d_max;
-	
+	#pragma omp for collapse(3) schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	x1D = nodeX[row][0][0].nodepos.x;
 	for (col = 0; col < partitions; ++col){
-	y1D = nodeX[row][col][0].nodepos.y;
 	for (mom = 0; mom < partitions; ++mom){
+	x1D = nodeX[row][0][0].nodepos.x;
+	y1D = nodeX[row][col][0].nodepos.y;
 	z1D = nodeX[row][col][mom].nodepos.z;			
-	//==================================================
-	// Distancias entre puntos del mismo nodo:
-	//==================================================
+		//==================================================
+		// Pairs of points in the same node:
+		//==================================================
 		for (i= 0; i<nodeX[row][col][mom].len-1; ++i){
 		x = nodeX[row][col][mom].elements[i].x;
 		y = nodeX[row][col][mom].elements[i].y;
@@ -1672,16 +1729,16 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 			dy = y-nodeX[row][col][mom].elements[j].y;
 			dz = z-nodeX[row][col][mom].elements[j].z;
 			dis = dx*dx+dy*dy+dz*dz;
-			if (dis <= dd_max) *(XX + (int)(sqrt(dis)*ds_new)) += a*nodeX[row][col][mom].elements[j].w;
+			if (dis < dd_max) *(SS + (int)(sqrt(dis)*ds_new)) += 2*a*nodeX[row][col][mom].elements[j].w;
 			}
 		}
 		//==================================================
-		// Distancias entre puntos del diferente nodo:
+		// Pairs of points at different nodes
 		//==================================================
 		u = row;
 		v = col;
 		//=========================
-		// N2 movil en Z
+		// N2 mobile in Z
 		//=========================
 		for (w=mom+1;  w<partitions ; ++w){	
 		z2D = nodeX[u][v][w].nodepos.z;
@@ -1698,21 +1755,21 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 				dy = y-nodeX[u][v][w].elements[j].y;
 				dz = z-nodeX[u][v][w].elements[j].z;
 				dis = dx*dx+dy*dy+dz*dz;
-				if (dis <= dd_max) *(XX + (int)(sqrt(dis)*ds_new)) +=  a*nodeX[row][col][mom].elements[j].w;
+				if (dis < dd_max) *(SS + (int)(sqrt(dis)*ds_new)) += 2*a*nodeX[row][col][mom].elements[j].w;
 				}
 			}
 			}
-			//=======================================
-			// Distacia de los puntos frontera XX
-			//=======================================
-			//Condiciones de nodos en frontera:
+			// ======================================= 
+			// Distance of border points XX 
+			// ======================================= 
+			// Boundary node conditions:
 			con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_z){
-			histo_front_XX(XX,nodeX,dis_nod,0.0,0.0,fabs(dz_nod),false,false,con_z,row,col,mom,u,v,w,ds_new);
+			histo_front_XX(SS,nodeX,dis_nod,0.0,0.0,fabs(dz_nod),false,false,con_z,row,col,mom,u,v,w,ds_new);
 			}
 		}
 		//=========================
-		// N2 movil en ZY
+		// N2 mobile in ZY
 		//=========================
 		for (v = col + 1; v < partitions ; ++v){
 		y2D = nodeX[u][v][0].nodepos.y;
@@ -1734,23 +1791,23 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 					dy =  y-nodeX[u][v][w].elements[j].y;
 					dz =  z-nodeX[u][v][w].elements[j].z;
 					dis = dx*dx+dy*dy+dz*dz;
-					if (dis <= dd_max) *(XX + (int)(sqrt(dis)*ds_new)) += a*nodeX[row][col][mom].elements[j].w;
+					if (dis < dd_max) *(SS + (int)(sqrt(dis)*ds_new)) += 2*a*nodeX[row][col][mom].elements[j].w;
 					}
 				}
 			}
-			//=======================================
-			// Distacia de los puntos frontera
-			//=======================================
-			//Condiciones de nodos en frontera:
+			// ======================================= 
+			// Distance of border points XX 
+			// ======================================= 
+			// Boundary node conditions:
 			con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 			con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_y || con_z){ 
-			histo_front_XX(XX,nodeX,dis_nod,0.0,fabs(dy_nod),fabs(dz_nod),false,con_y,con_z,row,col,mom,u,v,w,ds_new);
+			histo_front_XX(SS,nodeX,dis_nod,0.0,fabs(dy_nod),fabs(dz_nod),false,con_y,con_z,row,col,mom,u,v,w,ds_new);
 			}
 			}
 		}
 		//=========================
-		// N2 movil en ZYX
+		// N2 mobile in  ZYX
 		//=========================
 		for ( u = row + 1; u < partitions; ++u){
 		x2D = nodeX[u][0][0].nodepos.x;
@@ -1776,19 +1833,19 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 						dy = y-nodeX[u][v][w].elements[j].y;
 						dz = z-nodeX[u][v][w].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
-						if (dis <= dd_max) *(XX + (int)(sqrt(dis)*ds_new)) += a*nodeX[row][col][mom].elements[j].w;
+						if (dis < dd_max) *(SS + (int)(sqrt(dis)*ds_new)) += 2*a*nodeX[row][col][mom].elements[j].w;
 						}
 					}
 				}
-				//=======================================
-				// Distacia de los puntos frontera
-				//=======================================
-				//Condiciones de nodos en frontera:
+				//======================================= 
+				// Distance of border points XX 
+				//======================================= 
+				// Boundary node conditions:
 				con_x = ((x1D<=d_max_pm)&&(x2D>=front_pm))||((x2D<=d_max_pm)&&(x1D>=front_pm));
 				con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 				con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_x || con_y || con_z){
-			histo_front_XX(XX,nodeX,dis_nod,fabs(dx_nod),fabs(dy_nod),fabs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,ds_new);
+			histo_front_XX(SS,nodeX,dis_nod,fabs(dx_nod),fabs(dy_nod),fabs(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,ds_new);
 			}	
 				}	
 			}
@@ -1796,18 +1853,37 @@ void NODE3P::make_histoXX(double *XX, float *YY, Node ***nodeX, int bins){
 	}
 	}
 	}
+	#pragma omp critical
+	for(int a=0; a<bins; a++) *(XX+a)+=*(SS+a);
+	}
 	//======================================
-	// Histograma RR (ANALITICA)
+	// Histogram RR (ANALYTICAL)
 	//======================================
+	
 	double dr = (d_max/(double)bins);
-	double V = size_box*size_box*size_box;
-	double beta1 = n_pts*n_pts/V;
-	double alph = 4*(2*acos(0.0))*(beta1)*dr*dr*dr/3;
+	double V = size_box;
+	double beta1 = n_pts/V;
+	beta1 *= n_pts/size_box;
+	beta1 /= size_box;
+	double alph = 4*(2*acos(0.0))*(beta1)/3;
+	alph *= dr*dr*dr;
+	
+	#pragma omp parallel num_threads(2)
+	{
+	
+	double *SS;
+    	SS = new double[bins];
+    	for (int k = 0; k < bins; k++) *(SS+k) = 0.0;
+	
 	double r1, r2;
+	#pragma omp for schedule(dynamic)	
 	for(int a=0; a<bins; ++a) {
 		r2 = (double)(a);
 		r1 = r2+1;
-        	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
+        	*(SS+a) += alph*((r1*r1*r1)-(r2*r2*r2));
+	}
+	#pragma omp critical
+	for(int a=0; a<bins; a++) *(YY+a)+=*(SS+a);
 	}
 }
 
@@ -1817,7 +1893,6 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 	float dis_f, dis, d_x, d_y, d_z;
 	float x, y, z, a;
 	//======================================================================
-	// Si los puentos estás en las paredes laterales de X
 	if( con_in_x ){
 	dis_f = disn + ll - 2*dn_x*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1831,13 +1906,12 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = y-dat[u][v][w].elements[j].y;
 			d_z = z-dat[u][v][w].elements[j].z;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
-	//======================================================================
-	// Si los puentos estás en las paredes laterales de Y		
+	//======================================================================	
 	if( con_in_y ){
 	dis_f = disn + ll - 2*dn_y*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1851,13 +1925,12 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = fabs(y-dat[u][v][w].elements[j].y)-size_box;
 			d_z = z-dat[u][v][w].elements[j].z;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
 	//======================================================================
-	// Si los puentos estás en las paredes laterales de Z
 	if( con_in_z ){
 	dis_f = disn + ll - 2*dn_z*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1871,16 +1944,15 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = y-dat[u][v][w].elements[j].y;
 			d_z = fabs(z-dat[u][v][w].elements[j].z)-size_box;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max)*(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max)*(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Y			
+	//======================================================================			
 	if( con_in_x && con_in_y ){
 	dis_f = disn + 2*ll - 2*(dn_x+dn_y)*size_box;
-	if (dis_f < ddmax_nod){
+	if (dis_f <= ddmax_nod){
 		for (i=0; i<dat[row][col][mom].len; ++i){
 		x = dat[row][col][mom].elements[i].x;
 		y = dat[row][col][mom].elements[i].y;
@@ -1891,13 +1963,12 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = fabs(y-dat[u][v][w].elements[j].y)-size_box;
 			d_z = z-dat[u][v][w].elements[j].z;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X y Z				
+	//======================================================================			
 	if( con_in_x && con_in_z ){
 	dis_f = disn + 2*ll - 2*(dn_x+dn_z)*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1911,13 +1982,12 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = y-dat[u][v][w].elements[j].y;
 			d_z = fabs(z-dat[u][v][w].elements[j].z)-size_box;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de Y y Z			
+	//======================================================================		
 	if( con_in_y && con_in_z ){
 	dis_f = disn + 2*ll - 2*(dn_y+dn_z)*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1931,13 +2001,12 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = fabs(y-dat[u][v][w].elements[j].y)-size_box;
 			d_z = fabs(z-dat[u][v][w].elements[j].z)-size_box;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
 	}
-	//======================================================================
-	// Si los puentos estás en las esquinas que cruzan las paredes laterales de X, Y y Z		
+	//======================================================================		
 	if( con_in_x && con_in_y && con_in_z ){
 	dis_f = disn + 3*ll - 2*(dn_x+dn_y+dn_z)*size_box;
 	if (dis_f <= ddmax_nod){
@@ -1951,7 +2020,7 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = fabs(y-dat[u][v][w].elements[j].y)-size_box;
 			d_z = fabs(z-dat[u][v][w].elements[j].z)-size_box;
 			dis = d_x*d_x + d_y*d_y + d_z*d_z;
-			if (dis <= dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}
@@ -1959,6 +2028,13 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 }
 //=================================================================== 
 void NODE3P::symmetrize_analitic(double ***XXX){
+	/*
+	Function to symmetrize histogram
+
+	Arg
+	XXX: array to symmetrize
+	*/ 
+
 	int i,j,k;
 	float elem;
 	for (i=0; i<bn; i++){

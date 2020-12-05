@@ -116,7 +116,7 @@ int main(int argc, char **argv){
 }
 
 //====================================================================
-//===================== Functions Section ===========================
+//===================== Functions Section ============================
 //====================================================================
 void open_files(string name_file, int pts, PointW3D *datos){
 	/* 
@@ -133,7 +133,9 @@ void open_files(string name_file, int pts, PointW3D *datos){
 }
 //====================================================================
 void save_histogram(string name, int bns, double *histo){
-	/* Función para guardar nuestros archivos de histogramas */
+	/* 
+	Function to save our histogram files
+	*/
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);
 	

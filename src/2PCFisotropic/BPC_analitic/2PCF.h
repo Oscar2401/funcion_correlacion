@@ -152,10 +152,15 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	*/
 	
 	int partitions = (int)((size_box/size_node)+1);
+	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
 	std::cout << "-> doing DD histogram ..." << std::endl;
 	
 	#pragma omp parallel num_threads(2) 
 	{
+	
+	double *SS;
+    	SS = new double[bn];
+    	for (int k = 0; k < bn; ++k) *(SS+k) = 0.0;
     	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
@@ -164,13 +169,10 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
 	bool con_x, con_y, con_z;
-	float d_max_pm = d_max + size_node/2, front_pm = front - size_node/2;
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	
 	for (col = 0; col < partitions; ++col){
-	
 	for (mom = 0; mom < partitions; ++mom){
 	x1D = nodeX[row][0][0].nodepos.x;
 	y1D = nodeX[row][col][0].nodepos.y;
@@ -189,7 +191,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 			dz = z-nodeX[row][col][mom].elements[j].z;
 			dis = dx*dx+dy*dy+dz*dz;
 			if (dis <= dd_max){
-			*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[row][col][mom].elements[j].w;
+			*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[row][col][mom].elements[j].w;
 			}
 			}
 		}
@@ -217,7 +219,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 				dz = z-nodeX[u][v][w].elements[j].z;
 				dis = dx*dx+dy*dy+dz*dz;
 				if (dis <= dd_max){
-				*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+				*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 				}
 				}
 				}
@@ -228,7 +230,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 			// Boundary node conditions:
 			con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_z){
-			histo_front_XX(XX,nodeX,dis_nod,0.0,0.0,fabs(dz_nod),false,false,con_z,row,col,mom,u,v,w);
+			histo_front_XX(SS,nodeX,dis_nod,0.0,0.0,fabs(dz_nod),false,false,con_z,row,col,mom,u,v,w);
 			}
 		}
 		//=========================
@@ -255,7 +257,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 					dz =  z-nodeX[u][v][w].elements[j].z;
 					dis = dx*dx+dy*dy+dz*dz;
 					if (dis <= dd_max){
-					*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+					*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 					}
 					}
 				}
@@ -267,7 +269,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 			con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 			con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_y || con_z){ 
-			histo_front_XX(XX,nodeX,dis_nod,0.0,sqrt(dy_nod),sqrt(dz_nod),false,con_y,con_z,row,col,mom,u,v,w);
+			histo_front_XX(SS,nodeX,dis_nod,0.0,sqrt(dy_nod),sqrt(dz_nod),false,con_y,con_z,row,col,mom,u,v,w);
 			}
 			}
 		}
@@ -299,7 +301,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 						dz = z-nodeX[u][v][w].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis <= dd_max){
-							*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+							*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 						}
 						}
 					}
@@ -312,7 +314,7 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 				con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 				con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 				if(con_x || con_y || con_z){
-				histo_front_XX(XX,nodeX,dis_nod,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
+				histo_front_XX(SS,nodeX,dis_nod,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w);
 				}	
 				}	
 			}
@@ -320,26 +322,38 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
 	}
 	}
 	}
+	#pragma omp critical
+	for(int a=0; a<bn; a++) *(XX+a)+=*(SS+a);
 	}
 	// ======================================
 	// RR Histogram (ANALYTICAL)
 	// ======================================
 	std::cout << "-> doing RR histogram ..." << std::endl;
-	#pragma omp parallel num_threads(2) 
-	{
+	
 	double dr = (d_max/bn);
-	double V = size_box*size_box;
-	double beta1 = n_pts*n_pts/(V*size_box);
+	double V = size_box;
+	double beta1 = n_pts/(V);
+	beta1 *= n_pts/size_box;
+	beta1 /= size_box;
 	double alph = 4*(2*acos(0.0))*(beta1)/3;
 	alph *= dr*dr*dr;
+	
+	#pragma omp parallel num_threads(2) 
+	{
+	
+	double *SS;
+    	SS = new double[bn];
+    	for (int k = 0; k < bn; k++) *(SS+k) = 0.0;
+	
 	double r1, r2;
-	int a;
 	#pragma omp for schedule(dynamic)
-	for(a=0; a<bn; ++a) {
+	for(int a=0; a<bn; ++a) {
 		r2 = (double)(a);
 		r1 = r2+1;
-        	*(YY+a) += alph*((r1*r1*r1)-(r2*r2*r2));
+        	*(SS+a) += alph*((r1*r1*r1)-(r2*r2*r2));
 	}
+	#pragma omp critical
+	for(int a=0; a<bn; a++) *(YY+a)+=*(SS+a);
 	}
 }
 

@@ -162,7 +162,10 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	
 	#pragma omp parallel num_threads(2)
 	{
-	
+	double *SS;
+    	SS = new double[bn];
+    	for (int k = 0; k < bn; k++) *(SS+k) = 0;
+    	
 	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
 	float dis, dis_nod;
@@ -172,9 +175,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	
 	#pragma omp for collapse(3) schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	
 	for (col = 0; col < partitions; ++col){
-	
 	for (mom = 0; mom < partitions; ++mom){
 	x1D = nodeX[row][0][0].nodepos.x;
 	y1D = nodeX[row][col][0].nodepos.y;
@@ -193,7 +194,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 			dz = z-nodeX[row][col][mom].elements[j].z;
 			dis = dx*dx+dy*dy+dz*dz;
 			if (dis < dd_max){
-			*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[row][col][mom].elements[j].w;
+			*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[row][col][mom].elements[j].w;
 			}
 			}
 		}
@@ -221,7 +222,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 				dz = z-nodeX[u][v][w].elements[j].z;
 				dis = dx*dx+dy*dy+dz*dz;
 				if (dis < dd_max){
-				*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+				*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 				}
 				}
 				}
@@ -251,7 +252,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 					dz =  z-nodeX[u][v][w].elements[j].z;
 					dis = dx*dx+dy*dy+dz*dz;
 					if (dis < dd_max){
-					*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+					*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 					}
 					}
 				}
@@ -286,7 +287,7 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 						dz = z-nodeX[u][v][w].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis < dd_max){
-							*(XX + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
+							*(SS + (int)(sqrt(dis)*ds)) += 2*w1*nodeX[u][v][w].elements[j].w;
 						}
 						}
 					}
@@ -297,6 +298,8 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
 	}
 	}
 	}
+	#pragma omp critical
+        for(int a=0; a<bn; a++) *(XX+a)+=*(SS+a);
 	}
 }
 //=================================================================== 
@@ -315,6 +318,11 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 	
 	#pragma omp parallel num_threads(2)
 	{
+	
+	double *SS;
+    	SS = new double[bn];
+    	for (int k = 0; k < bn; k++) *(SS+k) = 0;
+    	
 	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w, h;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
@@ -359,7 +367,7 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 						dz = z-nodeY[u][v][w].elements[j].z;
 						dis = dx*dx + dy*dy + dz*dz;
 						if (dis < dd_max){
-						*(XY + (int)(sqrt(dis)*ds)) += w1*nodeY[u][v][w].elements[j].w;
+						*(SS + (int)(sqrt(dis)*ds)) += w1*nodeY[u][v][w].elements[j].w;
 						}
 						}
 					}
@@ -370,6 +378,8 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 	}
 	}
 	}
+	#pragma omp critical
+	for(int a=0; a<bn; a++) *(XY+a)+=*(SS+a);
 	}
 }
 //=================================================================== 

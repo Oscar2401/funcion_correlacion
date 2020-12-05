@@ -10,19 +10,19 @@ using namespace std;
 
 void open_files(string, int, PointW3D *);
 void save_histogram(string, int, double *);
-void save_histogram_analitic(string, int, double *);
 
 PointW3D *dataD;
 PointW3D *dataR;
 double *DD; 
 double *RR;
+double *DR;
 Node ***nodeD;
 Node ***nodeR;
 
 int main(int argc, char **argv){
 
-	int n_pts = 32*32*32, bn = 400;
-	float d_max = 180.0, size_box = 250.0, alpha = 2.176;
+	int n_pts = 32*32*32, bn = 100;
+	float d_max = 150.0, size_box = 250.0, alpha = 2.176;
 	float size_node = alpha*(size_box/pow((float)(n_pts),1/3.));
 	dataD = new PointW3D[n_pts]; 
 	dataR = new PointW3D[n_pts]; 
@@ -44,19 +44,23 @@ int main(int argc, char **argv){
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	
 	// File names
-	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_";
+	string nameDD = "DDiso_mesh_3D_", nameRR = "RRiso_mesh_3D_", nameDR = "DRiso_mesh_3D_";
 	nameDD.append(argv[3]);
 	nameRR.append(argv[3]);
+	nameDR.append(argv[3]);
 	nameDD += ".dat";
 	nameRR += ".dat";
+	nameDR += ".dat";
 	
 	// Initialize the histograms
 	DD = new double[bn];
 	RR = new double[bn];
+	DR = new double[bn];
 	int i, j;
 	for (i = 0; i < bn; ++i){
 		*(DD+i) = 0.0;
 		*(RR+i) = 0.0;
+		*(DR+i) = 0.0;
 	}
 
 	open_files(argv[1],n_pts,dataD);
@@ -90,9 +94,14 @@ int main(int argc, char **argv){
 	delete[] DD;
 	//===============================================
 	my_hist.make_histoXX(RR, my_hist.meshRand()); 
-	save_histogram_analitic(nameRR, bn, RR);
+	save_histogram(nameRR, bn, RR);
 	cout << "Save histogram RR ..." << endl;
 	delete[] RR;
+	//===============================================
+	my_hist.make_histoXY(DR, my_hist.meshData(), my_hist.meshRand()); 
+	save_histogram(nameDR, bn, DR);
+	cout << "Save histogram DR ..." << endl;
+	delete[] DR;
 	//===============================================
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
@@ -127,19 +136,6 @@ void open_files(string name_file, int pts, PointW3D *datos){
 //====================================================================
 void save_histogram(string name, int bns, double *histo){
 	/* Función para guardar nuestros archivos de histogramas */
-	ofstream file2;
-	file2.open(name.c_str(), ios::out | ios::binary);
-	
-	if (file2.fail()){
-		cout << "Failed to save file! " << endl;
-		exit(1);
-	}
-	for (int i=0; i<bns; ++i) file2 << histo[i] << endl;
-	file2.close();
-}
-//====================================================================
-void save_histogram_analitic(string name, int bns, double *histo){
-	/* Function to save our histogram files */
 	ofstream file2;
 	file2.open(name.c_str(), ios::out | ios::binary);
 	

@@ -163,9 +163,17 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	
 	#pragma omp parallel num_threads(2) 
     	{
-    	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
+	
+    	double **SS;
+    	SS = new double*[bn];
+    	for (i=0; i<bn; ++i) *(SS+i) = new double[bn];
+    	
+	for (i=0; i<bn; ++i){
+	for (j=0; j<bn; ++j) *(*(SS+i)+j) = 0.0;
+	}
+	
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
@@ -176,9 +184,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	
 	for (col = 0; col < partitions; ++col){
-	
 	for (mom = 0; mom < partitions; ++mom){
 	x1D = nodeX[row][0][0].nodepos.x;
 	y1D = nodeX[row][col][0].nodepos.y;
@@ -200,7 +206,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 			if (dz < dd_max && r_ort < dd_max){
 			dz = int(sqrt(dz)*ds);
 			r_ort = int(sqrt(r_ort)*ds);
-			*(*(XX+int(dz))+int(r_ort)) += 2*w1*nodeX[row][col][mom].elements[j].w;
+			*(*(SS+int(dz))+int(r_ort)) += 2*w1*nodeX[row][col][mom].elements[j].w;
 			}
 			}
 		}
@@ -231,7 +237,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 				if (dz < dd_max && r_ort < dd_max){
 				dz = int(sqrt(dz)*ds);
 				r_ort = int(sqrt(r_ort)*ds);
-				*(*(XX+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
+				*(*(SS+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
 				}
 				}
 			}
@@ -242,7 +248,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 		// Boundary node conditions:
 		con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 		if(con_z){
-		histo_front(XX,nodeX,nodeX,0.0,0.0,sqrt(dz_nod),false,false,con_z,row,col,mom,u,v,w,2);
+		histo_front(SS,nodeX,nodeX,0.0,0.0,sqrt(dz_nod),false,false,con_z,row,col,mom,u,v,w,2);
 		}
 		}
 		u = row;
@@ -273,7 +279,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 					if (dz < dd_max && r_ort < dd_max){
 					dz = int(sqrt(dz)*ds);
 					r_ort = int(sqrt(r_ort)*ds);
-					*(*(XX+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
+					*(*(SS+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
 					}
 					}
 				}
@@ -285,7 +291,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 			con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 			con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 			if(con_y || con_z){ 
-			histo_front(XX,nodeX,nodeX,0.0,sqrt(dy_nod),sqrt(dz_nod),false,con_y,con_z,row,col,mom,u,v,w,2);
+			histo_front(SS,nodeX,nodeX,0.0,sqrt(dy_nod),sqrt(dz_nod),false,con_y,con_z,row,col,mom,u,v,w,2);
 			}
 			}
 		}
@@ -320,7 +326,7 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 						if (dz < dd_max && r_ort < dd_max){
 						dz = int(sqrt(dz)*ds);
 						r_ort = int(sqrt(r_ort)*ds);
-						*(*(XX+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
+						*(*(SS+int(dz))+int(r_ort)) += 2*w1*nodeX[u][v][w].elements[j].w;
 						}
 						}
 					}
@@ -333,13 +339,17 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 				con_y = ((y1D<=d_max_pm)&&(y2D>=front_pm))||((y2D<=d_max_pm)&&(y1D>=front_pm));
 				con_z = ((z1D<=d_max_pm)&&(z2D>=front_pm))||((z2D<=d_max_pm)&&(z1D>=front_pm));
 				if(con_x || con_y || con_z){
-				histo_front(XX,nodeX,nodeX,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,2);
+				histo_front(SS,nodeX,nodeX,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,2);
 				}	
 				}	
 			}
 		}
 	}
 	}
+	}
+	#pragma omp critical
+	for(int a=0; a<bn; a++){
+	for(int b=0; b<bn; b++) *(*(XX+a)+b)+=*(*(SS+a)+b);
 	}
 	}
 }
@@ -361,6 +371,15 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
     	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
+	
+    	double **SS;
+    	SS = new double*[bn];
+    	for (i=0; i<bn; ++i) *(SS+i) = new double[bn];
+    	
+	for (i=0; i<bn; ++i){
+	for (j=0; j<bn; ++j) *(*(SS+i)+j) = 0.0;
+	}
+	
 	float dis, dis_nod;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float x, y, z, w1;
@@ -371,9 +390,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	
 	#pragma omp for collapse(3)  schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	
 	for (col = 0; col < partitions; ++col){
-	
 	for (mom = 0; mom < partitions; ++mom){
 	x1D = nodeX[row][0][0].nodepos.x;
 	y1D = nodeX[row][col][0].nodepos.y;
@@ -409,7 +426,7 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 					if (dz < dd_max && r_ort < dd_max){
 					dz = int(sqrt(dz)*ds);
 					r_ort = int(sqrt(r_ort)*ds);
-					*(*(XY+int(dz))+int(r_ort)) += w1*nodeY[u][v][w].elements[j].w;
+					*(*(SS+int(dz))+int(r_ort)) += w1*nodeY[u][v][w].elements[j].w;
 					}
 					}
 				}
@@ -422,13 +439,17 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 			con_y = ((y1D<=d_max_pm)&&(y2R>=front_pm))||((y2R<=d_max_pm)&&(y1D>=front_pm));
 			con_z = ((z1D<=d_max_pm)&&(z2R>=front_pm))||((z2R<=d_max_pm)&&(z1D>=front_pm));
 			if(con_x || con_y || con_z){
-			histo_front(XY,nodeX,nodeY,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,1);
+			histo_front(SS,nodeX,nodeY,sqrt(dx_nod),sqrt(dy_nod),sqrt(dz_nod),con_x,con_y,con_z,row,col,mom,u,v,w,1);
 			}	
 			}	
 		}
 	}
 	}
 	}
+	}
+	#pragma omp critical
+	for(int a=0; a<bn; a++){
+	for(int b=0; b<bn; b++) *(*(XY+a)+b)+=*(*(SS+a)+b);
 	}
 	}
 }
