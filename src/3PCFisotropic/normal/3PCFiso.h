@@ -740,7 +740,6 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	int i, j, k, row, col, mom, u, v, w, a, b, c;
 	
 	double ***SSS;
-	
 	SSS = new double**[bn];
 	for (i=0; i<bn; i++){
 	*(SSS+i) = new double*[bn];

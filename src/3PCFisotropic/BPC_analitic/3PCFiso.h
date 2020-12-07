@@ -1477,8 +1477,9 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 	double ri, rj, rk;
 	double V = size_box*size_box;
 	double beta = n_pts/V;
-	double gama  = 3*8*(4*acos(0.0)*acos(0.0))*(n_pts*beta*beta);
+	double gama  = 8*(4*acos(0.0)*acos(0.0))*(n_pts*beta*beta);
 	gama /= V;
+	gama *= 1;
 	double alph = gama*dr*dr*dr;
 	
 	// Refinement for RRR
@@ -1518,7 +1519,7 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 	for(i=0; i<bn; ++i){
 	ri = i*dr;
 	i_ = i*ptt;
-	f_av = 0.0;
+		f_av = 0.0;
 		#pragma omp parallel num_threads(2) shared(f_av,DD,RR)
 		#pragma omp for private(j,rj) reduction(+:f_av)
 		for(j=0; j<ptt; ++j){
@@ -1561,12 +1562,14 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 		rj = j*dr_ref;
 		j_ = j*ptt;
 			f_av = 0;
+			
 			#pragma omp parallel num_threads(2) shared(f_av,DD,RR)
 			#pragma omp for private(k,rk) reduction(+:f_av)
 			for( k=0; k<ptt; ++k){
 				rk = (k+0.5)*dr_ptt_ref;
-				f_av += (ri+rj+rk)*(((*(DD+i_+j_+k))/(*(RR+i_+j_+k))) - 1);
+				f_av += (ri+rj+rk)*(((*(DD+(i_*ptt)+j_+k))/(*(RR+(i_*ptt)+j_+k))) - 1);
 			}
+			
 		*(ff_av_ref+i_+j) += f_av/(double)(ptt);
 		//std::cout << "=>" << *(ff_av_ref+i_+j) << std::endl;
 		}
@@ -1590,13 +1593,14 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 	double f;
 	double S_av;
 	bool con;
+			double c_RRR;
 	
 	for(i=0; i<bn; ++i) {
 	ri = i*dr;
-	i_ = i*(int)(bn_ref);
+	i_ = i*bn_ref;
 	for(j=i; j<bn; ++j) {
 	rj = j*dr;
-	j_ = j*(int)(bn_ref);
+	j_ = j*bn_ref;
 	for(k=j; k<bn; ++k) {
 	rk = k*dr;
 		// Check vertices of the 
@@ -1618,9 +1622,9 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 		if (v_in==8){
 			*(*(*(XXX+i)+j)+k) += alph*(ri+dr2)*(rj+dr2)*(rk+dr2);
 			f = 1;
-			f += (*(ff_av+i)/(3*(ri+dr_ptt2)));
-			f += (*(ff_av+j)/(3*(rj+dr_ptt2)));
-			f += (*(ff_av+k)/(3*(rk+dr_ptt2)));
+			f += (*(ff_av+i)/(3*(ri+dr2)));
+			f += (*(ff_av+j)/(3*(rj+dr2)));
+			f += (*(ff_av+k)/(3*(rk+dr2)));
 			f *= *(*(*(XXX+i)+j)+k);
 			*(*(*(XXY+i)+j)+k) += f;
 		}
@@ -1631,13 +1635,6 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 			S_av = 0.0;
 			f_av = 0.0;
 			
-			#pragma omp parallel num_threads(2) shared(S_av,f_av,DD,RR)
-			{
-			double ru,rv,rw;
-			double r1,r2,r3;
-			double c_RRR;
-			short int v_in;
-			#pragma omp for collapse(3) schedule(dynamic) reduction(+:S_av,f_av)
 			for(int u=0; u<bn_ref; ++u) {
 			for(int v=0; v<bn_ref; ++v) {
 			for(int w=0; w<bn_ref; ++w) {
@@ -1669,7 +1666,6 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 					//if(i_+u > bn_ref*bn) std::cout << i_+u << std::endl;
 					con = true;
 				}
-			}
 			}
 			}
 			}
