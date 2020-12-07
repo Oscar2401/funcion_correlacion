@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string.h>
 #include <ctime>
-#include "3PCFiso.h"
+#include "3PCFiso2.h"
 #include <omp.h>
 #include <cmath>
 

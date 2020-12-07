@@ -5,10 +5,10 @@ import numpy as np
 def estim_LS(NDDD, NRRR, NDDR, NDRR):
     return (NDDD - 3*NDDR + 3*NDRR - NRRR)/NRRR
 
-DDD = np.loadtxt('DDDiso_mesh_3D_10K.dat')
-RRR = np.loadtxt('RRRiso_mesh_3D_10K.dat')
-DDR = np.loadtxt('DDRiso_mesh_3D_10K.dat')
-DRR = np.loadtxt('DRRiso_mesh_3D_10K.dat')
+DDD = np.loadtxt('DDDiso_mesh_3D_10k.dat')
+RRR = np.loadtxt('RRRiso_mesh_3D_10k.dat')
+DDR = np.loadtxt('DDRiso_mesh_3D_10k.dat')
+DRR = np.loadtxt('DRRiso_mesh_3D_10k.dat')
 
 bn = 20
 
@@ -21,10 +21,9 @@ eps_LS = estim_LS(DDD,RRR,DDR,DRR)
 eps_LS[np.where(np.isnan(eps_LS))] = 0.0
 eps_LS[np.where(np.isinf(eps_LS))] = 0.0
 
-limt = 0.10
+limt = 0.01
 limt_ = -limt
 
-r = 17
 d_max  = 60
 for r in range(bn):
 	plt.figure(figsize=(6,6), dpi=100)
