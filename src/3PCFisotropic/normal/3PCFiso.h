@@ -946,7 +946,7 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
 			d23 = sqrt(d23);
-				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
+				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
 			}
 			}
 			}
@@ -1010,7 +1010,7 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
 			d23 = sqrt(d23);
-				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
+				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
 			}
 			}
 			}

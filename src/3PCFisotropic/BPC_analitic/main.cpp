@@ -22,7 +22,7 @@ Node ***nodeD;
 
 int main(int argc, char **argv){
 
-	int n_pts = 10000, bn = 20;
+	int n_pts = 10000, bn = 40;
 	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; 
 	
@@ -100,7 +100,7 @@ int main(int argc, char **argv){
 	delete_dat();
 	clock_t c_start = clock();
 	//====================================================================
-	//my_hist.make_histoXXX(DDD, my_hist.meshData());
+	my_hist.make_histoXXX(DDD, my_hist.meshData());
 	//====================================================================
 	my_hist.make_histo_analitic(DDR, RRR, my_hist.meshData() );
 	//====================================================================
@@ -111,8 +111,8 @@ int main(int argc, char **argv){
 	
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
-	//save_histogram(nameDDD, bn, DDD);
-	//cout << "Save histogram DDD ..." << endl;
+	save_histogram(nameDDD, bn, DDD);
+	cout << "Save histogram DDD ..." << endl;
 	save_histogram(nameRRR, bn, RRR);
 	cout << "Save histogram RRR ..." << endl;
 	save_histogram(nameDDR, bn, DDR);

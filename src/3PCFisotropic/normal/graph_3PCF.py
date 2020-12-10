@@ -10,7 +10,7 @@ RRR = np.loadtxt('RRRiso_mesh_3D_10K.dat')
 DDR = np.loadtxt('DDRiso_mesh_3D_10K.dat')
 DRR = np.loadtxt('DRRiso_mesh_3D_10K.dat')
 
-bn = 20
+bn = 40
 
 DDD = np.reshape(DDD, (bn,bn,bn))
 RRR = np.reshape(RRR, (bn,bn,bn))
@@ -21,10 +21,9 @@ eps_LS = estim_LS(DDD,RRR,DDR,DRR)
 eps_LS[np.where(np.isnan(eps_LS))] = 0.0
 eps_LS[np.where(np.isinf(eps_LS))] = 0.0
 
-limt = 0.10
+limt = 0.050
 limt_ = -limt
 
-r = 17
 d_max  = 60
 for r in range(bn):
 	plt.figure(figsize=(6,6), dpi=100)

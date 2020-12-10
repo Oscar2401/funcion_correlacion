@@ -10,7 +10,7 @@ RRR = np.loadtxt('RRRiso_mesh_3D_10k.dat')
 DDR = np.loadtxt('DDRiso_mesh_3D_10k.dat')
 DRR = np.loadtxt('DRRiso_mesh_3D_10k.dat')
 
-bn = 20
+bn = 40
 
 DDD = np.reshape(DDD, (bn,bn,bn))
 RRR = np.reshape(RRR, (bn,bn,bn))
