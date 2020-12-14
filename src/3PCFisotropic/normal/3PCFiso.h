@@ -33,7 +33,7 @@ class NODE3P{
 	private:
 		// Assigned
 		int bn;
-		int n_pts;
+		unsigned long  n_pts;
 		int partitions;
 		float size_box;
 		float size_node;
@@ -47,7 +47,7 @@ class NODE3P{
 		float dd_max;
 		float corr;
 		float front;
-		float ds;
+		double ds;
 		float ddmax_nod;
 		
 	private: 
@@ -57,7 +57,7 @@ class NODE3P{
 	// Class methods:
 	public:
 		// Class constructor:
-		NODE3P(int _bn, int _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
+		NODE3P(int _bn, unsigned long  _n_pts, float _size_box, float _size_node, float _d_max, PointW3D *_dataD, Node ***_nodeD, PointW3D *_dataR, Node ***_nodeR){
 			// Assigned
 			bn = _bn;
 			n_pts = _n_pts;
@@ -73,7 +73,7 @@ class NODE3P{
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
-			ds = ((float)(bn))/d_max;
+			ds = floor(((double)(bn)/d_max)*1000000)/1000000;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
 			partitions = (int)(ceil(size_box/size_node));
 			
@@ -164,7 +164,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	nodeX: array of nodes.
 
 	*/
-	
+	std::cout << "====> " << ds << std::endl;
 	#pragma omp parallel num_threads(2) 
     	{
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
@@ -185,7 +185,8 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 	}
 	}
 	
-	float dis, dis_nod, dis_nod2, dis_nod3;
+	double dis;
+	float dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
 	float x, y, z;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod, dx_nod2, dy_nod2, dz_nod2, dx_nod3, dy_nod3, dz_nod3;
@@ -513,7 +514,7 @@ void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***node
 	*/
 	int i,j,k;
 	float dx,dy,dz;
-	float d12,d13,d23;
+	double d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3;
 
 	for (i=0; i<nodeS[row][col][mom].len-2; ++i){
@@ -542,12 +543,12 @@ void NODE3P::count_3_N111(int row, int col, int mom, double ***XXX, Node ***node
 			dz = z3-z1;
 			d13 = dx*dx+dy*dy+dz*dz;
 			if (d13<dd_max){
-			d13 = sqrt(d13);
 			dx = x3-x2;
 			dy = y3-y2;
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
+			d13 = sqrt(d13);
 			d23 = sqrt(d23);
 				*(*(*(XXX+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
 			}
@@ -574,7 +575,7 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double
 	*/
 	int i,j,k;
 	float dx,dy,dz;
-	float d12,d13,d23;
+	double d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3;
 
 	for (i=0; i<nodeS[u][v][w].len; ++i){
@@ -603,12 +604,12 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double
 			dz = z3-z1;
 			d13 = dx*dx+dy*dy+dz*dz;
 			if (d13<dd_max){
-			d13 = sqrt(d13);
 			dx = x3-x2;
 			dy = y3-y2;
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
+			d13 = sqrt(d13);
 			d23 = sqrt(d23);
 				*(*(*(XXX+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
 			}
@@ -623,13 +624,13 @@ void NODE3P::count_3_N112(int row, int col, int mom, int u, int v, int w, double
 			dy = y3-y1;
 			dz = z3-z1;
 			d13 = dx*dx+dy*dy+dz*dz;
-			if (d13<=dd_max){
-			d13 = sqrt(d13);
+			if (d13<dd_max){
 			dx = x3-x2;
 			dy = y3-y2;
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
+			d13 = sqrt(d13);
 			d23 = sqrt(d23);
 				*(*(*(XXX+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
 			}
@@ -657,7 +658,7 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 	*/
 	int i,j,k;
 	float dx,dy,dz;
-	float d12,d13,d23;
+	double d12,d13,d23;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3;
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
 	x1 = nodeS[row][col][mom].elements[i].x;
@@ -685,12 +686,12 @@ void NODE3P::count_3_N123(int row, int col, int mom, int u, int v, int w, int a,
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
-			d23 = sqrt(d23);
 			dx = x2-x1;
 			dy = y2-y1;
 			dz = z2-z1;
 			d12 = dx*dx+dy*dy+dz*dz;
 			if (d12<dd_max){
+			d23 = sqrt(d23);
 			d12 = sqrt(d12);
 				*(*(*(XXX+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3;
 			}
@@ -754,7 +755,8 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	}
 	}
 	
-	float dis, dis_nod, dis_nod2, dis_nod3;
+	double dis;
+	float dis_nod, dis_nod2, dis_nod3;
 	float x1N, y1N, z1N, x2N, y2N, z2N, x3N, y3N, z3N;
 	float x, y, z;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod, dx_nod2, dy_nod2, dz_nod2, dx_nod3, dy_nod3, dz_nod3;
@@ -906,10 +908,8 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 	nodeS/nodeT: array of nodes.
 	*/
 	int i,j,k;
-	int a_,b_,c_;
-	int t,p, p_,q_;
 	float dx,dy,dz;
-	float d12,d13,d23;
+	double d12,d13,d23;
 	float cth1,cth2, cth2_,cth3_;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
 
@@ -939,12 +939,12 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 			dz = z3-z1;
 			d13 = dx*dx+dy*dy+dz*dz;
 			if (d13<dd_max){
-			d13 = sqrt(d13);
 			dx = x3-x2;
 			dy = y3-y2;
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
+			d13 = sqrt(d13);
 			d23 = sqrt(d23);
 				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
 			}
@@ -970,10 +970,8 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 	nodeS/nodeT: array of nodes.
 	*/
 	int i,j,k;
-	int a_,b_,c_;
-	int t,p, p_,q_;
 	float dx,dy,dz;
-	float d12,d13,d23;
+	double d12,d13,d23;
 	float cth1,cth2, cth2_,cth3_;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
 
@@ -1003,12 +1001,12 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 			dz = z3-z1;
 			d13 = dx*dx+dy*dy+dz*dz;
 			if (d13<dd_max){
-			d13 = sqrt(d13);
 			dx = x3-x2;
 			dy = y3-y2;
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
+			d13 = sqrt(d13);
 			d23 = sqrt(d23);
 				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
 			}

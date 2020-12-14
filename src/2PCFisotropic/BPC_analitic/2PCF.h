@@ -41,7 +41,7 @@ class NODE2P{
 		float dd_max;
 		float corr;
 		float front;
-		float ds;
+		double ds;
 		float ddmax_nod;
 		
 	private: 
@@ -67,7 +67,7 @@ class NODE2P{
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
-			ds = ((float)(bn))/d_max;
+			ds = floor(((double)(bn)/d_max)*1000000)/1000000;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
 			
 			make_nodos(nodeD,dataD); 
@@ -164,7 +164,8 @@ void NODE2P::make_histoXX(double *XX, double *YY, Node ***nodeX){
     	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
@@ -366,7 +367,8 @@ void NODE2P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 	*/
 	
 	int i, j;
-	float dis_f,dis,d_x,d_y,d_z;
+	double dis_f,dis;
+	float d_x,d_y,d_z;
 	float x,y,z,w1;
 	//======================================================================
 	if( con_in_x ){

@@ -43,7 +43,7 @@ class NODE2P{
 		float dd_max;
 		float corr;
 		float front;
-		float ds;
+		double ds;
 		float ddmax_nod;
 		
 	private: 
@@ -71,7 +71,7 @@ class NODE2P{
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
-			ds = ((float)(bn))/d_max;
+			ds = floor(((double)(bn)/d_max)*1000000)/1000000;
 			ddmax_nod = (d_max+corr)*(d_max+corr);
 			
 			make_nodos(nodeD,dataD);
@@ -170,7 +170,8 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
     	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
@@ -342,7 +343,8 @@ void NODE2P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 	*/
 	
 	int i, j;
-	float dis_f,dis,d_x,d_y,d_z;
+	double dis_f,dis;
+	float d_x,d_y,d_z;
 	float x,y,z,w1;
 	//======================================================================
 	if( con_in_x ){
@@ -515,7 +517,8 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
     	
     	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
@@ -582,7 +585,7 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 	}
 }
 //=================================================================== 
-void NODE2P::histo_front_XY(double *PP, Node ***dat, Node ***ran, float disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w){
+void NODE2P::histo_front_XY(double *PP, Node ***dat, Node ***ran, double disn, float dn_x, float dn_y, float dn_z, bool con_in_x, bool con_in_y, bool con_in_z, int row, int col, int mom, int u, int v, int w){
 	/*
 	
 	Function to add periodic boundary conditions
@@ -590,7 +593,8 @@ void NODE2P::histo_front_XY(double *PP, Node ***dat, Node ***ran, float disn, fl
 	*/
 	
 	int i, j;
-	float dis_f,dis,d_x,d_y,d_z;
+	double dis_f,dis;
+	float d_x,d_y,d_z;
 	float x,y,z,w1;
 	//======================================================================
 	if( con_in_x ){

@@ -5,8 +5,10 @@
 #include "3PCFiso.h"
 #include <omp.h>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 void open_files(string, int, PointW3D *);
 void save_histogram(string, int, double ***);
@@ -22,8 +24,9 @@ Node ***nodeD,***nodeR;
 
 int main(int argc, char **argv){
 
-	int n_pts = 10000, bn = 40;
-	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
+	unsigned long n_pts = 10000, bn = 40;
+	float d_max = 60.0;
+	float size_box = 250.0, size_node =  2.17 * size_box/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; 
 	dataR = new PointW3D[n_pts];
 	
@@ -98,7 +101,10 @@ int main(int argc, char **argv){
 		*(*(nodeD+i)+j) = new Node[partitions];
 		*(*(nodeR+i)+j) = new Node[partitions];
 		}
-	}		
+	}
+	
+	auto start = high_resolution_clock::now();
+		
 	cout << "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
 	cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" << endl;
 	// Iniciamos clase
@@ -111,23 +117,25 @@ int main(int argc, char **argv){
 	save_histogram(nameDDD, bn, DDD);
 	cout << "Save histogram DDD ..." << endl;
 	//====================================================================
-	std::cout << "-> I'm doing RRR histogram ..." << std::endl;
-	my_hist.make_histoXXX(RRR, my_hist.meshRand()); 
-	save_histogram(nameRRR, bn, RRR);
-	cout << "Save histogram RRR ..." << endl;
+	//std::cout << "-> I'm doing RRR histogram ..." << std::endl;
+	//my_hist.make_histoXXX(RRR, my_hist.meshRand()); 
+	//save_histogram(nameRRR, bn, RRR);
+	//cout << "Save histogram RRR ..." << endl;
 	//====================================================================
-	std::cout << "-> I'm doing DDR histogram ..." << std::endl;
-	my_hist.make_histoXXY(DDR, my_hist.meshData(), my_hist.meshRand());
-	save_histogram(nameDDR, bn, DDR);
-	cout << "Save histogram DDR ..." << endl;
+	//std::cout << "-> I'm doing DDR histogram ..." << std::endl;
+	//my_hist.make_histoXXY(DDR, my_hist.meshData(), my_hist.meshRand());
+	//save_histogram(nameDDR, bn, DDR);
+	//cout << "Save histogram DDR ..." << endl;
 	//====================================================================
-	std::cout << "-> I'm doing DRR histogram ..." << std::endl;
-	my_hist.make_histoXXY(DRR, my_hist.meshRand(), my_hist.meshData());
-	save_histogram(nameDRR, bn, DRR);
-	cout << "Save histogram DRR ..." << endl;
+	//std::cout << "-> I'm doing DRR histogram ..." << std::endl;
+	//my_hist.make_histoXXY(DRR, my_hist.meshRand(), my_hist.meshData());
+	//save_histogram(nameDRR, bn, DRR);
+	//cout << "Save histogram DRR ..." << endl;
 	//====================================================================
 	clock_t c_end = clock();
 	float time_elapsed_s = ((float)(c_end-c_start))/CLOCKS_PER_SEC;
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<minutes>(stop-start);
 	
 	my_hist.~NODE3P();
 	
@@ -136,6 +144,7 @@ int main(int argc, char **argv){
 	
 	cout << "Finish making all histograms" << endl;
 	printf("\nCPU time used = %.4f seg.\n", time_elapsed_s );
+	cout << "Time: " << duration.count() << " min." << endl;
 	cout << "Program completed SUCCESSFULLY!" << endl;
 	cin.get();
 	return 0;

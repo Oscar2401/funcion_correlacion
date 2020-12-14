@@ -43,7 +43,7 @@ class NODE2P{
 		float dd_max;
 		float corr;
 		float front;
-		float ds;
+		double ds;
 		float ddmax_nod;
 		
 	private: 
@@ -70,7 +70,7 @@ class NODE2P{
 			dd_max = d_max*d_max;
 			front = size_box - d_max;
 			corr = size_node*sqrt(3);
-			ds = ((float)(bn))/d_max;
+			ds = floor(((double)(bn)/d_max)*1000000)/1000000;
 			ddmax_nod = d_max+corr;
 			ddmax_nod *= ddmax_nod; 
 			
@@ -168,7 +168,8 @@ void NODE2P::make_histoXX(double *XX, Node ***nodeX){
     	
 	// Private variables in threads:
 	int i, j, row, col, mom, u, v, w;
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
@@ -328,13 +329,12 @@ void NODE2P::make_histoXY(double *XY, Node ***nodeX, Node ***nodeY){
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
-	float dis_nod, dis;
+	float dis_nod;
+	double dis;
 	
 	#pragma omp for collapse(3) schedule(dynamic)
 	for (row = 0; row < partitions; ++row){
-	
 	for (col = 0; col < partitions; ++col){
-
 	for (mom = 0; mom < partitions; ++mom){
 	x1D = nodeX[row][0][0].nodepos.x;
 	y1D = nodeX[row][col][0].nodepos.y;

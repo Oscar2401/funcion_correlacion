@@ -41,7 +41,7 @@ class NODE2P{
 		// Derivatives
 		float dd_max;
 		float corr;
-		float ds;
+		double ds;
 		float ddmax_nod;
 		
 	private: 
@@ -67,7 +67,7 @@ class NODE2P{
 			// Derivatives
 			dd_max = d_max*d_max;
 			corr = size_node*sqrt(3);
-			ds = ((float)(bn))/d_max;
+			ds = floor(((double)(bn)/d_max)*1000000)/1000000;
 			ddmax_nod = d_max+corr;
 			ddmax_nod *= ddmax_nod; 
 			
@@ -170,7 +170,8 @@ void NODE2P::make_histoXX(double **XX, Node ***nodeX){
 	for (j=0; j<bn; ++j) *(*(SS+i)+j) = 0.0;
 	}
 	
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
@@ -348,7 +349,8 @@ void NODE2P::make_histoXY(double **XY, Node ***nodeX, Node ***nodeY){
 	}
     	
     	
-	float dis, dis_nod;
+	double dis;
+	float dis_nod;
 	float x1D, y1D, z1D, x2R, y2R, z2R;
 	float x, y, z, w1;
 	float dx, dy, dz, dx_nod, dy_nod, dz_nod;
