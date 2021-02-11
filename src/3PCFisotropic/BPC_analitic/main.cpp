@@ -23,7 +23,7 @@ Node ***nodeD;
 int main(int argc, char **argv){
 
 	int n_pts = 10000, bn = 40;
-	float d_max = 60.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
+	float d_max = 150.0, size_box = 250.0, size_node =  2.17 * 250/pow(n_pts, (double)1/3);
 	dataD = new PointW3D[n_pts]; 
 	
 	cout << "\n      ANISOTROPIC 3-POINT CORRELATION FUNCTION        \n" << endl;

@@ -124,7 +124,7 @@ void NODE3P::make_nodos(Node ***nod, PointW3D *dat){
 	*/
 	
 	float p_med = size_node/2;
-	#pragma omp parallel num_threads(2) 
+	#pragma omp parallel num_threads(50) 
     	{
 	int i, row, col, mom;
 	float posx, posy, posz;
@@ -204,7 +204,7 @@ void NODE3P::make_histoXXX(double ***XXX, Node ***nodeX){
 
 	*/
 	std::cout << "Constructing DDD histogram..." << std::endl;
-	#pragma omp parallel num_threads(2) 
+	#pragma omp parallel num_threads(50) 
 	{
 	
 	int i, j, k, row, col, mom, u, v, w, a ,b, c;
@@ -1474,214 +1474,246 @@ void NODE3P::make_histo_analitic(double ***XXY, double ***XXX, Node ***nodeX){
 	// RRR, DDR and DRR Histogram (ANALYTICS)
 	//=======================================
 	
+	std::cout << "Constructing RRR and DDR histograms..." << std::endl;
+	
 	int i, j, k, u, v, w, a, b, c;
 	
+	//====================================================
 	// Constants for RRR
-	double dr = d_max/(double)bn;
+	double dr = d_max/(double)(bn);
 	double ri, rj, rk;
 	double V = size_box*size_box;
 	double beta = n_pts/V;
-	double gama  = 8*(4*acos(0.0)*acos(0.0))*(n_pts*beta*beta);
+	double gama  = 8*(3.14159265359*3.14159265359)*(n_pts*beta*beta);
 	gama /= V;
-	gama *= 1;
 	double alph = gama*dr*dr*dr;
 	
 	// Refinement for RRR
-	int bn_ref = 200; 
-	double dr_ref = dr/bn_ref;
+	int ptt_r = 200;
+	int bn_ref_r = ptt_r*bn; 
+	double dr_ref_r = dr/(double)(ptt_r);
 	
-	double f_av;
-	
-	//=====================================================================
-	
+	//====================================================
 	// Constants for DDR
-	int ptt = 100;
+	int ptt = 1000;
 	int bins = ptt*bn;
-	double dr_ptt = d_max/(double)bins;
+	double dr_ptt = d_max/(double)(bins);
 	double *DD;
 	double *RR;
 	DD = new double[bins];
 	RR = new double[bins];
-	for (i = 0; i < bins; ++i){
+	for (i=0; i<bins; ++i){
 		*(DD+i) = 0.0; 
 		*(RR+i) = 0.0;
 	}
 	
 	// Make the DD and RR histograms
+	//====================================================
 	make_histoXX(DD, RR, nodeX, bins);
 	
-	//for (i=0; i<bins; ++i) std::cout << "=>" << *(DD+i) << std::endl;
+	//Imprimir DD y RR
+	std::cout << " "  << std::endl;
+	std::cout << "   DD   " << std::endl;
+	int stp = bins/15;
 	
-	// Initiate an arrangement for the function f_averrage
-	double *ff_av;
-	ff_av = new double[bn];
-	for (i=0; i<bn; ++i) *(ff_av+i) = 0.0;
+	for (i=0; i<stp; i++){
+		for (j=0; j<15; j++) std::cout << *(DD+(i*15)+j) << " ";
+		std::cout << " "  << std::endl;
+	}
+	std::cout << " "  << std::endl;
+	std::cout << "   RR   "  << std::endl;
+	for (i=0; i<stp; i++){
+		for (j=0; j<15; j++) std::cout << *(RR+(i*15)+j) << " ";
+		std::cout << " "  << std::endl;
+	}
 	
+	//====================================================
+	// Initiate an arrangement for the function f
+	double *f;
+	f = new double[bins];
+	for (i=0; i<bins; ++i) *(f+i) = 0.0;
+	
+	// Calculate the f
+	#pragma omp parallel num_threads(50) shared(DD,RR)
+	{
+	double *SS;
+    	SS = new double[bins];
+    	for (int k=0; k<bins; k++) *(SS+k) = 0.0;
+    	
+    	double ri;
+    	
+	#pragma omp for schedule(dynamic)
+	for(int i=0; i<bins; ++i){
+		ri = (i+0.5)*dr_ptt;
+		*(SS+i) += ri*((*(DD+i)/(*(RR+i))) - 1);
+	}
+	#pragma omp critical
+	for(int a=0; a<bins; ++a) *(f+a) += *(SS+a);
+	delete[] SS;
+	}
+	
+	delete[] DD;
+	delete[] RR;
+	
+	//====================================================
 	// Calculate the f_averrage
+	double *f_v;
+	f_v = new double[bn];
+	for (i=0; i<bn; ++i) *(f_v+i) = 0.0;
 	
 	int i_;
+	double ff;
+	
 	for(i=0; i<bn; ++i){
-	ri = i*dr;
 	i_ = i*ptt;
-		f_av = 0.0;
-		#pragma omp parallel num_threads(2) shared(f_av,DD,RR)
-		#pragma omp for private(j,rj) reduction(+:f_av)
-		for(j=0; j<ptt; ++j){
-			rj = (j+0.5)*dr_ptt;
-			f_av += (ri + rj)*((*(DD+i_+j)/(*(RR+i_+j))) - 1);
-		}
-	//std::cout << "=>" << f_av/(double)(ptt) << std::endl;
-	*(ff_av+i) += f_av/(double)(ptt);
-	}
-	delete[] DD;
-	delete[] RR;
-	
-	//=====================================================================
-	
-	// Refinement for DDR
-	int bins_ref = ptt*bn_ref*bn;
-	double dr_ptt_ref = d_max/(double)(bins_ref);
-	double dr_ptt_ref2 = dr_ptt_ref/2;
-	DD = new double[bins_ref];
-	RR = new double[bins_ref];
-	for (i = 0; i < bins_ref; i++){
-		*(DD+i) = 0.0; 
-		*(RR+i) = 0.0;
+	ff = 0.0;
+		#pragma omp parallel num_threads(50) shared(ff)
+		#pragma omp for reduction(+:ff)
+		for(int j=0; j<ptt; ++j)  ff += *(f+i_+j);
+	*(f_v+i) += ff/(double)(ptt);
 	}
 	
-	// Make the DD and RR histograms
-	make_histoXX(DD, RR, nodeX, bins_ref);
-	
-	// Initiate a fix for the refinement function f_averrage
-	double *ff_av_ref;
-	ff_av_ref = new double[bn_ref*bn];
-	for (i=0; i<bn_ref*bn; ++i) *(ff_av_ref+i) = 0.0;
-	
-	// Calculate the f_averrage of the refinement
+	//====================================================
 	int j_;
-	for(i=0; i<bn; ++i){
-	ri = i*dr;
-	i_ = i*bn_ref;
-		for(j=0; j<bn_ref; ++j){
-		rj = j*dr_ref;
-		j_ = j*ptt;
-			f_av = 0;
-			
-			#pragma omp parallel num_threads(2) shared(f_av,DD,RR)
-			#pragma omp for private(k,rk) reduction(+:f_av)
-			for( k=0; k<ptt; ++k){
-				rk = (k+0.5)*dr_ptt_ref;
-				f_av += (ri+rj+rk)*(((*(DD+(i_*ptt)+j_+k))/(*(RR+(i_*ptt)+j_+k))) - 1);
-			}
-			
-		*(ff_av_ref+i_+j) += f_av/(double)(ptt);
-		//std::cout << "=>" << *(ff_av_ref+i_+j) << std::endl;
-		}
-	//std::cout << "=>" << *(ff_av_ref+i) << std::endl;
-	}
-	
-	delete[] DD;
-	delete[] RR;
-	
-	//=====================================================================
-	
-	double alph_ref = gama*dr_ref*dr_ref*dr_ref;
+	int n;
+	double alph_ref = gama*dr_ref_r*dr_ref_r*dr_ref_r;
 	double dr2 = dr/2;
 	double dr_ptt2 = dr_ptt/2;
-	double dr_ref2 = dr_ref/2;
+	double dr_ref2 = dr_ref_r/2;
+	
 	std::cout << "Constructing RRR and DDR histograms..." << std::endl;
 	
-	int short v_in;
+    	int short v_in;
 	double r1, r2, r3;
 	double ru, rv, rw;
-	double f;
-	double S_av;
+	double S;
+	double ff_ave;
 	bool con;
-			double c_RRR;
+	double c_RRR;
 	
 	for(i=0; i<bn; ++i) {
 	ri = i*dr;
-	i_ = i*bn_ref;
+	i_ = i*ptt;
 	for(j=i; j<bn; ++j) {
 	rj = j*dr;
-	j_ = j*bn_ref;
+	j_ = j*ptt;
 	for(k=j; k<bn; ++k) {
 	rk = k*dr;
-		// Check vertices of the 
-		// cube to make refinement
 		
 		v_in = 0;
 		
+		// Check vertices of the 
+		// cube to make refinement
 		for (a = 0; a < 2; ++a){
 		r1 = ri + (a*dr);
 		for (b = 0; b < 2; ++b){
 		r2 = rj + (b*dr);
 		for (c = 0; c < 2; ++c){
 		r3 = rk + (c*dr);	
-			if (r1 + r2 >= r3 && r1 + r3 >= r2 && r2 + r3 >= r1) ++v_in; 
+			if (r1 + r2 > r3 && r1 + r3 > r2 && r2 + r3 > r1) ++v_in; 
 		}
 		}
 		}
 		
+		// bins inequality of the triangle true
 		if (v_in==8){
-			*(*(*(XXX+i)+j)+k) += alph*(ri+dr2)*(rj+dr2)*(rk+dr2);
-			f = 1;
-			f += (*(ff_av+i)/(3*(ri+dr2)));
-			f += (*(ff_av+j)/(3*(rj+dr2)));
-			f += (*(ff_av+k)/(3*(rk+dr2)));
-			f *= *(*(*(XXX+i)+j)+k);
-			*(*(*(XXY+i)+j)+k) += f;
+			S = alph*(ri+dr2)*(rj+dr2)*(rk+dr2);
+			ff = 1;
+			ff += *(f_v+i)/(3*(ri+dr2));
+			ff += *(f_v+j)/(3*(rj+dr2));
+			ff += *(f_v+k)/(3*(rk+dr2));
+			ff *= S;
+			*(*(*(XXY+i)+j)+k) += ff;
+			*(*(*(XXX+i)+j)+k) += S;
 		}
 		
+		// bins inequality of the triangle false
 		else if (v_in < 8 && v_in > 0){
 			
-			con = false;
-			S_av = 0.0;
-			f_av = 0.0;
+			//====================================================================
 			
-			for(int u=0; u<bn_ref; ++u) {
-			for(int v=0; v<bn_ref; ++v) {
-			for(int w=0; w<bn_ref; ++w) {
-			ru = ri + (u*dr_ref);
-			rv = rj + (v*dr_ref);
-			rw = rk + (w*dr_ref);
+			con = false;
+			c_RRR = 0.0;
+			
+			for(int u=0; u<ptt_r; ++u) {
+			ru = ri + (u*dr_ref_r);
+			for(int v=0; v<ptt_r; ++v) {
+			rv = rj + (v*dr_ref_r);
+			for(int w=0; w<ptt_r; ++w) {
+			rw = rk + (w*dr_ref_r);
 			
 				v_in = 0;
-		
-				for (int a = 0; a < 2; ++a){
-				r1 = ru + (a*dr_ref);
-				for (int b = 0; b < 2; ++b){
-				r2 = rv + (b*dr_ref);
-				for (int c = 0; c < 2; ++c){
-				r3 = rw + (c*dr_ref);	
-					if (r1 + r2 >= r3 && r1 + r3 >= r2 && r2 + r3 >= r1) ++v_in;
+				
+				// Check vertices of the 
+				// cube to make refinement
+				for (int a=0; a<2; ++a){
+				r1 = ru + (a*dr_ref_r);
+				for (int b=0; b<2; ++b){
+				r2 = rv + (b*dr_ref_r);
+				for (int c=0; c<2; ++c){
+				r3 = rw + (c*dr_ref_r);	
+					if (r1 + r2 > r3 && r1 + r3 > r2 && r2 + r3 > r1) ++v_in;
 				}
 				}
 				}
+				
+				// bins inequality of the triangle true
 				if (v_in==8){
-					c_RRR = (ru+dr_ref2)*(rv+dr_ref2)*(rw+dr_ref2);
-					S_av += c_RRR;
-					f = 1;
-					f += (*(ff_av_ref+i_+u)/(3*(ru+dr_ref2)));
-					f += (*(ff_av_ref+j_+v)/(3*(rv+dr_ref2)));
-					f += (*(ff_av_ref+(k*bn_ref)+w)/(3*(rw+dr_ref2)));
-					f *= c_RRR;
-					f_av += f;
-					//if(i_+u > bn_ref*bn) std::cout << i_+u << std::endl;
+					c_RRR += (ru+dr_ref2)*(rv+dr_ref2)*(rw+dr_ref2);
 					con = true;
 				}
 			}
 			}
 			}
+			if (con) *(*(*(XXX+i)+j)+k) += alph_ref*c_RRR;
 			
-			if (con){
-				*(*(*(XXX+i)+j)+k) += alph_ref*S_av;
-				*(*(*(XXY+i)+j)+k) += alph_ref*f_av;
+			//====================================================================
+			
+			con = false;
+			ff_ave = 0.0;
+			n = 0;
+			
+			for(int u=0; u<ptt; ++u) {
+			ru = ri + (u*dr_ptt);
+			for(int v=0; v<ptt; ++v) {
+			rv = rj + (v*dr_ptt);
+			for(int w=0; w<ptt; ++w) {
+			rw = rk + (w*dr_ptt);
+			
+				v_in = 0;
+				
+				// Check vertices of the 
+				// cube to make refinement
+				for (int a=0; a<2; ++a){
+				r1 = ru + (a*dr_ptt);
+				for (int b=0; b<2; ++b){
+				r2 = rv + (b*dr_ptt);
+				for (int c=0; c<2; ++c){
+				r3 = rw + (c*dr_ptt);	
+					if (r1 + r2 > r3 && r1 + r3 > r2 && r2 + r3 > r1) ++v_in;
+				}
+				}
+				}
+				
+				// bins inequality of the triangle true
+				if (v_in==8){
+					ff = 1;
+					ff += *(f+i_+u)/(3*(ru+dr_ptt2));
+					ff += *(f+j_+v)/(3*(rv+dr_ptt2));
+					ff += *(f+(k*ptt)+w)/(3*(rw+dr_ptt2));
+					ff_ave += ff;
+					con = true;
+					n++; 
+				}
 			}
+			}
+			}
+			if (con) *(*(*(XXY+i)+j)+k) += *(*(*(XXX+i)+j)+k)*(ff_ave/n);
 		}
 	}
 	}
 	}
+	
 	symmetrize_analitic(XXX);
 	symmetrize_analitic(XXY); 
 	
@@ -1696,17 +1728,21 @@ void NODE3P::make_histoXX(double *XX, double *YY, Node ***nodeX, int bins){
 	RR: array where the RR histogram will be created.
 	
 	*/
+	
+	std::cout << "Constructing DD..." << std::endl;
+	
 	double ds_new = ((float)(bins))/d_max;
 	
-	#pragma omp parallel num_threads(2)
+	#pragma omp parallel num_threads(50)
 	{
+	
+	int i, j, k, row, col, mom, u, v, w;
 	
 	double *SS;
     	SS = new double[bins];
-    	for (int k = 0; k < bins; ++k) *(SS+k) = 0.0;
-	
+    	for (k = 0; k < bins; ++k) *(SS+k) = 0.0;
+    	
 	// Private variables in threads:
-	int i, j, row, col, mom, u, v, w;
 	double dis;
 	float dis_nod;
 	float x1D, y1D, z1D, x2D, y2D, z2D;
@@ -1859,13 +1895,16 @@ void NODE3P::make_histoXX(double *XX, double *YY, Node ***nodeX, int bins){
 	}
 	}
 	#pragma omp critical
-	for(int a=0; a<bins; a++) *(XX+a)+=*(SS+a);
+	for(int a=0; a<bins; ++a) *(XX+a)+=*(SS+a);
 	}
+	
+	std::cout << "Constructing RR..." << std::endl;
+	
 	//======================================
 	// Histogram RR (ANALYTICAL)
 	//======================================
 	
-	double dr = (d_max/(double)bins);
+	double dr = d_max/(double)(bins);
 	double V = size_box;
 	double beta1 = n_pts/V;
 	beta1 *= n_pts/size_box;
@@ -1873,8 +1912,9 @@ void NODE3P::make_histoXX(double *XX, double *YY, Node ***nodeX, int bins){
 	double alph = 4*(2*acos(0.0))*(beta1)/3;
 	alph *= dr*dr*dr;
 	
-	#pragma omp parallel num_threads(2)
+	#pragma omp parallel num_threads(50)
 	{
+	
 	double *SS;
     	SS = new double[bins];
     	for (int k = 0; k < bins; k++) *(SS+k) = 0.0;
@@ -1887,7 +1927,9 @@ void NODE3P::make_histoXX(double *XX, double *YY, Node ***nodeX, int bins){
         	*(SS+a) += alph*((r1*r1*r1)-(r2*r2*r2));
 	}
 	#pragma omp critical
-	for(int a=0; a<bins; a++) *(YY+a)+=*(SS+a);
+	for(int a=0; a<bins; ++a) *(YY+a)+=*(SS+a);
+	
+	delete[] SS;
 	}
 }
 
@@ -1949,7 +1991,7 @@ void NODE3P::histo_front_XX(double *PP, Node ***dat, float disn, float dn_x, flo
 			d_y = y-dat[u][v][w].elements[j].y;
 			d_z = fabs(z-dat[u][v][w].elements[j].z)-size_box;
 			dis = (d_x*d_x) + (d_y*d_y) + (d_z*d_z); 
-			if (dis < dd_max)*(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
+			if (dis < dd_max) *(PP + (int)(sqrt(dis)*ds_new)) += 2*a*dat[u][v][w].elements[j].w;
 			}
 		}
 	}

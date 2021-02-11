@@ -112,20 +112,20 @@ int main(int argc, char **argv){
 	delete_dat();
 	clock_t c_start = clock();
 	//====================================================================
-	std::cout << "-> I'm doing DDD histogram ..." << std::endl;
-	my_hist.make_histoXXX(DDD, my_hist.meshData()); 
-	save_histogram(nameDDD, bn, DDD);
-	cout << "Save histogram DDD ..." << endl;
+	//std::cout << "-> I'm doing DDD histogram ..." << std::endl;
+	//my_hist.make_histoXXX(DDD, my_hist.meshData()); 
+	//save_histogram(nameDDD, bn, DDD);
+	//cout << "Save histogram DDD ..." << endl;
 	//====================================================================
 	//std::cout << "-> I'm doing RRR histogram ..." << std::endl;
 	//my_hist.make_histoXXX(RRR, my_hist.meshRand()); 
 	//save_histogram(nameRRR, bn, RRR);
 	//cout << "Save histogram RRR ..." << endl;
 	//====================================================================
-	//std::cout << "-> I'm doing DDR histogram ..." << std::endl;
-	//my_hist.make_histoXXY(DDR, my_hist.meshData(), my_hist.meshRand());
-	//save_histogram(nameDDR, bn, DDR);
-	//cout << "Save histogram DDR ..." << endl;
+	std::cout << "-> I'm doing DDR histogram ..." << std::endl;
+	my_hist.make_histoXXY(DDR, my_hist.meshData(), my_hist.meshRand());
+	save_histogram(nameDDR, bn, DDR);
+	cout << "Save histogram DDR ..." << endl;
 	//====================================================================
 	//std::cout << "-> I'm doing DRR histogram ..." << std::endl;
 	//my_hist.make_histoXXY(DRR, my_hist.meshRand(), my_hist.meshData());

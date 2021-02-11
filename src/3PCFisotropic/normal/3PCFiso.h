@@ -99,6 +99,7 @@ class NODE3P{
 		void count_3_N123_xxy(int, int, int, int, int, int, int, int, int, double ***, Node ***, Node ***);
 		
 		void symmetrize(double ***);
+		void symmetrize_xxy(double ***);
 		
 		~NODE3P();
 };
@@ -786,7 +787,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 			dz_nod = z2N-z1N;
 			dz_nod *= dz_nod;
 			dis_nod = dx_nod + dy_nod + dz_nod;
-			if (dis_nod <= ddmax_nod){
+			if (dis_nod < ddmax_nod){
 			//==============================================
 			// 2 points in node1 and 1 point in node2
 			//==============================================
@@ -810,10 +811,10 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 				dz_nod2 = z3N-z1N;
 				dz_nod2 *= dz_nod2;
 				dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
-				if (dis_nod2 <= ddmax_nod){
+				if (dis_nod2 < ddmax_nod){
 				dz_nod3 = z3N-z2N;
 				dis_nod3 = dz_nod3*dz_nod3;
-				if (dis_nod3 <= ddmax_nod){
+				if (dis_nod3 < ddmax_nod){
 					count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 				}
 				}
@@ -830,13 +831,13 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 					dz_nod2 = z3N-z1N;
 					dz_nod2 *= dz_nod2;
 					dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
-					if (dis_nod2 <= ddmax_nod){
+					if (dis_nod2 < ddmax_nod){
 					dy_nod3 = y3N-y2N;
 					dy_nod3 *= dy_nod3;
 					dz_nod3 = z3N-z2N;
 					dz_nod3 *= dz_nod3;
 					dis_nod3 = dy_nod3 + dz_nod3;
-					if (dis_nod3 <= ddmax_nod){
+					if (dis_nod3 < ddmax_nod){
 						count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 					}
 					}
@@ -858,7 +859,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 						dz_nod2 = z3N-z1N;
 						dz_nod2 *= dz_nod2;
 						dis_nod2 = dx_nod2 + dy_nod2 + dz_nod2;
-						if (dis_nod2 <= ddmax_nod){
+						if (dis_nod2 < ddmax_nod){
 						dx_nod3 = x3N-x2N;
 						dx_nod3 *= dx_nod3;
 						dy_nod3 = y3N-y2N;
@@ -866,7 +867,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 						dz_nod3 = z3N-z2N;
 						dz_nod3 *= dz_nod3;
 						dis_nod3 = dx_nod3 + dy_nod3 + dz_nod3;
-						if (dis_nod3 <= ddmax_nod){
+						if (dis_nod3 < ddmax_nod){
 							count_3_N123_xxy(row, col, mom, u, v, w, a, b, c, SSS, nodeX, nodeY);
 						}
 						}
@@ -890,7 +891,7 @@ void NODE3P::make_histoXXY(double ***XXY, Node ***nodeX, Node ***nodeY){
 	//================================
 	// Simetrización:
 	//================================
-	symmetrize(XXY); 
+	//symmetrize_xxy(XXY); 
 	
 }
 //=================================================================== 
@@ -912,8 +913,9 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 	double d12,d13,d23;
 	float cth1,cth2, cth2_,cth3_;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
+	int n,m,l;
 
-	for (i=0; i<nodeS[row][col][mom].len; ++i){
+	for (i=0; i<nodeS[row][col][mom].len-1; ++i){
 	x1 = nodeS[row][col][mom].elements[i].x;
 	y1 = nodeS[row][col][mom].elements[i].y;
 	z1 = nodeS[row][col][mom].elements[i].z;
@@ -928,7 +930,7 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 		dz = z2-z1;
 		d12 = dx*dx+dy*dy+dz*dz;
 		if (d12<dd_max){
-		d12 = sqrt(d12);
+		n = (int)(ds*sqrt(d12));
 			for (k=i+1; k<nodeS[row][col][mom].len; ++k){
 			x3 = nodeS[row][col][mom].elements[k].x;
 			y3 = nodeS[row][col][mom].elements[k].y;
@@ -944,9 +946,15 @@ void NODE3P::count_3_N112_xxy(int row, int col, int mom, int u, int v, int w, do
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
-			d13 = sqrt(d13);
-			d23 = sqrt(d23);
-				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
+			m = (int)(ds*sqrt(d13));
+			l = (int)(ds*sqrt(d23));
+				//*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
+				*(*(*(XXY+n)+m)+l)+=w1*w2*w3;
+				*(*(*(XXY+l)+n)+m)+=w1*w2*w3;
+				*(*(*(XXY+m)+l)+n)+=w1*w2*w3;
+				*(*(*(XXY+m)+n)+l)+=w1*w2*w3;
+				*(*(*(XXY+l)+m)+n)+=w1*w2*w3;
+				*(*(*(XXY+n)+l)+m)+=w1*w2*w3;
 			}
 			}
 			}
@@ -974,7 +982,8 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 	double d12,d13,d23;
 	float cth1,cth2, cth2_,cth3_;
 	float x1,y1,z1,x2,y2,z2,x3,y3,z3,w1,w2,w3,W;
-
+	int n,m,l;
+	
 	for (i=0; i<nodeS[row][col][mom].len; ++i){
 	x1 = nodeS[row][col][mom].elements[i].x;
 	y1 = nodeS[row][col][mom].elements[i].y;
@@ -990,7 +999,7 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 		dz = z2-z1;
 		d12 = dx*dx+dy*dy+dz*dz;
 		if (d12<dd_max){
-		d12 = sqrt(d12);
+		n = (int)(ds*sqrt(d12));
 			for (k=0; k<nodeS[a][b][c].len; ++k){
 			x3 = nodeS[a][b][c].elements[k].x;
 			y3 = nodeS[a][b][c].elements[k].y;
@@ -1006,14 +1015,44 @@ void NODE3P::count_3_N123_xxy(int row, int col, int mom, int u, int v, int w, in
 			dz = z3-z2;
 			d23 = dx*dx+dy*dy+dz*dz;
 			if (d23<dd_max){
-			d13 = sqrt(d13);
-			d23 = sqrt(d23);
-				*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
+			m = (int)(ds*sqrt(d13));
+			l = (int)(ds*sqrt(d23));
+				//*(*(*(XXY+(int)(d12*ds))+(int)(d13*ds))+(int)(d23*ds))+=w1*w2*w3/3;
+				*(*(*(XXY+n)+m)+l)+=w1*w2*w3;
+				*(*(*(XXY+l)+n)+m)+=w1*w2*w3;
+				*(*(*(XXY+m)+l)+n)+=w1*w2*w3;
+				*(*(*(XXY+m)+n)+l)+=w1*w2*w3;
+				*(*(*(XXY+l)+m)+n)+=w1*w2*w3;
+				*(*(*(XXY+n)+l)+m)+=w1*w2*w3;
 			}
 			}
 			}
 		}
 		}
+	}
+}
+//=================================================================== 
+void NODE3P::symmetrize_xxy(double ***XXY){
+	/*
+	Function to symmetrize histogram
+
+	Arg
+	XXX: array to symmetrize
+	*/ 
+	int i,j,k;
+	float elem;
+	for (i=0; i<bn; i++){
+	for (j=i; j<bn; j++){
+	for (k=j; k<bn; k++){
+		elem = XXY[i][j][k] + XXY[k][i][j] + XXY[j][k][i] + XXY[j][i][k] + XXY[k][j][i] + XXY[i][k][j];
+		XXY[i][j][k] = elem;
+		XXY[k][i][j] = elem;
+		XXY[j][k][i] = elem;
+		XXY[j][i][k] = elem;
+		XXY[k][j][i] = elem;
+		XXY[i][k][j] = elem;
+	}
+	}
 	}
 }
 //=================================================================== 
